@@ -204,8 +204,8 @@ class _ProductOrderDetailScreenState extends State<ProductOrderDetailScreen> {
   Widget _section({required String title, required Widget child}) {
     return Container(
       width: context.width(),
-      decoration:
-          boxDecorationDefault(color: context.cardColor, borderRadius: radius()),
+      decoration: boxDecorationDefault(
+          color: context.cardColor, borderRadius: radius()),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

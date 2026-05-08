@@ -119,8 +119,8 @@ class _ProductOrderHistoryScreenState extends State<ProductOrderHistoryScreen> {
                               label: Text('Order',
                                   style: boldTextStyle(size: 13))),
                           DataColumn(
-                              label: Text('Date',
-                                  style: boldTextStyle(size: 13))),
+                              label:
+                                  Text('Date', style: boldTextStyle(size: 13))),
                           DataColumn(
                               label: Text('Items',
                                   style: boldTextStyle(size: 13))),
@@ -141,7 +141,8 @@ class _ProductOrderHistoryScreenState extends State<ProductOrderHistoryScreen> {
                           return DataRow(
                             cells: [
                               DataCell(Text(
-                                order.orderNumber.validate(value: '#${order.id}'),
+                                order.orderNumber
+                                    .validate(value: '#${order.id}'),
                                 style: primaryTextStyle(size: 13),
                               )),
                               DataCell(Text(order.orderDate,

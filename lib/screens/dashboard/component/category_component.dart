@@ -59,7 +59,10 @@ class CategoryComponentState extends State<CategoryComponent> {
                     onTap: () {
                       ViewAllServiceScreen(categoryId: data.id.validate(), categoryName: data.name, isFromCategory: true).launch(context);
                     },
-                    child: CategoryWidget(categoryData: data),
+                    child: CategoryWidget(
+                      categoryData: data,
+                      width: (context.width() - 68) / 4.21,
+                    ),
                   );
                 },
               )

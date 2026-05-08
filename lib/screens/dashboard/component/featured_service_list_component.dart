@@ -39,7 +39,11 @@ class FeaturedServiceListComponent extends StatelessWidget {
               itemCount: serviceList.length,
               spacing: 16,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              itemBuilder: (context, index) => ServiceComponent(serviceData: serviceList[index], width: 280, isBorderEnabled: true),
+              itemBuilder: (context, index) => ServiceComponent(
+                serviceData: serviceList[index],
+                width: (context.width() - 48) / 2.21,
+                isBorderEnabled: true,
+              ),
             )
           else
             Container(

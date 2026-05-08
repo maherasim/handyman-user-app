@@ -39,7 +39,7 @@ class ServiceListComponent extends StatelessWidget {
                 spacing: 12,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemBuilder: (context, index) {
-                  final double cardWidth = (context.width() - 44) / 2;
+                  final double cardWidth = (context.width() - 44) / 2.21;
                   return ServiceComponent(
                     serviceData: serviceList[index],
                     width: cardWidth,
