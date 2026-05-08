@@ -135,12 +135,11 @@ class _ServiceDashboardComponent3State extends State<ServiceDashboardComponent3>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 16.height,
-                Marquee(
-                  directionMarguee: DirectionMarguee.oneDirection,
-                  child: Text(
-                    "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}".toUpperCase(),
-                    style: boldTextStyle(color: appStore.isDarkMode ? textSecondaryColorGlobal : primaryColor, size: 12),
-                  ),
+                Text(
+                  "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}".toUpperCase(),
+                  style: boldTextStyle(color: appStore.isDarkMode ? textSecondaryColorGlobal : primaryColor, size: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ).paddingSymmetric(horizontal: 16),
                 16.height,
                 Text(
@@ -152,32 +151,29 @@ class _ServiceDashboardComponent3State extends State<ServiceDashboardComponent3>
                 16.height,
                 Row(
                   children: [
-                    Marquee(
-                      directionMarguee: DirectionMarguee.oneDirection,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (widget.serviceData.discount != 0)
-                            PriceWidget(
-                              price: discountedAmount,
-                              isHourlyService: widget.serviceData.isHourlyService,
-                              color: primaryColor,
-                              hourlyTextColor: primaryColor,
-                              size: 18,
-                              isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
-                            ),
-                          if (widget.serviceData.discount != 0) 16.width,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        if (widget.serviceData.discount != 0)
                           PriceWidget(
-                            price: widget.serviceData.price.validate(),
-                            isLineThroughEnabled: widget.serviceData.discount != 0 ? true : false,
+                            price: discountedAmount,
                             isHourlyService: widget.serviceData.isHourlyService,
-                            color: widget.serviceData.discount != 0 ? textSecondaryColorGlobal : primaryColor,
-                            hourlyTextColor: widget.serviceData.discount != 0 ? textSecondaryColorGlobal : primaryColor,
-                            size: widget.serviceData.discount != 0 ? 14 : 18,
+                            color: primaryColor,
+                            hourlyTextColor: primaryColor,
+                            size: 18,
                             isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
                           ),
-                        ],
-                      ),
+                        if (widget.serviceData.discount != 0) 16.width,
+                        PriceWidget(
+                          price: widget.serviceData.price.validate(),
+                          isLineThroughEnabled: widget.serviceData.discount != 0 ? true : false,
+                          isHourlyService: widget.serviceData.isHourlyService,
+                          color: widget.serviceData.discount != 0 ? textSecondaryColorGlobal : primaryColor,
+                          hourlyTextColor: widget.serviceData.discount != 0 ? textSecondaryColorGlobal : primaryColor,
+                          size: widget.serviceData.discount != 0 ? 14 : 18,
+                          isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
+                        ),
+                      ],
                     ),
                     const Spacer(),
                     if (widget.serviceData.totalRating.validate() > 0)

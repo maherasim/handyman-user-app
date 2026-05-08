@@ -59,10 +59,11 @@ class HorizontalShopListComponent extends StatelessWidget {
           itemCount: shopList.length,
           padding: EdgeInsets.symmetric(horizontal: 16),
           itemBuilder: (context, index) {
+            final double compactCardWidth = cardWidth ?? ((context.width() - 48) / 2);
             return ShopComponent(
               shop: shopList[index],
               showServices: showServices,
-              width: context.width() - 32,
+              width: compactCardWidth,
             );
           },
         ),

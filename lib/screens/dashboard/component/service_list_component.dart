@@ -10,8 +10,10 @@ import '../../service/view_all_service_screen.dart';
 
 class ServiceListComponent extends StatelessWidget {
   final List<ServiceData> serviceList;
+  final String? title;
+  final VoidCallback? onViewAll;
 
-  ServiceListComponent({required this.serviceList});
+  ServiceListComponent({required this.serviceList, this.title, this.onViewAll});
 
   @override
   Widget build(BuildContext context) {
@@ -20,21 +22,30 @@ class ServiceListComponent extends StatelessWidget {
       children: [
         16.height,
         ViewAllLabel(
-          label: language.service,
+          label: title ?? language.service,
           list: serviceList,
           onTap: () {
-            ViewAllServiceScreen().launch(context);
+            if (onViewAll != null) {
+              onViewAll!.call();
+            } else {
+              ViewAllServiceScreen().launch(context);
+            }
           },
         ).paddingSymmetric(horizontal: 16),
         8.height,
         serviceList.isNotEmpty
-            ? Wrap(
-                spacing: 16,
-                runSpacing: 16,
-                children: List.generate(serviceList.length, (index) {
-                  return ServiceComponent(serviceData: serviceList[index], width: context.width() / 2 - 26);
-                }),
-              ).paddingSymmetric(horizontal: 16, vertical: 8)
+            ? HorizontalList(
+                itemCount: serviceList.length,
+                spacing: 12,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                itemBuilder: (context, index) {
+                  final double cardWidth = (context.width() - 44) / 2;
+                  return ServiceComponent(
+                    serviceData: serviceList[index],
+                    width: cardWidth,
+                  );
+                },
+              )
             : Container(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
                 child: NoDataWidget(

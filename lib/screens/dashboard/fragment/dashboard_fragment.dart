@@ -113,7 +113,23 @@ class _DashboardFragmentState extends State<DashboardFragment> {
                         ),
                         30.height,
                         PendingBookingComponent(upcomingConfirmedBooking: snap.upcomingData),
-                        CategoryComponent(categoryList: snap.category.validate()),
+                        CategoryComponent(
+                          categoryList: snap.category.validate(),
+                          isHorizontal: true,
+                          title: 'Top Categories',
+                        ),
+                        12.height,
+                        CategoryComponent(
+                          categoryList: snap.productCategory.validate(),
+                          isHorizontal: true,
+                          title: 'Product Categories',
+                        ),
+                        12.height,
+                        CategoryComponent(
+                          categoryList: snap.classifiedCategory.validate(),
+                          isHorizontal: true,
+                          title: 'Classified Categories',
+                        ),
                         if (appStore.isLoggedIn && snap.referralRule.validate()) DashboardReferralComponent().paddingTop(16),
                         if (snap.promotionalBanner.validate().isNotEmpty && appConfigurationStore.isPromotionalBanner)
                           PromotionalBannerSliderComponent(
@@ -122,8 +138,19 @@ class _DashboardFragmentState extends State<DashboardFragment> {
                         16.height,
                         FeaturedServiceListComponent(serviceList: snap.featuredServices.validate()),
                         ServiceListComponent(serviceList: snap.service.validate()),
+                        ServiceListComponent(
+                          serviceList: snap.product.validate(),
+                          title: 'Products',
+                        ),
+                        ServiceListComponent(
+                          serviceList: snap.post.validate(),
+                          title: 'Posts',
+                        ),
                         16.height,
-                        HorizontalShopListComponent(shopList: snap.shops.validate().take(5).toList()),
+                        HorizontalShopListComponent(
+                          shopList: snap.shops.validate().take(5).toList(),
+                          showServices: false,
+                        ),
                         16.height,
                         if (appConfigurationStore.jobRequestStatus) const NewJobRequestComponent(),
                       ],

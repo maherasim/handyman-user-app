@@ -34,6 +34,7 @@ class ServiceData {
   String? providerImage;
   String? name;
   String? type;
+  String? serviceType;
   String? createdAt;
   String? customerName;
   String? bookingDate;
@@ -53,6 +54,14 @@ class ServiceData {
   List<BookingPackage>? servicePackage;
   String? visitType;
   Map<String, MultiLanguageRequest>? translations;
+  bool? hasVariants;
+  int? totalStock;
+  int? maxPurchaseQty;
+  int? maxAllowedQuantity;
+  bool? requiresVariantSelection;
+  String? variantAttributeName;
+  int? productUnitId;
+  String? productUnitName;
 
   //Local
   bool isSelected = false;
@@ -105,6 +114,7 @@ class ServiceData {
     this.totalReview,
     this.providerImage,
     this.type,
+    this.serviceType,
     this.isFavourite,
     this.serviceAddressMapping,
     this.subCategoryName,
@@ -122,6 +132,14 @@ class ServiceData {
     this.attachmentsArray,
     this.visitType,
     this.translations,
+    this.hasVariants,
+    this.totalStock,
+    this.maxPurchaseQty,
+    this.maxAllowedQuantity,
+    this.requiresVariantSelection,
+    this.variantAttributeName,
+    this.productUnitId,
+    this.productUnitName,
   });
 
   factory ServiceData.fromJson(Map<String, dynamic> json) {
@@ -132,6 +150,7 @@ class ServiceData {
       providerId: json['provider_id'],
       price: json['price'],
       type: json['type'],
+      serviceType: json['service_type'] ?? json['type'],
       bookingDate: json['booking_date'],
       bookingSlot: json['booking_slot'],
       bookingDay: json['booking_day'],
@@ -163,18 +182,15 @@ class ServiceData {
       advancePaymentAmount: json['advance_payment_amount'],
       attachmentsArray: json['attchments_array'] != null ? (json['attchments_array'] as List).map((i) => Attachments.fromJson(i)).toList() : null,
       visitType: json['visit_type'],
-      translations: json['translations'] != null
-          ? (jsonDecode(json['translations']) as Map<String, dynamic>).map(
-              (key, value) {
-                if (value is Map<String, dynamic>) {
-                  return MapEntry(key, MultiLanguageRequest.fromJson(value));
-                } else {
-                  print('Unexpected translation value for key $key: $value');
-                  return MapEntry(key, MultiLanguageRequest());
-                }
-              },
-            )
-          : null,
+      translations: _parseTranslations(json['translations']),
+      hasVariants: _parseBool(json['has_variants']),
+      totalStock: json['total_stock'] != null ? json['total_stock'].toString().toInt() : null,
+      maxPurchaseQty: json['max_purchase_qty'] != null ? json['max_purchase_qty'].toString().toInt() : null,
+      maxAllowedQuantity: json['max_allowed_quantity'] != null ? json['max_allowed_quantity'].toString().toInt() : null,
+      requiresVariantSelection: _parseBool(json['requires_variant_selection']),
+      variantAttributeName: json['variant_attribute_name'],
+      productUnitId: json['product_unit_id'] != null ? json['product_unit_id'].toString().toInt() : null,
+      productUnitName: json['product_unit_name'],
     );
   }
 
@@ -209,6 +225,7 @@ class ServiceData {
     data['service_id'] = serviceId;
     data['user_id'] = userId;
     data['type'] = type;
+    data['service_type'] = serviceType;
     if (serviceAttachments != null) {
       data['service_attchments'] = serviceAttachments;
     }
@@ -233,8 +250,52 @@ class ServiceData {
     if (translations != null) {
       data['translations'] = translations!.map((key, value) => MapEntry(key, value.toJson()));
     }
+    data['has_variants'] = hasVariants;
+    data['total_stock'] = totalStock;
+    data['max_purchase_qty'] = maxPurchaseQty;
+    data['max_allowed_quantity'] = maxAllowedQuantity;
+    data['requires_variant_selection'] = requiresVariantSelection;
+    data['variant_attribute_name'] = variantAttributeName;
+    data['product_unit_id'] = productUnitId;
+    data['product_unit_name'] = productUnitName;
     return data;
   }
+}
+
+bool? _parseBool(dynamic value) {
+  if (value == null) return null;
+  if (value is bool) return value;
+  if (value is num) return value == 1;
+  if (value is String) {
+    final String normalized = value.trim().toLowerCase();
+    return normalized == 'true' || normalized == '1';
+  }
+  return false;
+}
+
+Map<String, MultiLanguageRequest>? _parseTranslations(dynamic rawTranslations) {
+  if (rawTranslations == null) return null;
+
+  Map<String, dynamic>? translationMap;
+
+  if (rawTranslations is String) {
+    if (rawTranslations.trim().isEmpty) return null;
+    final dynamic decoded = jsonDecode(rawTranslations);
+    if (decoded is Map<String, dynamic>) translationMap = decoded;
+  } else if (rawTranslations is Map<String, dynamic>) {
+    translationMap = rawTranslations;
+  }
+
+  if (translationMap == null) return null;
+
+  return translationMap.map(
+    (key, value) {
+      if (value is Map<String, dynamic>) {
+        return MapEntry(key, MultiLanguageRequest.fromJson(value));
+      }
+      return MapEntry(key, MultiLanguageRequest());
+    },
+  );
 }
 
 class ServiceAddressMapping {

@@ -102,13 +102,12 @@ class _ServiceDashboardComponent4State extends State<ServiceDashboardComponent4>
                   backgroundColor: context.cardColor.withValues(alpha:0.9),
                   borderRadius: radius(12),
                 ),
-                child: Marquee(
-                  directionMarguee: DirectionMarguee.oneDirection,
-                  child: Text(
-                    "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}".toUpperCase(),
-                    style: boldTextStyle(color: appStore.isDarkMode ? white : primaryColor, size: 12),
-                  ).paddingSymmetric(horizontal: 8, vertical: 4),
-                ),
+                child: Text(
+                  "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}".toUpperCase(),
+                  style: boldTextStyle(color: appStore.isDarkMode ? white : primaryColor, size: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ).paddingSymmetric(horizontal: 8, vertical: 4),
               ),
             ),
             if (widget.serviceData.isOnlineService)
@@ -195,30 +194,27 @@ class _ServiceDashboardComponent4State extends State<ServiceDashboardComponent4>
                   color: primaryColor,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Marquee(
-                  directionMarguee: DirectionMarguee.oneDirection,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (widget.serviceData.discount.validate() != 0)
-                        PriceWidget(
-                          price: discountedAmount,
-                          isHourlyService: widget.serviceData.isHourlyService,
-                          color: Colors.white,
-                          hourlyTextColor: Colors.white,
-                          isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
-                        ).paddingRight(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (widget.serviceData.discount.validate() != 0)
                       PriceWidget(
-                        price: widget.serviceData.price.validate(),
-                        isLineThroughEnabled: widget.serviceData.discount != 0 ? true : false,
+                        price: discountedAmount,
                         isHourlyService: widget.serviceData.isHourlyService,
                         color: Colors.white,
                         hourlyTextColor: Colors.white,
-                        size: widget.serviceData.discount != 0 ? 12 : 16,
                         isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
-                      ),
-                    ],
-                  ),
+                      ).paddingRight(8),
+                    PriceWidget(
+                      price: widget.serviceData.price.validate(),
+                      isLineThroughEnabled: widget.serviceData.discount != 0 ? true : false,
+                      isHourlyService: widget.serviceData.isHourlyService,
+                      color: Colors.white,
+                      hourlyTextColor: Colors.white,
+                      size: widget.serviceData.discount != 0 ? 12 : 16,
+                      isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -162,13 +162,12 @@ class _ServiceDashboardComponent2State extends State<ServiceDashboardComponent2>
                         backgroundColor: appStore.isDarkMode ? primaryColor.withValues(alpha:0.1) : lightPrimaryColor,
                         borderRadius: radius(24),
                       ),
-                      child: Marquee(
-                        directionMarguee: DirectionMarguee.oneDirection,
-                        child: Text(
-                          "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}".toUpperCase(),
-                          style: boldTextStyle(color: appStore.isDarkMode ? white : primaryColor, size: 12),
-                        ).paddingSymmetric(horizontal: 8, vertical: 4),
-                      ),
+                      child: Text(
+                        "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}".toUpperCase(),
+                        style: boldTextStyle(color: appStore.isDarkMode ? white : primaryColor, size: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ).paddingSymmetric(horizontal: 8, vertical: 4),
                     ),
                   ],
                 ).paddingOnly(left: 16),
@@ -180,32 +179,29 @@ class _ServiceDashboardComponent2State extends State<ServiceDashboardComponent2>
                   overflow: TextOverflow.ellipsis,
                 ).paddingSymmetric(horizontal: 16),
                 12.height,
-                Marquee(
-                  directionMarguee: DirectionMarguee.oneDirection,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (widget.serviceData.discount != 0)
-                        PriceWidget(
-                          price: discountedAmount,
-                          isHourlyService: widget.serviceData.isHourlyService,
-                          color: primaryColor,
-                          hourlyTextColor: primaryColor,
-                          size: 16,
-                          isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
-                        ),
-                      if (widget.serviceData.discount != 0) 16.width,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    if (widget.serviceData.discount != 0)
                       PriceWidget(
-                        price: widget.serviceData.price.validate(),
-                        isLineThroughEnabled: widget.serviceData.discount != 0 ? true : false,
+                        price: discountedAmount,
                         isHourlyService: widget.serviceData.isHourlyService,
-                        color: widget.serviceData.discount != 0 ? textSecondaryColorGlobal : primaryColor,
-                        hourlyTextColor: widget.serviceData.discount != 0 ? textSecondaryColorGlobal : primaryColor,
-                        size: widget.serviceData.discount != 0 ? 14 : 16,
+                        color: primaryColor,
+                        hourlyTextColor: primaryColor,
+                        size: 16,
                         isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
                       ),
-                    ],
-                  ),
+                    if (widget.serviceData.discount != 0) 16.width,
+                    PriceWidget(
+                      price: widget.serviceData.price.validate(),
+                      isLineThroughEnabled: widget.serviceData.discount != 0 ? true : false,
+                      isHourlyService: widget.serviceData.isHourlyService,
+                      color: widget.serviceData.discount != 0 ? textSecondaryColorGlobal : primaryColor,
+                      hourlyTextColor: widget.serviceData.discount != 0 ? textSecondaryColorGlobal : primaryColor,
+                      size: widget.serviceData.discount != 0 ? 14 : 16,
+                      isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
+                    ),
+                  ],
                 ).paddingSymmetric(horizontal: 16),
                 12.height,
                 Row(

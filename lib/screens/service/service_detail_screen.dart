@@ -42,11 +42,13 @@ class ServiceDetailScreen extends StatefulWidget {
   final int serviceId;
   final ServiceData? service;
   final bool isFromProviderInfo;
+  final String detailType;
 
   ServiceDetailScreen({
     required this.serviceId,
     this.service,
     this.isFromProviderInfo = false,
+    this.detailType = 'service',
   });
 
   @override
@@ -73,10 +75,22 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
   }
 
   void init() async {
-    future = getServiceDetails(
-      serviceId: widget.serviceId.validate(),
-      customerId: appStore.userId,
-    );
+    if (widget.detailType == 'product') {
+      future = getProductDetails(
+        productId: widget.serviceId.validate(),
+        customerId: appStore.userId,
+      );
+    } else if (widget.detailType == 'post') {
+      future = getPostDetails(
+        postId: widget.serviceId.validate(),
+        customerId: appStore.userId,
+      );
+    } else {
+      future = getServiceDetails(
+        serviceId: widget.serviceId.validate(),
+        customerId: appStore.userId,
+      );
+    }
     setState(() {});
   }
 

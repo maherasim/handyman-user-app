@@ -11,8 +11,10 @@ import 'package:nb_utils/nb_utils.dart';
 class CategoryComponent extends StatefulWidget {
   final List<CategoryData>? categoryList;
   final bool isNewDashboard;
+  final bool isHorizontal;
+  final String? title;
 
-  CategoryComponent({this.categoryList, this.isNewDashboard = false});
+  CategoryComponent({this.categoryList, this.isNewDashboard = false, this.isHorizontal = false, this.title});
 
   @override
   CategoryComponentState createState() => CategoryComponentState();
@@ -37,7 +39,7 @@ class CategoryComponentState extends State<CategoryComponent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ViewAllLabel(
-          label: widget.isNewDashboard ? language.lblCategory : language.category,
+          label: widget.title ?? (widget.isNewDashboard ? language.lblCategory : language.category),
           list: widget.categoryList!,
           trailingTextStyle: widget.isNewDashboard ? boldTextStyle(color: primaryColor, size: 12) : null,
           onTap: () {
@@ -46,20 +48,35 @@ class CategoryComponentState extends State<CategoryComponent> {
             });
           },
         ).paddingSymmetric(horizontal: 16),
-        AnimatedWrap(
-          spacing: 16,
-          runSpacing: 16,
-          itemCount: widget.categoryList.validate().length,
-          itemBuilder: (ctx, i) {
-            CategoryData data = widget.categoryList![i];
-            return GestureDetector(
-              onTap: () {
-                ViewAllServiceScreen(categoryId: data.id.validate(), categoryName: data.name, isFromCategory: true).launch(context);
-              },
-              child: CategoryWidget(categoryData: data),
-            );
-          },
-        ).paddingSymmetric(horizontal: 16),
+        widget.isHorizontal
+            ? HorizontalList(
+                itemCount: widget.categoryList.validate().length,
+                spacing: 12,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemBuilder: (ctx, i) {
+                  CategoryData data = widget.categoryList![i];
+                  return GestureDetector(
+                    onTap: () {
+                      ViewAllServiceScreen(categoryId: data.id.validate(), categoryName: data.name, isFromCategory: true).launch(context);
+                    },
+                    child: CategoryWidget(categoryData: data),
+                  );
+                },
+              )
+            : AnimatedWrap(
+                spacing: 16,
+                runSpacing: 16,
+                itemCount: widget.categoryList.validate().length,
+                itemBuilder: (ctx, i) {
+                  CategoryData data = widget.categoryList![i];
+                  return GestureDetector(
+                    onTap: () {
+                      ViewAllServiceScreen(categoryId: data.id.validate(), categoryName: data.name, isFromCategory: true).launch(context);
+                    },
+                    child: CategoryWidget(categoryData: data),
+                  );
+                },
+              ).paddingSymmetric(horizontal: 16),
       ],
     );
   }

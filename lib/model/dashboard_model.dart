@@ -9,7 +9,11 @@ class DashboardResponse {
   List<SliderModel>? slider;
   List<PromotionalBannerModel>? promotionalBanner;
   List<CategoryData>? category;
+  List<CategoryData>? productCategory;
+  List<CategoryData>? classifiedCategory;
   List<ServiceData>? service;
+  List<ServiceData>? product;
+  List<ServiceData>? post;
   List<ServiceData>? featuredServices;
   List<UserData>? provider;
   List<DashboardCustomerReview>? dashboardCustomerReview;
@@ -21,9 +25,13 @@ class DashboardResponse {
 
   DashboardResponse({
     this.category,
+    this.productCategory,
+    this.classifiedCategory,
     this.featuredServices,
     this.provider,
     this.service,
+    this.product,
+    this.post,
     this.slider,
     this.promotionalBanner,
     this.dashboardCustomerReview,
@@ -35,12 +43,23 @@ class DashboardResponse {
   });
 
   factory DashboardResponse.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> sliderData = _extractDataList(json['slider']);
+    final List<dynamic> serviceData = _extractDataList(json['service']);
+    final List<dynamic> productData = _extractDataList(json['product']);
+    final List<dynamic> postData = _extractDataList(json['post']);
+    final List<dynamic> featuredServiceData = _extractDataList(json['featured_service']);
+    final List<dynamic> providerData = _extractDataList(json['provider']);
+
     return DashboardResponse(
       category: json['category'] != null ? (json['category'] as List).map((i) => CategoryData.fromJson(i)).toList() : null,
-      provider: json['provider'] != null ? (json['provider'] as List).map((i) => UserData.fromJson(i)).toList() : null,
-      service: json['service'] != null ? (json['service'] as List).map((i) => ServiceData.fromJson(i)).toList() : null,
-      featuredServices: json['featured_service'] != null ? (json['featured_service'] as List).map((i) => ServiceData.fromJson(i)).toList() : null,
-      slider: json['slider'] != null ? (json['slider'] as List).map((i) => SliderModel.fromJson(i)).toList() : null,
+      productCategory: json['product_category'] != null ? (json['product_category'] as List).map((i) => CategoryData.fromJson(i)).toList() : null,
+      classifiedCategory: json['classified_category'] != null ? (json['classified_category'] as List).map((i) => CategoryData.fromJson(i)).toList() : null,
+      provider: providerData.isNotEmpty ? providerData.map((i) => UserData.fromJson(i)).toList() : null,
+      service: serviceData.isNotEmpty ? serviceData.map((i) => ServiceData.fromJson(i)).toList() : null,
+      product: productData.isNotEmpty ? productData.map((i) => ServiceData.fromJson(i)).toList() : null,
+      post: postData.isNotEmpty ? postData.map((i) => ServiceData.fromJson(i)).toList() : null,
+      featuredServices: featuredServiceData.isNotEmpty ? featuredServiceData.map((i) => ServiceData.fromJson(i)).toList() : null,
+      slider: sliderData.isNotEmpty ? sliderData.map((i) => SliderModel.fromJson(i)).toList() : null,
       promotionalBanner: json['promotional_banner'] != null ? (json['promotional_banner'] as List).map((i) => PromotionalBannerModel.fromJson(i)).toList() : null,
       dashboardCustomerReview: json['customer_review'] != null ? (json['customer_review'] as List).map((i) => DashboardCustomerReview.fromJson(i)).toList() : null,
       upcomingData: json['upcomming_confirmed_booking'] != null ? BookingData.fromJson(json['upcomming_confirmed_booking']) : null,
@@ -57,11 +76,23 @@ class DashboardResponse {
     if (category != null) {
       data['category'] = category!.map((v) => v.toJson()).toList();
     }
+    if (productCategory != null) {
+      data['product_category'] = productCategory!.map((v) => v.toJson()).toList();
+    }
+    if (classifiedCategory != null) {
+      data['classified_category'] = classifiedCategory!.map((v) => v.toJson()).toList();
+    }
     if (provider != null) {
       data['provider'] = provider!.map((v) => v.toJson()).toList();
     }
     if (service != null) {
       data['service'] = service!.map((v) => v.toJson()).toList();
+    }
+    if (product != null) {
+      data['product'] = product!.map((v) => v.toJson()).toList();
+    }
+    if (post != null) {
+      data['post'] = post!.map((v) => v.toJson()).toList();
     }
     if (featuredServices != null) {
       data['featured_service'] = service!.map((v) => v.toJson()).toList();
@@ -86,6 +117,21 @@ class DashboardResponse {
     }
     return data;
   }
+}
+
+List<dynamic> _extractDataList(dynamic rawValue) {
+  if (rawValue is List) {
+    return rawValue;
+  }
+
+  if (rawValue is Map<String, dynamic>) {
+    final dynamic data = rawValue['data'];
+    if (data is List) {
+      return data;
+    }
+  }
+
+  return const <dynamic>[];
 }
 
 class SliderModel {
