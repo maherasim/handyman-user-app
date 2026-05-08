@@ -120,139 +120,167 @@ class ServiceComponentState extends State<ServiceComponent> {
 
     ProductVariantOption selectedVariant = variants.first;
     int quantity = 1;
-    _quantityController.text = '1';
 
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: context.scaffoldBackgroundColor,
-      shape: RoundedRectangleBorder(borderRadius: radiusOnly(topLeft: 16, topRight: 16)),
+      backgroundColor: Colors.transparent,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, modalSetState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 16,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      CachedImageWidget(
-                        url: detail.product.firstServiceImage.validate(),
-                        height: 44,
-                        width: 44,
-                        fit: BoxFit.cover,
-                      ).cornerRadiusWithClipRRect(8),
-                      12.width,
-                      Text(
-                        detail.product.name.validate(),
-                        style: boldTextStyle(size: 16),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ).expand(),
-                    ],
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: boxDecorationDefault(shape: BoxShape.circle, color: Colors.black54),
+                  child: const Icon(Icons.close, color: white),
+                ).onTap(() => finish(context)),
+                16.height,
+                Container(
+                  decoration: boxDecorationDefault(
+                    color: context.scaffoldBackgroundColor,
+                    borderRadius: radiusOnly(topLeft: 24, topRight: 24),
                   ),
-                  12.height,
-                  Text('Select variant', style: boldTextStyle(size: 18)),
-                  4.height,
-                  Text('Select any 1', style: secondaryTextStyle()),
-                  12.height,
-                  Container(
-                    decoration: boxDecorationDefault(color: context.cardColor),
-                    child: Column(
-                      children: variants.map((variant) {
-                        final bool isSelected = selectedVariant.id == variant.id;
-                        return RadioListTile<int>(
-                          value: variant.id,
-                          groupValue: selectedVariant.id,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 6),
-                          title: Text(
-                            variant.label.isNotEmpty
-                                ? variant.label
-                                : (variant.optionValue.isNotEmpty ? variant.optionValue : variant.attributeName),
-                            style: boldTextStyle(size: 16),
-                          ),
-                          subtitle: Text(
-                            variant.priceFormat.isNotEmpty ? variant.priceFormat : '${variant.price}',
-                            style: boldTextStyle(size: 15),
-                          ),
-                          activeColor: context.primaryColor,
-                          onChanged: (value) {
-                            if (value == null) return;
-                            selectedVariant = variants.firstWhere((e) => e.id == value);
-                            if (quantity > selectedVariant.quantityLimit) {
-                              quantity = selectedVariant.quantityLimit;
-                            }
-                            modalSetState(() {});
-                          },
-                          selected: isSelected,
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  16.height,
-                  Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          CachedImageWidget(
+                            url: detail.product.firstServiceImage.validate(),
+                            height: 60,
+                            width: 60,
+                            fit: BoxFit.cover,
+                          ).cornerRadiusWithClipRRect(12),
+                          16.width,
+                          Text(detail.product.name.validate(), style: boldTextStyle(size: 18)).expand(),
+                        ],
+                      ).paddingAll(16),
                       Container(
-                        decoration: boxDecorationDefault(
-                          color: context.cardColor,
-                          border: Border.all(color: context.primaryColor.withValues(alpha: 0.5)),
-                        ),
-                        child: Row(
+                        width: context.width(),
+                        color: context.cardColor,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.remove),
-                              onPressed: () {
-                                if (quantity > 1) {
-                                  quantity--;
-                                  modalSetState(() {});
-                                }
-                              },
-                            ),
-                            Text('$quantity', style: boldTextStyle(size: 16)),
-                            IconButton(
-                              icon: const Icon(Icons.add),
-                              onPressed: () {
-                                if (quantity < selectedVariant.quantityLimit) {
-                                  quantity++;
-                                  modalSetState(() {});
-                                }
-                              },
+                            Text('Select variant', style: boldTextStyle(size: 18)).paddingSymmetric(horizontal: 16),
+                            4.height,
+                            Text('Select any 1', style: secondaryTextStyle()).paddingSymmetric(horizontal: 16),
+                            16.height,
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: boxDecorationDefault(
+                                color: context.scaffoldBackgroundColor,
+                                borderRadius: radius(12),
+                                border: Border.all(color: context.dividerColor),
+                              ),
+                              child: Column(
+                                children: variants.map((variant) {
+                                  final bool isSelected = selectedVariant.id == variant.id;
+                                  return Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.stop_circle_outlined, color: Colors.green, size: 24),
+                                          12.width,
+                                          Text(
+                                            variant.label.isNotEmpty
+                                                ? variant.label
+                                                : (variant.optionValue.isNotEmpty ? variant.optionValue : variant.attributeName),
+                                            style: boldTextStyle(size: 16),
+                                          ).expand(),
+                                          Text(variant.priceFormat, style: boldTextStyle(size: 16)),
+                                          16.width,
+                                          Icon(
+                                            isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                                            color: isSelected ? context.primaryColor : context.dividerColor,
+                                          ),
+                                        ],
+                                      ).paddingAll(16).onTap(() {
+                                        selectedVariant = variant;
+                                        modalSetState(() {});
+                                      }),
+                                      if (variant != variants.last) const Divider(height: 0),
+                                    ],
+                                  );
+                                }).toList(),
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      12.width,
-                      AppButton(
-                        width: 0,
-                        color: context.primaryColor,
-                        textColor: white,
-                        text: 'Add | ${selectedVariant.priceFormat.isNotEmpty ? selectedVariant.priceFormat : selectedVariant.price}',
-                        onTap: () async {
-                          try {
-                            await addToCart(
-                              productId: detail.product.id.validate(),
-                              productVariantId: selectedVariant.productVariantId,
-                              quantity: quantity,
-                            );
-                            if (!mounted) return;
-                            finish(context);
-                            toast('Product added to cart');
-                          } catch (e) {
-                            toast(e.toString());
-                          }
-                        },
-                      ).expand(),
+                      Container(
+                        padding: EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 16,
+                          bottom: context.navigationBarHeight + 16,
+                        ),
+                        decoration: boxDecorationDefault(color: context.scaffoldBackgroundColor),
+                        child: Row(
+                          children: [
+                            Container(
+                              height: 48,
+                              decoration: boxDecorationDefault(
+                                color: context.cardColor,
+                                border: Border.all(color: context.primaryColor),
+                                borderRadius: radius(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.remove, color: context.primaryColor),
+                                    onPressed: () {
+                                      if (quantity > 1) {
+                                        quantity--;
+                                        modalSetState(() {});
+                                      }
+                                    },
+                                  ),
+                                  Text('$quantity', style: boldTextStyle(color: context.primaryColor, size: 18)),
+                                  IconButton(
+                                    icon: Icon(Icons.add, color: context.primaryColor),
+                                    onPressed: () {
+                                      if (quantity < selectedVariant.quantityLimit) {
+                                        quantity++;
+                                        modalSetState(() {});
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            16.width,
+                            AppButton(
+                              height: 48,
+                              color: context.primaryColor,
+                              text: 'Add | ${appConfigurationStore.currencySymbol}${selectedVariant.price * quantity}',
+                              textStyle: boldTextStyle(color: white),
+                              onTap: () async {
+                                try {
+                                  await addToCart(
+                                    productId: detail.product.id.validate(),
+                                    productVariantId: selectedVariant.productVariantId,
+                                    quantity: quantity,
+                                  );
+                                  if (!mounted) return;
+                                  finish(context);
+                                  toast('Product added to cart');
+                                  widget.onUpdate?.call();
+                                } catch (e) {
+                                  toast(e.toString());
+                                }
+                              },
+                            ).expand(),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         );
@@ -284,6 +312,188 @@ class ServiceComponentState extends State<ServiceComponent> {
       if (itemType == 'ecommerce' || itemType == 'product') return 'product';
       if (itemType == 'classified' || itemType == 'post') return 'post';
       return 'service';
+    }
+
+    Widget buildProductComponent() {
+      return Container(
+        width: widget.width,
+        decoration: boxDecorationWithRoundedCorners(
+          borderRadius: radius(12),
+          backgroundColor: context.cardColor,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                CachedImageWidget(
+                  url: widget.serviceData.firstServiceImage.validate(),
+                  height: 180,
+                  width: widget.width ?? context.width(),
+                  fit: BoxFit.cover,
+                ).cornerRadiusWithClipRRectOnly(topLeft: 12, topRight: 12),
+                if (widget.serviceData.discount.validate() > 0)
+                  Positioned(
+                    top: 12,
+                    left: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: boxDecorationWithRoundedCorners(
+                        backgroundColor: Colors.green.withValues(alpha: 0.9),
+                        borderRadius: radiusOnly(topRight: 8, bottomRight: 8),
+                      ),
+                      child: Text(
+                        "${widget.serviceData.discount}% OFF",
+                        style: boldTextStyle(color: white, size: 10),
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: boxDecorationWithShadow(boxShape: BoxShape.circle, backgroundColor: context.cardColor),
+                    child: widget.serviceData.isFavourite == 1 ? Icon(Icons.bookmark, color: context.primaryColor, size: 20) : Icon(Icons.bookmark_border, color: context.dividerColor, size: 20),
+                  ).onTap(() async {
+                    if (widget.serviceData.isFavourite != 0) {
+                      widget.serviceData.isFavourite = 1;
+                      setState(() {});
+
+                      await removeToWishList(serviceId: widget.serviceData.serviceId.validate().toInt()).then((value) {
+                        if (!value) {
+                          widget.serviceData.isFavourite = 1;
+                          setState(() {});
+                        }
+                      });
+                    } else {
+                      widget.serviceData.isFavourite = 0;
+                      setState(() {});
+
+                      await addToWishList(serviceId: widget.serviceData.serviceId.validate().toInt()).then((value) {
+                        if (!value) {
+                          widget.serviceData.isFavourite = 1;
+                          setState(() {});
+                        }
+                      });
+                    }
+                    widget.onUpdate?.call();
+                  }),
+                ),
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: _requiresVariantSelection || !_showInlineQuantityControl
+                      ? Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: boxDecorationWithRoundedCorners(
+                            backgroundColor: white,
+                            border: Border.all(color: context.primaryColor),
+                            borderRadius: radius(8),
+                          ),
+                          child: Icon(Icons.add, color: context.primaryColor, size: 24),
+                        ).onTap(() {
+                          if (_requiresVariantSelection) {
+                            _onProductActionTap();
+                          } else {
+                            _cardQuantity = 1;
+                            _showInlineQuantityControl = true;
+                            setState(() {});
+                            _addSimpleProductToCart(quantity: 1);
+                          }
+                        })
+                      : Container(
+                          decoration: boxDecorationWithRoundedCorners(
+                            backgroundColor: white,
+                            border: Border.all(color: context.primaryColor),
+                            borderRadius: radius(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.remove, color: context.primaryColor, size: 20).paddingAll(4).onTap(() {
+                                if (_cardQuantity <= 1) {
+                                  _showInlineQuantityControl = false;
+                                  setState(() {});
+                                  return;
+                                }
+                                _cardQuantity--;
+                                setState(() {});
+                                _addSimpleProductToCart(quantity: _cardQuantity);
+                              }),
+                              4.width,
+                              Text('$_cardQuantity', style: boldTextStyle(color: context.primaryColor)),
+                              4.width,
+                              Icon(Icons.add, color: context.primaryColor, size: 20).paddingAll(4).onTap(() {
+                                _cardQuantity++;
+                                setState(() {});
+                                _addSimpleProductToCart(quantity: _cardQuantity);
+                              }),
+                            ],
+                          ),
+                        ),
+                ),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                8.height,
+                Text(
+                  widget.serviceData.name.validate(),
+                  style: boldTextStyle(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                4.height,
+                Row(
+                  children: [
+                    PriceWidget(
+                      price: widget.serviceData.price.validate(),
+                      color: context.primaryColor,
+                      size: 16,
+                    ),
+                    if (widget.serviceData.discount.validate() > 0) ...[
+                      8.width,
+                      Text(
+                        "${appConfigurationStore.currencySymbol}${widget.serviceData.price.validate()}",
+                        style: secondaryTextStyle(decoration: TextDecoration.lineThrough),
+                      ),
+                    ],
+                  ],
+                ),
+                4.height,
+                Row(
+                  children: [
+                    DisabledRatingBarWidget(rating: widget.serviceData.totalRating.validate(), size: 12),
+                    4.width,
+                    Text("(${widget.serviceData.totalReview.validate().toInt()})", style: secondaryTextStyle(size: 10)),
+                  ],
+                ),
+                8.height,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: boxDecorationWithRoundedCorners(
+                    backgroundColor: context.primaryColor.withValues(alpha: 0.1),
+                    borderRadius: radius(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.timer_outlined, size: 14, color: context.primaryColor),
+                      4.width,
+                      Text(
+                        "${DateTime.parse(widget.serviceData.createdAt.validate(value: DateTime.now().toString())).timeAgo}",
+                        style: boldTextStyle(size: 10, color: context.primaryColor),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ).paddingSymmetric(horizontal: 8, vertical: 8),
+          ],
+        ),
+      );
     }
 
     Widget buildServiceComponent() {
@@ -511,7 +721,19 @@ class ServiceComponentState extends State<ServiceComponent> {
       onTap: () {
         hideKeyboard(context);
         if (_isProductCard) {
-          _onProductActionTap();
+          if (_requiresVariantSelection) {
+            _onProductActionTap();
+          } else {
+            // If no variants, just go to detail or add to cart?
+            // Usually detail is better on whole card tap
+            ServiceDetailScreen(
+              serviceId: widget.isFavouriteService ? widget.serviceData.serviceId.validate().toInt() : widget.serviceData.id.validate(),
+              detailType: resolveDetailType(),
+            ).launch(context).then((value) {
+              setStatusBarColor(context.primaryColor);
+              widget.onUpdate?.call();
+            });
+          }
           return;
         }
         ServiceDetailScreen(
@@ -525,69 +747,7 @@ class ServiceComponentState extends State<ServiceComponent> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          buildServiceComponent(),
-          if (_isProductCard)
-            Align(
-              alignment: Alignment.centerRight,
-              child: _requiresVariantSelection || !_showInlineQuantityControl
-                  ? Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      decoration: boxDecorationDefault(color: context.primaryColor),
-                      child: IconButton(
-                        onPressed: _isCartActionLoading
-                            ? null
-                            : () {
-                                if (_requiresVariantSelection) {
-                                  _onProductActionTap();
-                                } else {
-                                  _cardQuantity = 1;
-                                  _showInlineQuantityControl = true;
-                                  setState(() {});
-                                  _addSimpleProductToCart(quantity: 1);
-                                }
-                              },
-                        icon: const Icon(Icons.add, color: white),
-                      ),
-                    )
-                  : Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      decoration: boxDecorationDefault(
-                        color: context.cardColor,
-                        border: Border.all(color: context.primaryColor.withValues(alpha: 0.5)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove),
-                            onPressed: _isCartActionLoading
-                                ? null
-                                : () {
-                                    if (_cardQuantity <= 1) {
-                                      _showInlineQuantityControl = false;
-                                      setState(() {});
-                                      return;
-                                    }
-                                    _cardQuantity--;
-                                    setState(() {});
-                                    _addSimpleProductToCart(quantity: _cardQuantity);
-                                  },
-                          ),
-                          Text('$_cardQuantity', style: boldTextStyle()),
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: _isCartActionLoading
-                                ? null
-                                : () {
-                                    _cardQuantity++;
-                                    setState(() {});
-                                    _addSimpleProductToCart(quantity: _cardQuantity);
-                                  },
-                          ),
-                        ],
-                      ),
-                    ),
-            ),
+          _isProductCard ? buildProductComponent() : buildServiceComponent(),
         ],
       ),
     );
