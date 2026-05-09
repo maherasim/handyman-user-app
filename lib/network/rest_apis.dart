@@ -711,7 +711,7 @@ Future<CartResponse> getCartList() async {
       await buildHttpResponse('my-cart', method: HttpMethodType.GET)));
 }
 
-Future<BaseResponseModel> addToCart({
+Future<Map<String, dynamic>> addToCart({
   required int productId,
   int? productVariantId,
   int quantity = 1,
@@ -721,9 +721,8 @@ Future<BaseResponseModel> addToCart({
     'quantity': quantity,
     if (productVariantId != null) 'product_variant_id': productVariantId,
   };
-  return BaseResponseModel.fromJson(await handleResponse(
-      await buildHttpResponse('cart-add',
-          request: request, method: HttpMethodType.POST)));
+  return await handleResponse(await buildHttpResponse('cart-add',
+      request: request, method: HttpMethodType.POST));
 }
 
 Future<BaseResponseModel> updateCartQuantity({

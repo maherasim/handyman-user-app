@@ -1,5 +1,6 @@
 import 'package:booking_system_flutter/component/loader_widget.dart';
 import 'package:booking_system_flutter/main.dart';
+import 'package:booking_system_flutter/model/category_model.dart';
 import 'package:booking_system_flutter/model/service_data_model.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
 import 'package:booking_system_flutter/screens/service/component/service_component.dart';
@@ -24,6 +25,8 @@ class _ProductFragmentState extends State<ProductFragment> {
 
   int page = 1;
   bool isLastPage = false;
+  List<CategoryData> categoryList = [];
+  List<CategoryData> subCategoryList = [];
 
   @override
   void initState() {
@@ -45,7 +48,11 @@ class _ProductFragmentState extends State<ProductFragment> {
       'longitude': appStore.longitude,
     }).then((value) {
       isLastPage = value.serviceList.validate().length != PER_PAGE_ITEM;
-      if (page == 1) products.clear();
+      if (page == 1) {
+        products.clear();
+        categoryList = value.categoryList.validate();
+        subCategoryList = value.subCategoryList.validate();
+      }
       products.addAll(value.serviceList.validate());
       setState(() {});
       return products;
@@ -72,7 +79,7 @@ class _ProductFragmentState extends State<ProductFragment> {
           IconButton(
             icon: Icon(Icons.filter_list, color: white),
             onPressed: () async {
-              await FilterScreen(isFromProvider: true).launch(context).then((value) {
+              await FilterScreen(isFromProvider: true, categories: categoryList).launch(context).then((value) {
                 if (value != null) {
                   page = 1;
                   init();

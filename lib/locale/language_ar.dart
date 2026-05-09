@@ -585,6 +585,9 @@ class LanguageAr extends BaseLanguage {
   String get lblFeaturedProduct => "هذا المنتج مميز";
 
   @override
+  String get lblProducts => "منتجات";
+
+  @override
   String get lblAlert => "إنذار";
 
   @override

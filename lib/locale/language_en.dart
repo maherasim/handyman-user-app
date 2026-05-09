@@ -586,6 +586,9 @@ class LanguageEn extends BaseLanguage {
   String get lblFeaturedProduct => "This is Featured Product";
 
   @override
+  String get lblProducts => "Products";
+
+  @override
   String get lblAlert => "Alert";
 
   @override

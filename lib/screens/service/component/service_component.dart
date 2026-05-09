@@ -52,6 +52,7 @@ class ServiceComponentState extends State<ServiceComponent> {
   bool _isCartActionLoading = false;
   int _cardQuantity = 1;
   bool _showInlineQuantityControl = false;
+  int? _currentCartItemId;
 
   @override
   void initState() {
@@ -97,7 +98,10 @@ class ServiceComponentState extends State<ServiceComponent> {
           if (!mounted) return;
           await _showVariantPicker(detail);
         } else {
-          await addToCart(productId: widget.serviceData.id.validate(), quantity: 1);
+          final res = await addToCart(productId: widget.serviceData.id.validate(), quantity: 1);
+          if (res.containsKey('cart_id') || res.containsKey('cart_item_id')) {
+            _currentCartItemId = (res['cart_id'] ?? res['cart_item_id']).toString().toInt();
+          }
           toast('Product added to cart');
         }
       } catch (e) {
@@ -260,11 +264,14 @@ class ServiceComponentState extends State<ServiceComponent> {
                               textStyle: boldTextStyle(color: white),
                               onTap: () async {
                                 try {
-                                  await addToCart(
+                                  final res = await addToCart(
                                     productId: detail.product.id.validate(),
                                     productVariantId: selectedVariant.productVariantId,
                                     quantity: quantity,
                                   );
+                                  if (res.containsKey('cart_id') || res.containsKey('cart_item_id')) {
+                                    _currentCartItemId = (res['cart_id'] ?? res['cart_item_id']).toString().toInt();
+                                  }
                                   if (!mounted) return;
                                   finish(context);
                                   toast('Product added to cart');
@@ -294,8 +301,31 @@ class ServiceComponentState extends State<ServiceComponent> {
       _isCartActionLoading = true;
       setState(() {});
       try {
-        await addToCart(productId: widget.serviceData.id.validate(), quantity: quantity ?? _cardQuantity);
+        final res = await addToCart(productId: widget.serviceData.id.validate(), quantity: quantity ?? _cardQuantity);
+        if (res.containsKey('cart_id') || res.containsKey('cart_item_id')) {
+          _currentCartItemId = (res['cart_id'] ?? res['cart_item_id']).toString().toInt();
+        }
         toast('Product added to cart');
+      } catch (e) {
+        toast(e.toString());
+      } finally {
+        _isCartActionLoading = false;
+        if (mounted) setState(() {});
+      }
+    });
+  }
+
+  Future<void> _removeProductFromCart() async {
+    if (_currentCartItemId == null) return;
+    if (_isCartActionLoading) return;
+
+    doIfLoggedIn(context, () async {
+      _isCartActionLoading = true;
+      setState(() {});
+      try {
+        await removeCartItem(cartItemId: _currentCartItemId!);
+        _currentCartItemId = null;
+        toast('Product removed from cart');
       } catch (e) {
         toast(e.toString());
       } finally {
@@ -332,9 +362,25 @@ class ServiceComponentState extends State<ServiceComponent> {
                   width: widget.width ?? context.width(),
                   fit: BoxFit.cover,
                 ).cornerRadiusWithClipRRectOnly(topLeft: 12, topRight: 12),
-                if (widget.serviceData.discount.validate() > 0)
+                if (widget.serviceData.isFeatured == 1)
                   Positioned(
                     top: 12,
+                    left: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: boxDecorationWithRoundedCorners(
+                        backgroundColor: Colors.orange.withValues(alpha: 0.9),
+                        borderRadius: radiusOnly(topRight: 8, bottomRight: 8),
+                      ),
+                      child: Text(
+                        "FEATURED",
+                        style: boldTextStyle(color: white, size: 10),
+                      ),
+                    ),
+                  ),
+                if (widget.serviceData.discount.validate() > 0)
+                  Positioned(
+                    top: widget.serviceData.isFeatured == 1 ? 40 : 12,
                     left: 0,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -413,7 +459,9 @@ class ServiceComponentState extends State<ServiceComponent> {
                             children: [
                               Icon(Icons.remove, color: context.primaryColor, size: 20).paddingAll(4).onTap(() {
                                 if (_cardQuantity <= 1) {
+                                  _cardQuantity = 0;
                                   _showInlineQuantityControl = false;
+                                  _removeProductFromCart();
                                   setState(() {});
                                   return;
                                 }
@@ -573,15 +621,31 @@ class ServiceComponentState extends State<ServiceComponent> {
                         width: widget.width ?? context.width(),
                         circle: false,
                       ).cornerRadiusWithClipRRectOnly(topRight: defaultRadius.toInt(), topLeft: defaultRadius.toInt()),
+                      if (widget.serviceData.isFeatured == 1)
+                        Positioned(
+                          top: 12,
+                          left: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: boxDecorationWithRoundedCorners(
+                              backgroundColor: Colors.orange.withValues(alpha: 0.9),
+                              borderRadius: radiusOnly(topRight: 8, bottomRight: 8),
+                            ),
+                            child: Text(
+                              "FEATURED",
+                              style: boldTextStyle(color: white, size: 10),
+                            ),
+                          ),
+                        ),
                       Positioned(
-                        top: 12,
-                        left: 12,
+                        top: widget.serviceData.isFeatured == 1 ? 40 : 12,
+                        left: widget.serviceData.isFeatured == 1 ? 0 : 12,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
                           constraints: BoxConstraints(maxWidth: context.width() * 0.3),
                           decoration: boxDecorationWithShadow(
                             backgroundColor: context.cardColor.withValues(alpha: 0.9),
-                            borderRadius: radius(24),
+                            borderRadius: widget.serviceData.isFeatured == 1 ? radiusOnly(topRight: 8, bottomRight: 8) : radius(24),
                           ),
                           child: Text(
                             "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}".toUpperCase(),

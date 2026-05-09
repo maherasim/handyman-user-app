@@ -391,6 +391,8 @@ abstract class BaseLanguage {
 
   String get lblFeaturedProduct;
 
+  String get lblProducts;
+
   String get lblAlert;
 
   String get lblOnBase;

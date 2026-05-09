@@ -92,15 +92,31 @@ class _ServiceDashboardComponent4State extends State<ServiceDashboardComponent4>
                 ),
               ),
             ),
+            if (widget.serviceData.isFeatured == 1)
+              Positioned(
+                top: 12,
+                left: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: boxDecorationWithRoundedCorners(
+                    backgroundColor: Colors.orange.withValues(alpha: 0.9),
+                    borderRadius: radiusOnly(topRight: 8, bottomRight: 8),
+                  ),
+                  child: Text(
+                    "FEATURED",
+                    style: boldTextStyle(color: white, size: 10),
+                  ),
+                ),
+              ),
             Positioned(
-              top: 12,
-              left: 12,
+              top: widget.serviceData.isFeatured == 1 ? 40 : 12,
+              left: widget.serviceData.isFeatured == 1 ? 0 : 12,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
                 constraints: BoxConstraints(maxWidth: context.width() * 0.3),
                 decoration: boxDecorationWithShadow(
-                  backgroundColor: context.cardColor.withValues(alpha:0.9),
-                  borderRadius: radius(12),
+                  backgroundColor: context.cardColor.withValues(alpha: 0.9),
+                  borderRadius: widget.serviceData.isFeatured == 1 ? radiusOnly(topRight: 8, bottomRight: 8) : radius(12),
                 ),
                 child: Text(
                   "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}".toUpperCase(),

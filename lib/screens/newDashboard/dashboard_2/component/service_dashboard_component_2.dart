@@ -98,11 +98,27 @@ class _ServiceDashboardComponent2State extends State<ServiceDashboardComponent2>
                     width: widget.width ?? context.width(),
                     circle: false,
                   ).cornerRadiusWithClipRRectOnly(topRight: defaultRadius.toInt(), topLeft: defaultRadius.toInt()),
-                  if (widget.serviceData.isOnlineService)
-                    const Positioned(
+                  if (widget.serviceData.isFeatured == 1)
+                    Positioned(
                       top: 12,
+                      left: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: boxDecorationWithRoundedCorners(
+                          backgroundColor: Colors.orange.withValues(alpha: 0.9),
+                          borderRadius: radiusOnly(topRight: 8, bottomRight: 8),
+                        ),
+                        child: Text(
+                          "FEATURED",
+                          style: boldTextStyle(color: white, size: 10),
+                        ),
+                      ),
+                    ),
+                  if (widget.serviceData.isOnlineService)
+                    Positioned(
+                      top: widget.serviceData.isFeatured == 1 ? 40 : 12,
                       left: 12,
-                      child: OnlineServiceIconWidget(),
+                      child: const OnlineServiceIconWidget(),
                     ),
                   if (widget.isFavouriteService)
                     Positioned(

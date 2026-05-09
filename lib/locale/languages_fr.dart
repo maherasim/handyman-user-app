@@ -588,6 +588,9 @@ class LanguageFr extends BaseLanguage {
   String get lblFeaturedProduct => "Ceci est produit en vedette";
 
   @override
+  String get lblProducts => "Des produits";
+
+  @override
   String get lblAlert => "Alerte";
 
   @override

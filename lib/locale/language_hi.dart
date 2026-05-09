@@ -586,6 +586,9 @@ class LanguageHi extends BaseLanguage {
   String get lblFeaturedProduct => "यह चित्रित उत्पाद है";
 
   @override
+  String get lblProducts => "उत्पादों";
+
+  @override
   String get lblAlert => "चेतावनी";
 
   @override

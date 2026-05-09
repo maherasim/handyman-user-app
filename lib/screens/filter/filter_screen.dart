@@ -20,11 +20,13 @@ class FilterScreen extends StatefulWidget {
   final bool isFromProvider;
   final bool isFromCategory;
   final bool isFromShop;
+  final List<CategoryData>? categories;
 
   FilterScreen({
     this.isFromProvider = true,
     this.isFromCategory = false,
     this.isFromShop = false,
+    this.categories,
   });
 
   @override
@@ -50,9 +52,19 @@ class _FilterScreenState extends State<FilterScreen> {
   }
 
   void init() async {
+    if (widget.categories != null && widget.categories!.isNotEmpty) {
+      catList = widget.categories!;
+      for (var element in catList) {
+        if (filterStore.categoryId.contains(element.id)) {
+          element.isSelected = true;
+        }
+      }
+      setState(() {});
+    }
+
     Future.wait([
       if (widget.isFromProvider) getProviders(),
-      if (!widget.isFromCategory) getCategories(),
+      if (!widget.isFromCategory && widget.categories == null) getCategories(),
     ]);
 
     // Initialize selected zone from filter store

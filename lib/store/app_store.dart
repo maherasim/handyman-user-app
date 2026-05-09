@@ -89,6 +89,9 @@ abstract class _AppStore with Store {
   int unreadCount = 0;
 
   @observable
+  int cartCount = 0;
+
+  @observable
   bool useMaterialYouTheme = getBoolAsync(USE_MATERIAL_YOU_THEME);
 
   @observable
@@ -290,6 +293,11 @@ abstract class _AppStore with Store {
   @action
   void setUnreadCount(int val) {
     unreadCount = val;
+  }
+
+  @action
+  void setCartCount(int val) {
+    cartCount = val;
   }
 
   @action

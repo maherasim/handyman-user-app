@@ -35,8 +35,9 @@ class CategoryData {
   int? status;
   bool isSelected;
   int? services;
+  int? products;
 
-  CategoryData({this.categoryImage, this.color, this.description, this.id, this.isFeatured, this.name, this.status, this.isSelected = false, this.services});
+  CategoryData({this.categoryImage, this.color, this.description, this.id, this.isFeatured, this.name, this.status, this.isSelected = false, this.services, this.products});
 
   factory CategoryData.fromJson(Map<String, dynamic> json) {
     return CategoryData(
@@ -48,6 +49,7 @@ class CategoryData {
       name: json['name'],
       status: json['status'],
       services: json['services'],
+      products: json['products'],
     );
   }
 
@@ -61,6 +63,7 @@ class CategoryData {
     data['name'] = name;
     data['status'] = status;
     data['services'] = services;
+    data['products'] = products;
     return data;
   }
 }

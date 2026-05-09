@@ -59,7 +59,10 @@ class _FilterCategoryComponentState extends State<FilterCategoryComponent> {
                 children: [
                   Text(data.name.validate(), style: boldTextStyle()),
                   4.height,
-                  Text('${data.services} ${language.service}', style: secondaryTextStyle()),
+                  if (data.products != null)
+                    Text('${data.products} ${language.lblProducts}', style: secondaryTextStyle())
+                  else
+                    Text('${data.services} ${language.service}', style: secondaryTextStyle()),
                 ],
               ).expand(),
               8.width,

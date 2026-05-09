@@ -587,6 +587,9 @@ class LanguageDe extends BaseLanguage {
   String get lblFeaturedProduct => "Dies ist ein Produkt";
 
   @override
+  String get lblProducts => "Produkte";
+
+  @override
   String get lblAlert => "Alarm";
 
   @override
