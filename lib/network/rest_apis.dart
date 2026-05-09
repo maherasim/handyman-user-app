@@ -488,6 +488,21 @@ Future<ServiceDetailResponse> getServiceDetails({
   }
 }
 
+Future<ServiceResponse> getProductList(Map<String, dynamic> request) async {
+  String params = "";
+  request.forEach((key, value) {
+    if (value != null && value.toString().isNotEmpty) {
+      if (params.isEmpty) {
+        params += "?$key=$value";
+      } else {
+        params += "&$key=$value";
+      }
+    }
+  });
+
+  return ServiceResponse.fromJson(await handleResponse(await buildHttpResponse('product-list$params', method: HttpMethodType.GET)));
+}
+
 Future<ServiceDetailResponse> getProductDetails({
   required int productId,
   int? customerId,

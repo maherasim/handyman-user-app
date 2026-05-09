@@ -174,16 +174,16 @@ class _WithdrawRequestState extends State<WithdrawRequest> {
                   ),
                   16.height,
                   DropdownButtonFormField<String>(
-                    decoration: inputDecoration(context),
+                    decoration: inputDecoration(context, labelText: language.lblMethod),
                     isExpanded: true,
+                    dropdownColor: context.cardColor,
                     menuMaxHeight: 300,
-                    initialValue: selectedWithdrawalMethod,
+                    value: selectedWithdrawalMethod,
                     hint: Text(
                       language.chooseWithdrawalMethod,
-                      style: secondaryTextStyle(size: 12),
+                      style: secondaryTextStyle(size: 12, color: appTextSecondaryColor),
                     ),
                     icon: ic_down_arrow.iconImage(size: 16),
-                    dropdownColor: context.cardColor,
                     items: withdrawalMethodList.map((String e) {
                       return DropdownMenuItem<String>(
                         value: e,
@@ -222,16 +222,16 @@ class _WithdrawRequestState extends State<WithdrawRequest> {
                     ),
                     8.height,
                     DropdownButtonFormField<BankHistory>(
-                      decoration: inputDecoration(context),
+                      decoration: inputDecoration(context, labelText: language.bankName),
                       isExpanded: true,
+                      dropdownColor: context.cardColor,
                       menuMaxHeight: 300,
-                      initialValue: selectedBank,
+                      value: selectedBank,
                       hint: Text(
                         language.egCentralNationalBank,
-                        style: secondaryTextStyle(size: 12),
+                        style: secondaryTextStyle(size: 12, color: appTextSecondaryColor),
                       ),
                       icon: ic_down_arrow.iconImage(size: 16),
-                      dropdownColor: context.cardColor,
                       items: bankHistoryList.map((BankHistory e) {
                         return DropdownMenuItem<BankHistory>(
                           value: e,

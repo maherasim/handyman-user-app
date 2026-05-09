@@ -1,4 +1,5 @@
 import 'package:booking_system_flutter/component/base_scaffold_widget.dart';
+import 'package:booking_system_flutter/component/cached_image_widget.dart';
 import 'package:booking_system_flutter/component/empty_error_state_widget.dart';
 import 'package:booking_system_flutter/component/loader_widget.dart';
 import 'package:booking_system_flutter/main.dart';
@@ -100,81 +101,73 @@ class _ProductOrderHistoryScreenState extends State<ProductOrderHistoryScreen> {
                   }
                 },
                 children: [
-                  Container(
-                    width: context.width(),
-                    decoration: boxDecorationDefault(
-                      color: context.cardColor,
-                      borderRadius: radius(),
-                    ),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        headingRowColor: WidgetStatePropertyAll(
-                          context.primaryColor.withValues(alpha: 0.08),
-                        ),
-                        columnSpacing: 18,
-                        horizontalMargin: 14,
-                        columns: [
-                          DataColumn(
-                              label: Text('Order',
-                                  style: boldTextStyle(size: 13))),
-                          DataColumn(
-                              label:
-                                  Text('Date', style: boldTextStyle(size: 13))),
-                          DataColumn(
-                              label: Text('Items',
-                                  style: boldTextStyle(size: 13))),
-                          DataColumn(
-                              label: Text('Status',
-                                  style: boldTextStyle(size: 13))),
-                          DataColumn(
-                              label: Text('Payment',
-                                  style: boldTextStyle(size: 13))),
-                          DataColumn(
-                              label: Text('Total',
-                                  style: boldTextStyle(size: 13))),
-                          DataColumn(
-                              label: Text('Action',
-                                  style: boldTextStyle(size: 13))),
-                        ],
-                        rows: snap.map((order) {
-                          return DataRow(
-                            cells: [
-                              DataCell(Text(
-                                order.orderNumber
-                                    .validate(value: '#${order.id}'),
-                                style: primaryTextStyle(size: 13),
-                              )),
-                              DataCell(Text(order.orderDate,
-                                  style: primaryTextStyle(size: 13))),
-                              DataCell(Text(order.itemsCount.toString(),
-                                  style: primaryTextStyle(size: 13))),
-                              DataCell(_statusChip(order.status)),
-                              DataCell(Text(
-                                '${order.paymentType} / ${order.paymentStatus}',
-                                style: primaryTextStyle(size: 13),
-                              )),
-                              DataCell(Text(order.totalFormat,
-                                  style: boldTextStyle(
-                                      size: 13, color: primaryColor))),
-                              DataCell(
-                                TextButton(
-                                  onPressed: () {
-                                    ProductOrderDetailScreen(orderId: order.id)
-                                        .launch(context);
-                                  },
-                                  child: Text('View',
-                                      style: boldTextStyle(
-                                          size: 13,
-                                          color: context.primaryColor)),
+                  ...snap.map((order) {
+                    return GestureDetector(
+                      onTap: () {
+                        ProductOrderDetailScreen(orderId: order.id)
+                            .launch(context);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration:
+                            boxDecorationDefault(color: context.cardColor),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CachedImageWidget(
+                              url: order.productImage,
+                              height: 75,
+                              width: 75,
+                              radius: 8,
+                              fit: BoxFit.cover,
+                            ),
+                            12.width,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      order.orderNumber.validate(),
+                                      style: boldTextStyle(size: 14),
+                                    ).expand(),
+                                    _statusChip(order.status),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          );
-                        }).toList(),
+                                4.height,
+                                Text(
+                                  order.items.isNotEmpty 
+                                    ? order.items.map((e) => e.productName).join(", ")
+                                    : "${order.itemsCount} Item(s)",
+                                  style: secondaryTextStyle(),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                8.height,
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(order.orderDate,
+                                        style: secondaryTextStyle(size: 12)),
+                                    Text(order.totalFormat,
+                                        style: boldTextStyle(
+                                            color: primaryColor, size: 14)),
+                                  ],
+                                ),
+                              ],
+                            ).expand(),
+                            8.width,
+                            const Icon(Icons.chevron_right,
+                                color: grey, size: 20),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  }).toList(),
                 ],
               );
             },
@@ -189,16 +182,35 @@ class _ProductOrderHistoryScreenState extends State<ProductOrderHistoryScreen> {
   }
 
   Widget _statusChip(String status) {
-    final String value = status.validate(value: '-');
+    String value = status.validate(value: '-');
+    Color color = primaryColor;
+
+    if (value.toLowerCase().contains('pending')) {
+      color = pending;
+    } else if (value.toLowerCase().contains('completed')) {
+      color = completed;
+    } else if (value.toLowerCase().contains('cancelled')) {
+      color = cancelled;
+    } else if (value.toLowerCase().contains('hold')) {
+      color = hold;
+    } else if (value.toLowerCase().contains('progress')) {
+      color = in_progress;
+    } else if (value.toLowerCase().contains('failed')) {
+      color = failed;
+    } else if (value.toLowerCase().contains('rejected')) {
+      color = rejected;
+    }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: boxDecorationDefault(
-        color: context.primaryColor.withValues(alpha: 0.08),
-        borderRadius: radius(18),
+        color: color.withValues(alpha: 0.1),
+        borderRadius: radius(8),
       ),
-      child: Text(value.capitalizeFirstLetter(),
-          style: boldTextStyle(size: 12, color: context.primaryColor)),
+      child: Text(
+        value.capitalizeFirstLetter(),
+        style: boldTextStyle(size: 10, color: color),
+      ),
     );
   }
 }

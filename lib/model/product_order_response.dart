@@ -92,6 +92,7 @@ class ProductOrderData {
   final String taxTotalFormat;
   final num total;
   final String totalFormat;
+  final String productImage;
   final String detailUrl;
   final ProductOrderShipping? shipping;
   final List<ProductOrderItem> items;
@@ -112,6 +113,7 @@ class ProductOrderData {
     required this.taxTotalFormat,
     required this.total,
     required this.totalFormat,
+    required this.productImage,
     required this.detailUrl,
     required this.shipping,
     required this.items,
@@ -134,6 +136,7 @@ class ProductOrderData {
       taxTotalFormat: (json['tax_total_format'] ?? '').toString(),
       total: _parseNum(json['total']),
       totalFormat: (json['total_format'] ?? '').toString(),
+      productImage: (json['product_image'] ?? '').toString(),
       detailUrl: (json['detail_url'] ?? '').toString(),
       shipping: json['shipping'] is Map
           ? ProductOrderShipping.fromJson(

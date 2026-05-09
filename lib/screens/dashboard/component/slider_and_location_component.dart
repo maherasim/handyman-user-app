@@ -62,7 +62,7 @@ class _SliderLocationComponentState extends State<SliderLocationComponent> {
 
   Widget getSliderWidget() {
     return SizedBox(
-      height: 325,
+      height: 280,
       width: context.width(),
       child: Stack(
         children: [
@@ -73,7 +73,7 @@ class _SliderLocationComponentState extends State<SliderLocationComponent> {
                     widget.sliderList.length,
                     (index) {
                       SliderModel data = widget.sliderList[index];
-                      return CachedImageWidget(url: data.sliderImage.validate(), height: 250, width: context.width(), fit: BoxFit.cover).onTap(() {
+                      return CachedImageWidget(url: data.sliderImage.validate(), height: 200, width: context.width(), fit: BoxFit.cover).onTap(() {
                         if (data.type == SERVICE) {
                           ServiceDetailScreen(serviceId: data.typeId.validate().toInt()).launch(context, pageRouteAnimation: PageRouteAnimation.Fade);
                         }
@@ -81,7 +81,7 @@ class _SliderLocationComponentState extends State<SliderLocationComponent> {
                     },
                   ),
                 )
-              : CachedImageWidget(url: '', height: 250, width: context.width()),
+              : CachedImageWidget(url: '', height: 200, width: context.width()),
           if (widget.sliderList.length.validate() > 1)
             Positioned(
               bottom: 34,
@@ -158,7 +158,7 @@ class _SliderLocationComponentState extends State<SliderLocationComponent> {
       children: [
         getSliderWidget(),
         Positioned(
-          bottom: -24,
+          bottom: -12,
           right: 16,
           left: 16,
           child: Row(

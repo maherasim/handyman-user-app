@@ -17,6 +17,10 @@ import '../../../store/filter_store.dart';
 import '../../booking_filter/booking_filter_screen.dart';
 
 class BookingFragment extends StatefulWidget {
+  final bool isFromDashboard;
+
+  BookingFragment({this.isFromDashboard = true});
+
   @override
   _BookingFragmentState createState() => _BookingFragmentState();
 }
@@ -98,7 +102,7 @@ class _BookingFragmentState extends State<BookingFragment> {
       appBar: appBarWidget(
         language.booking,
         textColor: white,
-        showBack: false,
+        showBack: !widget.isFromDashboard,
         textSize: APP_BAR_TEXT_SIZE,
         elevation: 3.0,
         color: context.primaryColor,

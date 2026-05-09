@@ -62,7 +62,7 @@ class _SliderDashboardComponent1State extends State<SliderDashboardComponent1> {
 
   Widget getSliderWidget() {
     return SizedBox(
-      height: 300,
+      height: 250,
       width: context.width(),
       child: Stack(
         children: [
@@ -73,7 +73,7 @@ class _SliderDashboardComponent1State extends State<SliderDashboardComponent1> {
                     widget.sliderList.length,
                     (index) {
                       SliderModel data = widget.sliderList[index];
-                      return CachedImageWidget(url: data.sliderImage.validate(), height: 250, width: context.width(), fit: BoxFit.cover).onTap(() {
+                      return CachedImageWidget(url: data.sliderImage.validate(), height: 200, width: context.width(), fit: BoxFit.cover).onTap(() {
                         if (data.type == SERVICE) {
                           ServiceDetailScreen(serviceId: data.typeId.validate().toInt()).launch(context, pageRouteAnimation: PageRouteAnimation.Fade);
                         }
@@ -81,7 +81,7 @@ class _SliderDashboardComponent1State extends State<SliderDashboardComponent1> {
                     },
                   ),
                 )
-              : CachedImageWidget(url: '', height: 250, width: context.width()),
+              : CachedImageWidget(url: '', height: 200, width: context.width()),
           if (widget.sliderList.length.validate() > 1)
             Positioned(
               bottom: 25,
@@ -147,57 +147,63 @@ class _SliderDashboardComponent1State extends State<SliderDashboardComponent1> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
+      clipBehavior: Clip.none,
       children: [
         getSliderWidget(),
-        Row(
-          children: [
-            Observer(
-              builder: (context) {
-                return AppButton(
-                  padding: const EdgeInsets.all(0),
-                  width: context.width(),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: commonDecoration,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        ic_location.iconImage(color: appStore.isDarkMode ? Colors.white : Colors.black),
-                        8.width,
-                        Text(
-                          appStore.isCurrentLocation ? getStringAsync(CURRENT_ADDRESS) : language.lblLocationOff,
-                          style: secondaryTextStyle(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ).expand(),
-                        8.width,
-                        ic_active_location.iconImage(size: 24, color: appStore.isCurrentLocation ? primaryColor : grey),
-                      ],
+        Positioned(
+          bottom: -12,
+          left: 16,
+          right: 16,
+          child: Row(
+            children: [
+              Observer(
+                builder: (context) {
+                  return AppButton(
+                    padding: const EdgeInsets.all(0),
+                    width: context.width(),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: commonDecoration,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ic_location.iconImage(color: appStore.isDarkMode ? Colors.white : Colors.black),
+                          8.width,
+                          Text(
+                            appStore.isCurrentLocation ? getStringAsync(CURRENT_ADDRESS) : language.lblLocationOff,
+                            style: secondaryTextStyle(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ).expand(),
+                          8.width,
+                          ic_active_location.iconImage(size: 24, color: appStore.isCurrentLocation ? primaryColor : grey),
+                        ],
+                      ),
                     ),
-                  ),
-                  onTap: () async {
-                    locationWiseService(context, () {
-                      widget.callback?.call();
-                    });
-                  },
-                );
-              },
-            ).expand(),
-            16.width,
-            GestureDetector(
-              onTap: () {
-                SearchServiceScreen(featuredList: widget.featuredList).launch(context);
-              },
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: commonDecoration,
-                child: ic_search.iconImage(color: primaryColor),
+                    onTap: () async {
+                      locationWiseService(context, () {
+                        widget.callback?.call();
+                      });
+                    },
+                  );
+                },
+              ).expand(),
+              16.width,
+              GestureDetector(
+                onTap: () {
+                  SearchServiceScreen(featuredList: widget.featuredList).launch(context);
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: commonDecoration,
+                  child: ic_search.iconImage(color: primaryColor),
+                ),
               ),
-            ),
-          ],
-        ).paddingAll(16),
+            ],
+          ),
+        ),
       ],
-    );
+    ).paddingBottom(16);
   }
 }

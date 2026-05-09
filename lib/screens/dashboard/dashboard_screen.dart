@@ -13,10 +13,13 @@ import 'package:booking_system_flutter/utils/images.dart';
 import 'package:booking_system_flutter/utils/string_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../component/voice_search_component.dart';
 import '../../utils/app_configuration.dart';
+import '../cart/my_cart_screen.dart';
+import '../product/product_fragment.dart';
 import '../newDashboard/dashboard_1/dashboard_fragment_1.dart';
 import '../newDashboard/dashboard_2/dashboard_fragment_2.dart';
 import '../newDashboard/dashboard_3/dashboard_fragment_3.dart';
@@ -128,30 +131,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return DoublePressBackWidget(
       message: language.lblBackPressMsg,
       child: Scaffold(
-        body: AnimatedOpacity(
-          opacity: 1,
-          duration: const Duration(milliseconds: 500),
-          child: [
+        body: Stack(
+          children: [
+            AnimatedOpacity(
+              opacity: 1,
+              duration: const Duration(milliseconds: 500),
+              child: [
+                Observer(
+                  builder: (context) {
+                    if (appConfigurationStore.userDashboardType == DASHBOARD_1) {
+                      return DashboardFragment1();
+                    } else if (appConfigurationStore.userDashboardType == DASHBOARD_2) {
+                      return DashboardFragment2();
+                    } else if (appConfigurationStore.userDashboardType == DASHBOARD_3) {
+                      return DashboardFragment3();
+                    } else if (appConfigurationStore.userDashboardType == DASHBOARD_4) {
+                      return DashboardFragment4();
+                    } else {
+                      return DashboardFragment();
+                    }
+                  },
+                ),
+                ProductFragment(),
+                CategoryScreen(),
+                if (appConfigurationStore.isEnableChat) Observer(builder: (context) => appStore.isLoggedIn ? ChatListScreen() : const SignInScreen(isFromDashboard: true)),
+                ProfileFragment(),
+              ][currentIndex],
+            ),
             Observer(
               builder: (context) {
-                if (appConfigurationStore.userDashboardType == DASHBOARD_1) {
-                  return DashboardFragment1();
-                } else if (appConfigurationStore.userDashboardType == DASHBOARD_2) {
-                  return DashboardFragment2();
-                } else if (appConfigurationStore.userDashboardType == DASHBOARD_3) {
-                  return DashboardFragment3();
-                } else if (appConfigurationStore.userDashboardType == DASHBOARD_4) {
-                  return DashboardFragment4();
-                } else {
-                  return DashboardFragment();
-                }
+                return Positioned(
+                  top: context.statusBarHeight + 16,
+                  right: appStore.isLoggedIn ? 64 : 16,
+                  child: Container(
+                    decoration: boxDecorationDefault(color: context.cardColor, shape: BoxShape.circle),
+                    height: 36,
+                    padding: const EdgeInsets.all(8),
+                    width: 36,
+                    child: Icon(MaterialCommunityIcons.cart_outline, size: 20, color: primaryColor).center(),
+                  ).onTap(() {
+                    doIfLoggedIn(context, () {
+                      const MyCartScreen().launch(context);
+                    });
+                  }),
+                ).visible(currentIndex == 0);
               },
             ),
-            Observer(builder: (context) => appStore.isLoggedIn ? BookingFragment() : const SignInScreen(isFromDashboard: true)),
-            CategoryScreen(),
-            if (appConfigurationStore.isEnableChat) Observer(builder: (context) => appStore.isLoggedIn ? ChatListScreen() : const SignInScreen(isFromDashboard: true)),
-            ProfileFragment(),
-          ][currentIndex],
+          ],
         ),
         bottomNavigationBar: Blur(
           blur: 30,
@@ -173,9 +199,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   label: language.home,
                 ),
                 NavigationDestination(
-                  icon: ic_ticket.iconImage(color: appTextSecondaryColor),
-                  selectedIcon: ic_ticket.iconImage(color: context.primaryColor),
-                  label: language.booking,
+                  icon: Icon(MaterialCommunityIcons.shopping_outline, color: appTextSecondaryColor),
+                  selectedIcon: Icon(MaterialCommunityIcons.shopping, color: context.primaryColor),
+                  label: "Product",
                 ),
                 NavigationDestination(
                   icon: ic_category.iconImage(color: appTextSecondaryColor),

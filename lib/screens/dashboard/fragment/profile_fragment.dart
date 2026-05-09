@@ -32,6 +32,7 @@ import '../../favourite_provider_screen.dart';
 import '../../helpDesk/help_desk_list_screen.dart';
 import '../../referral_loyalty_points/referral_loyalty_screen.dart';
 import '../component/wallet_history.dart';
+import 'booking_fragment.dart';
 
 class ProfileFragment extends StatefulWidget {
   @override
@@ -251,6 +252,24 @@ class ProfileFragmentState extends State<ProfileFragment> {
                                 const BankDetails().launch(context);
                               },
                             ),
+                          SettingItemWidget(
+                            decoration: boxDecorationDefault(
+                                color: context.cardColor,
+                                borderRadius:
+                                    const BorderRadiusDirectional.vertical(
+                                        bottom: Radius.circular(0))),
+                            leading: ic_ticket.iconImage(size: SETTING_ICON_SIZE),
+                            title: language.booking,
+                            titleTextStyle: boldTextStyle(size: 12),
+                            trailing: trailing,
+                            padding: const EdgeInsets.only(
+                                top: 20, left: 16, right: 16),
+                            onTap: () {
+                              doIfLoggedIn(context, () {
+                                BookingFragment(isFromDashboard: false).launch(context);
+                              });
+                            },
+                          ),
                           SettingItemWidget(
                             decoration: boxDecorationDefault(
                                 color: context.cardColor,

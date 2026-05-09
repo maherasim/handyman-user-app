@@ -746,9 +746,11 @@ class _MyCartScreenState extends State<MyCartScreen> {
       children: [
         _fieldLabel('State'),
         DropdownButtonFormField<String>(
-          initialValue: selectedShippingState,
+          value: selectedShippingState,
           isExpanded: true,
+          dropdownColor: context.cardColor,
           decoration: inputDecoration(context, hintText: 'State'),
+          hint: Text('State', style: secondaryTextStyle(color: appTextSecondaryColor)),
           items: states.map((state) {
             return DropdownMenuItem<String>(
               value: state,
