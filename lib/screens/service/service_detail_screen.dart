@@ -543,7 +543,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                           ],
                         ),
                       ).paddingSymmetric(horizontal: 16, vertical: 8),
-                      providerWidget(data: snap.data!.provider!),
+                      if (snap.data!.provider != null) providerWidget(data: snap.data!.provider!),
                       if (snap.data!.shops.validate().isNotEmpty)
                         HorizontalShopListComponent(
                           listTitle: language.lblAboutShop,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:booking_system_flutter/main.dart';
@@ -503,6 +504,21 @@ Future<ServiceResponse> getProductList(Map<String, dynamic> request) async {
   return ServiceResponse.fromJson(await handleResponse(await buildHttpResponse('product-list$params', method: HttpMethodType.GET)));
 }
 
+Future<ServiceResponse> getPostList(Map<String, dynamic> request) async {
+  String params = "";
+  request.forEach((key, value) {
+    if (value != null && value.toString().isNotEmpty) {
+      if (params.isEmpty) {
+        params += "?$key=$value";
+      } else {
+        params += "&$key=$value";
+      }
+    }
+  });
+
+  return ServiceResponse.fromJson(await handleResponse(await buildHttpResponse('post-list$params', method: HttpMethodType.GET)));
+}
+
 Future<ServiceDetailResponse> getProductDetails({
   required int productId,
   int? customerId,
@@ -571,13 +587,90 @@ Future<ServiceDetailResponse> getPostDetails({
   }
 }
 
+Future<ServiceResponse> getUserPostList(int page, {var perPage = PER_PAGE_ITEM}) async {
+  return ServiceResponse.fromJson(await handleResponse(await buildHttpResponse('user-post-list?page=$page&per_page=$perPage', method: HttpMethodType.GET)));
+}
+
+Future<Map<String, dynamic>> getPostFormConfig() async {
+  return await handleResponse(await buildHttpResponse('post-form-config', method: HttpMethodType.GET));
+}
+
+Future<BaseResponseModel> deletePost(int id) async {
+  return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('delete-post', method: HttpMethodType.POST, request: {'id': id})));
+}
+
+Future<void> savePost({
+  int? id,
+  required String name,
+  required int categoryId,
+  int? subcategoryId,
+  String? description,
+  required num price,
+  int isFeatured = 0,
+  required List<int> serviceZones,
+  List<File>? postAttachments,
+  Function(dynamic)? onSuccess,
+  Function(dynamic)? onError,
+}) async {
+  appStore.setLoading(true);
+  MultipartRequest multiPartRequest = await getMultiPartRequest('save-post');
+
+  if (id != null) multiPartRequest.fields['id'] = id.toString();
+  multiPartRequest.fields['name'] = name;
+  multiPartRequest.fields['category_id'] = categoryId.toString();
+  if (subcategoryId != null) multiPartRequest.fields['subcategory_id'] = subcategoryId.toString();
+  if (description != null) multiPartRequest.fields['description'] = description;
+  multiPartRequest.fields['price'] = price.toString();
+  multiPartRequest.fields['is_featured'] = isFeatured.toString();
+  
+  for (int i = 0; i < serviceZones.length; i++) {
+    multiPartRequest.fields['service_zones[$i]'] = serviceZones[i].toString();
+  }
+
+  if (postAttachments != null && postAttachments.isNotEmpty) {
+    for (int i = 0; i < postAttachments.length; i++) {
+      multiPartRequest.files.add(await MultipartFile.fromPath('post_attachment[$i]', postAttachments[i].path));
+    }
+  }
+
+  multiPartRequest.headers.addAll(buildHeaderTokens());
+
+  await sendMultiPartRequest(
+    multiPartRequest,
+    onSuccess: (data) {
+      appStore.setLoading(false);
+      try {
+        var res = jsonDecode(data);
+        onSuccess?.call(res);
+      } catch (e) {
+        onSuccess?.call(data);
+      }
+    },
+    onError: (error) {
+      appStore.setLoading(false);
+      onError?.call(error);
+    },
+  );
+}
+
 Map<String, dynamic> _normalizeCatalogDetailResponse(dynamic rawResponse) {
   if (rawResponse is! Map<String, dynamic>) return <String, dynamic>{};
 
   final dynamic rawData = rawResponse['data'];
   if (rawData is! Map<String, dynamic>) return <String, dynamic>{};
 
-  final dynamic provider = rawData['provider'] ?? rawData['providers'];
+  dynamic provider = rawData['provider'] ?? rawData['providers'];
+  
+  if (provider == null && rawData['provider_id'] != null) {
+    provider = {
+      'id': rawData['provider_id'],
+      'display_name': rawData['provider_name'] ?? '',
+      'first_name': rawData['provider_name'] ?? '',
+      'last_name': '',
+      'profile_image': rawData['provider_image'] ?? '',
+      'status': 1,
+    };
+  }
 
   return <String, dynamic>{
     'service_detail': rawData,

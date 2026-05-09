@@ -1,9 +1,9 @@
 import 'package:booking_system_flutter/component/image_border_component.dart';
 import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/screens/auth/sign_in_screen.dart';
-import 'package:booking_system_flutter/screens/category/category_screen.dart';
+import 'package:booking_system_flutter/screens/post/post_list_screen.dart';
+
 import 'package:booking_system_flutter/screens/chat/chat_list_screen.dart';
-import 'package:booking_system_flutter/screens/dashboard/fragment/booking_fragment.dart';
 import 'package:booking_system_flutter/screens/dashboard/fragment/dashboard_fragment.dart';
 import 'package:booking_system_flutter/screens/dashboard/fragment/profile_fragment.dart';
 import 'package:booking_system_flutter/utils/colors.dart';
@@ -162,7 +162,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   },
                 ),
                 ProductFragment(),
-                CategoryScreen(),
+                PostListScreen(),
                 if (appConfigurationStore.isEnableChat) Observer(builder: (context) => appStore.isLoggedIn ? ChatListScreen() : const SignInScreen(isFromDashboard: true)),
                 ProfileFragment(),
               ][currentIndex],
@@ -234,9 +234,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   label: "Product",
                 ),
                 NavigationDestination(
-                  icon: ic_category.iconImage(color: appTextSecondaryColor),
-                  selectedIcon: ic_category.iconImage(color: context.primaryColor),
-                  label: language.category,
+                  icon: Icon(MaterialCommunityIcons.post_outline, color: appTextSecondaryColor),
+                  selectedIcon: Icon(MaterialCommunityIcons.post, color: context.primaryColor),
+                  label: "Posts",
                 ),
                 if (appConfigurationStore.isEnableChat)
                   NavigationDestination(

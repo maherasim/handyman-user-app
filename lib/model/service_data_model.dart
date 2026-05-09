@@ -19,6 +19,7 @@ class ServiceData {
   int? isFeatured;
   int? bookingAddressId;
   num? price;
+  String? priceFormat;
   num? discount;
   num? totalReview;
   num? totalRating;
@@ -62,6 +63,7 @@ class ServiceData {
   String? variantAttributeName;
   int? productUnitId;
   String? productUnitName;
+  PostOrderDetail? postOrderDetail;
 
   //Local
   bool isSelected = false;
@@ -107,6 +109,7 @@ class ServiceData {
     this.isFeatured,
     this.name,
     this.price,
+    this.priceFormat,
     this.providerId,
     this.providerName,
     this.status,
@@ -140,6 +143,7 @@ class ServiceData {
     this.variantAttributeName,
     this.productUnitId,
     this.productUnitName,
+    this.postOrderDetail,
   });
 
   factory ServiceData.fromJson(Map<String, dynamic> json) {
@@ -149,6 +153,7 @@ class ServiceData {
       categoryId: json['category_id'],
       providerId: json['provider_id'],
       price: json['price'],
+      priceFormat: json['price_format'],
       type: json['type'],
       serviceType: json['service_type'] ?? json['type'],
       bookingDate: json['booking_date'],
@@ -191,6 +196,7 @@ class ServiceData {
       variantAttributeName: json['variant_attribute_name'],
       productUnitId: json['product_unit_id'] != null ? json['product_unit_id'].toString().toInt() : null,
       productUnitName: json['product_unit_name'],
+      postOrderDetail: json['order_detail'] is Map ? PostOrderDetail.fromJson(json['order_detail'] as Map<String, dynamic>) : null,
     );
   }
 
@@ -212,7 +218,7 @@ class ServiceData {
     data['price'] = price;
     data['is_slot'] = isSlot;
     data['digital_service'] = isOnlineService;
-    // data['price_format'] = this.priceFormat;
+    data['price_format'] = priceFormat;
     data['provider_id'] = providerId;
     data['provider_name'] = providerName;
     data['status'] = status;
@@ -258,6 +264,9 @@ class ServiceData {
     data['variant_attribute_name'] = variantAttributeName;
     data['product_unit_id'] = productUnitId;
     data['product_unit_name'] = productUnitName;
+    if (postOrderDetail != null) {
+      data['order_detail'] = postOrderDetail!.toJson();
+    }
     return data;
   }
 }
@@ -367,3 +376,50 @@ class ProviderAddressMapping {
     return data;
   }
 }
+
+class PostOrderDetail {
+  String? postName;
+  num? price;
+  String? priceFormat;
+  num? discount;
+  num? discountAmount;
+  String? discountAmountFormat;
+  num? subtotal;
+  String? subtotalFormat;
+
+  PostOrderDetail({
+    this.postName,
+    this.price,
+    this.priceFormat,
+    this.discount,
+    this.discountAmount,
+    this.discountAmountFormat,
+    this.subtotal,
+    this.subtotalFormat,
+  });
+
+  PostOrderDetail.fromJson(Map<String, dynamic> json) {
+    postName = json['post_name'];
+    price = json['price'];
+    priceFormat = json['price_format'];
+    discount = json['discount'];
+    discountAmount = json['discount_amount'];
+    discountAmountFormat = json['discount_amount_format'];
+    subtotal = json['subtotal'];
+    subtotalFormat = json['subtotal_format'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['post_name'] = postName;
+    data['price'] = price;
+    data['price_format'] = priceFormat;
+    data['discount'] = discount;
+    data['discount_amount'] = discountAmount;
+    data['discount_amount_format'] = discountAmountFormat;
+    data['subtotal'] = subtotal;
+    data['subtotal_format'] = subtotalFormat;
+    return data;
+  }
+}
+

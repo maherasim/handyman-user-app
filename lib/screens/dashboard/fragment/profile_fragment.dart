@@ -12,7 +12,9 @@ import 'package:booking_system_flutter/screens/dashboard/dashboard_screen.dart';
 import 'package:booking_system_flutter/screens/product_order/product_order_history_screen.dart';
 import 'package:booking_system_flutter/screens/service/favourite_service_screen.dart';
 import 'package:booking_system_flutter/screens/setting_screen.dart';
+import 'package:booking_system_flutter/screens/category/category_screen.dart';
 import 'package:booking_system_flutter/screens/wallet/user_wallet_balance_screen.dart';
+
 import 'package:booking_system_flutter/utils/colors.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/configs.dart';
@@ -25,6 +27,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:booking_system_flutter/screens/post/my_post_list_screen.dart';
 
 import '../../../utils/app_configuration.dart';
 import '../../bankDetails/view/bank_details.dart';
@@ -233,6 +236,23 @@ class ProfileFragmentState extends State<ProfileFragment> {
                                 const UserWalletHistoryScreen().launch(context);
                               },
                             ),
+                          if (appStore.isLoggedIn)
+                            SettingItemWidget(
+                              decoration: boxDecorationDefault(
+                                  color: context.cardColor,
+                                  borderRadius:
+                                      const BorderRadiusDirectional.vertical(
+                                          bottom: Radius.circular(0))),
+                              leading: const Icon(MaterialCommunityIcons.post_outline, size: SETTING_ICON_SIZE, color: Color(0xFF6C757D)),
+                              title: "My Posts",
+                              titleTextStyle: boldTextStyle(size: 12),
+                              padding: const EdgeInsets.only(
+                                  top: 20, left: 16, right: 16),
+                              trailing: trailing,
+                              onTap: () {
+                                MyPostListScreen().launch(context);
+                              },
+                            ),
                           if (appStore.isLoggedIn &&
                               rolesAndPermissionStore.bankList)
                             SettingItemWidget(
@@ -258,6 +278,22 @@ class ProfileFragmentState extends State<ProfileFragment> {
                                 borderRadius:
                                     const BorderRadiusDirectional.vertical(
                                         bottom: Radius.circular(0))),
+                            leading: ic_category.iconImage(size: SETTING_ICON_SIZE),
+                            title: language.category,
+                            titleTextStyle: boldTextStyle(size: 12),
+                            trailing: trailing,
+                            padding: const EdgeInsets.only(
+                                top: 20, left: 16, right: 16),
+                            onTap: () {
+                              CategoryScreen().launch(context);
+                            },
+                          ),
+                          SettingItemWidget(
+                            decoration: boxDecorationDefault(
+                                color: context.cardColor,
+                                borderRadius:
+                                    const BorderRadiusDirectional.vertical(
+                                        bottom: Radius.circular(0))),
                             leading: ic_ticket.iconImage(size: SETTING_ICON_SIZE),
                             title: language.booking,
                             titleTextStyle: boldTextStyle(size: 12),
@@ -270,26 +306,26 @@ class ProfileFragmentState extends State<ProfileFragment> {
                               });
                             },
                           ),
-                          SettingItemWidget(
-                            decoration: boxDecorationDefault(
-                                color: context.cardColor,
-                                borderRadius:
-                                    const BorderRadiusDirectional.vertical(
-                                        bottom: Radius.circular(0))),
-                            leading: Icon(MaterialCommunityIcons.cart_outline,
-                                size: SETTING_ICON_SIZE,
-                                color: context.iconColor),
-                            title: 'My Cart',
-                            titleTextStyle: boldTextStyle(size: 12),
-                            trailing: trailing,
-                            padding: const EdgeInsets.only(
-                                top: 20, left: 16, right: 16),
-                            onTap: () {
-                              doIfLoggedIn(context, () {
-                                const MyCartScreen().launch(context);
-                              });
-                            },
-                          ),
+                          // SettingItemWidget(
+                          //   decoration: boxDecorationDefault(
+                          //       color: context.cardColor,
+                          //       borderRadius:
+                          //           const BorderRadiusDirectional.vertical(
+                          //               bottom: Radius.circular(0))),
+                          //   leading: Icon(MaterialCommunityIcons.cart_outline,
+                          //       size: SETTING_ICON_SIZE,
+                          //       color: context.iconColor),
+                          //   title: 'My Cart',
+                          //   titleTextStyle: boldTextStyle(size: 12),
+                          //   trailing: trailing,
+                          //   padding: const EdgeInsets.only(
+                          //       top: 20, left: 16, right: 16),
+                          //   onTap: () {
+                          //     doIfLoggedIn(context, () {
+                          //       const MyCartScreen().launch(context);
+                          //     });
+                          //   },
+                          // ),
                           SettingItemWidget(
                             decoration: boxDecorationDefault(
                                 color: context.cardColor,

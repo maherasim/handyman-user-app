@@ -8,6 +8,8 @@ import 'package:booking_system_flutter/model/service_data_model.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
 import 'package:booking_system_flutter/screens/booking/provider_info_screen.dart';
 import 'package:booking_system_flutter/screens/newDashboard/dashboard_4/component/service_dashboard_component_4.dart';
+import 'package:booking_system_flutter/screens/post/add_post_screen.dart';
+import 'package:booking_system_flutter/screens/post/post_detail_screen.dart';
 import 'package:booking_system_flutter/screens/service/service_detail_screen.dart';
 import 'package:booking_system_flutter/utils/colors.dart';
 import 'package:booking_system_flutter/utils/common.dart';
@@ -31,6 +33,9 @@ class ServiceComponent extends StatefulWidget {
   final bool isFromDashboard;
   final bool isFromViewAllService;
   final bool isFromServiceDetail;
+  /// Shorter grid card height for Posts listings (classified).
+  final bool isCompactPostListing;
+  final bool isMyPost;
 
   ServiceComponent({
     required this.serviceData,
@@ -41,6 +46,8 @@ class ServiceComponent extends StatefulWidget {
     this.isFromDashboard = false,
     this.isFromViewAllService = false,
     this.isFromServiceDetail = false,
+    this.isCompactPostListing = false,
+    this.isMyPost = false,
   });
 
   @override
@@ -559,8 +566,184 @@ class ServiceComponentState extends State<ServiceComponent> {
       );
     }
 
+    Widget buildCompactPostCard() {
+      const double imageH = 108.0;
+      const double stackH = 118.0;
+
+      return Container(
+        decoration: boxDecorationWithRoundedCorners(
+          borderRadius: radius(10),
+          backgroundColor: context.cardColor,
+          border: widget.isBorderEnabled.validate(value: false)
+              ? appStore.isDarkMode
+                  ? Border.all(color: context.dividerColor)
+                  : null
+              : null,
+        ),
+        width: widget.width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: stackH,
+              width: widget.width ?? context.width(),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  CachedImageWidget(
+                    url: widget.isFavouriteService && widget.serviceData.serviceAttachments.validate().isNotEmpty
+                        ? widget.serviceData.serviceAttachments!.first.validate()
+                        : widget.serviceData.firstServiceImage.validate(),
+                    fit: BoxFit.cover,
+                    height: imageH,
+                    width: widget.width ?? context.width(),
+                    circle: false,
+                  ).cornerRadiusWithClipRRectOnly(topRight: defaultRadius.toInt(), topLeft: defaultRadius.toInt()),
+                  if (widget.isMyPost)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: boxDecorationWithShadow(backgroundColor: Colors.white, borderRadius: radius(), border: Border.all(color: context.dividerColor)),
+                            child: Icon(Icons.edit, size: 16, color: context.primaryColor),
+                          ).onTap(() {
+                            // Navigate to AddPostScreen to edit
+                            AddPostScreen(postId: widget.serviceData.id).launch(context).then((value) {
+                              if (value ?? false) widget.onUpdate?.call();
+                            });
+                          }),
+                          8.width,
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: boxDecorationWithShadow(backgroundColor: Colors.white, borderRadius: radius(), border: Border.all(color: context.dividerColor)),
+                            child: Icon(Icons.delete, size: 16, color: Colors.red),
+                          ).onTap(() async {
+                            showConfirmDialogCustom(
+                              context,
+                              title: "Are you sure you want to delete this post?",
+                              positiveText: language.lblYes,
+                              negativeText: language.lblNo,
+                              primaryColor: context.primaryColor,
+                              onAccept: (c) {
+                                appStore.setLoading(true);
+                                deletePost(widget.serviceData.id.validate()).then((value) {
+                                  appStore.setLoading(false);
+                                  toast(value.message ?? 'Deleted successfully');
+                                  widget.onUpdate?.call();
+                                }).catchError((e) {
+                                  appStore.setLoading(false);
+                                  toast(e.toString());
+                                });
+                              },
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  if (widget.serviceData.isFeatured == 1 && !widget.isMyPost)
+                    Positioned(
+                      top: 6,
+                      left: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: boxDecorationWithRoundedCorners(
+                          backgroundColor: Colors.orange.withValues(alpha: 0.9),
+                          borderRadius: radiusOnly(topRight: 8, bottomRight: 8),
+                        ),
+                        child: Text(
+                          "FEATURED",
+                          style: boldTextStyle(color: white, size: 9),
+                        ),
+                      ),
+                    ),
+                  Positioned(
+                    top: widget.serviceData.isFeatured == 1 ? 32 : 6,
+                    left: widget.serviceData.isFeatured == 1 ? 0 : 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                      constraints: BoxConstraints(maxWidth: (widget.width ?? context.width()) * 0.45),
+                      decoration: boxDecorationWithShadow(
+                        backgroundColor: context.cardColor.withValues(alpha: 0.9),
+                        borderRadius: widget.serviceData.isFeatured == 1 ? radiusOnly(topRight: 8, bottomRight: 8) : radius(20),
+                      ),
+                      child: Text(
+                        "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}".toUpperCase(),
+                        style: boldTextStyle(color: appStore.isDarkMode ? white : primaryColor, size: 10),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ).paddingSymmetric(horizontal: 6, vertical: 2),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: boxDecorationWithShadow(
+                        backgroundColor: primaryColor,
+                        borderRadius: radius(20),
+                        border: Border.all(color: context.cardColor, width: 1.5),
+                      ),
+                      child: PriceWidget(
+                        price: widget.serviceData.price.validate(),
+                        isHourlyService: widget.serviceData.isHourlyService,
+                        color: Colors.white,
+                        hourlyTextColor: Colors.white,
+                        size: 12,
+                        isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DisabledRatingBarWidget(rating: widget.serviceData.totalRating.validate(), size: 11).paddingSymmetric(horizontal: 12),
+                6.height,
+                Text(
+                  widget.serviceData.name.validate(),
+                  style: boldTextStyle(size: 13),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ).paddingSymmetric(horizontal: 12),
+                6.height,
+                Row(
+                  children: [
+                    ImageBorder(src: widget.serviceData.providerImage.validate(), height: 22),
+                    6.width,
+                    if (widget.serviceData.providerName.validate().isNotEmpty)
+                      Text(
+                        widget.serviceData.providerName.validate(),
+                        style: secondaryTextStyle(size: 11, color: appStore.isDarkMode ? Colors.white : appTextSecondaryColor),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ).expand(),
+                  ],
+                ).onTap(() async {
+                  if (widget.serviceData.providerId != appStore.userId.validate()) {
+                    await ProviderInfoScreen(providerId: widget.serviceData.providerId.validate()).launch(context);
+                    setStatusBarColor(Colors.transparent);
+                  }
+                }).paddingSymmetric(horizontal: 12),
+                10.height,
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     Widget buildServiceComponent() {
       return Observer(builder: (context) {
+        if (widget.isCompactPostListing) {
+          return buildCompactPostCard();
+        }
         if (appConfigurationStore.userDashboardType == DASHBOARD_1) {
           return ServiceDashboardComponent1(
             serviceData: widget.serviceData,
@@ -815,13 +998,23 @@ class ServiceComponentState extends State<ServiceComponent> {
           }
           return;
         }
-        ServiceDetailScreen(
-          serviceId: widget.isFavouriteService ? widget.serviceData.serviceId.validate().toInt() : widget.serviceData.id.validate(),
-          detailType: resolveDetailType(),
-        ).launch(context).then((value) {
-          setStatusBarColor(context.primaryColor);
-          widget.onUpdate?.call();
-        });
+        final String detailType = resolveDetailType();
+        final int resolvedId = widget.isFavouriteService ? widget.serviceData.serviceId.validate().toInt() : widget.serviceData.id.validate();
+
+        if (detailType == 'post') {
+          PostDetailScreen(postId: resolvedId).launch(context).then((value) {
+            setStatusBarColor(context.primaryColor);
+            widget.onUpdate?.call();
+          });
+        } else {
+          ServiceDetailScreen(
+            serviceId: resolvedId,
+            detailType: detailType,
+          ).launch(context).then((value) {
+            setStatusBarColor(context.primaryColor);
+            widget.onUpdate?.call();
+          });
+        }
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
