@@ -209,6 +209,22 @@ mixin _$AppStore on _AppStore, Store {
     });
   }
 
+  late final _$referralCodeAtom =
+      Atom(name: '_AppStore.referralCode', context: context);
+
+  @override
+  String get referralCode {
+    _$referralCodeAtom.reportRead();
+    return super.referralCode;
+  }
+
+  @override
+  set referralCode(String value) {
+    _$referralCodeAtom.reportWrite(value, super.referralCode, () {
+      super.referralCode = value;
+    });
+  }
+
   late final _$userNameAtom =
       Atom(name: '_AppStore.userName', context: context);
 
@@ -361,6 +377,22 @@ mixin _$AppStore on _AppStore, Store {
   set unreadCount(int value) {
     _$unreadCountAtom.reportWrite(value, super.unreadCount, () {
       super.unreadCount = value;
+    });
+  }
+
+  late final _$cartCountAtom =
+      Atom(name: '_AppStore.cartCount', context: context);
+
+  @override
+  int get cartCount {
+    _$cartCountAtom.reportRead();
+    return super.cartCount;
+  }
+
+  @override
+  set cartCount(int value) {
+    _$cartCountAtom.reportWrite(value, super.cartCount, () {
+      super.cartCount = value;
     });
   }
 
@@ -659,6 +691,14 @@ mixin _$AppStore on _AppStore, Store {
     return _$setLastNameAsyncAction.run(() => super.setLastName(val));
   }
 
+  late final _$setReferralCodeAsyncAction =
+      AsyncAction('_AppStore.setReferralCode', context: context);
+
+  @override
+  Future<void> setReferralCode(String val) {
+    return _$setReferralCodeAsyncAction.run(() => super.setReferralCode(val));
+  }
+
   late final _$setContactNumberAsyncAction =
       AsyncAction('_AppStore.setContactNumber', context: context);
 
@@ -783,6 +823,17 @@ mixin _$AppStore on _AppStore, Store {
   }
 
   @override
+  void setCartCount(int val) {
+    final _$actionInfo =
+        _$_AppStoreActionController.startAction(name: '_AppStore.setCartCount');
+    try {
+      return super.setCartCount(val);
+    } finally {
+      _$_AppStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 isLoggedIn: ${isLoggedIn},
@@ -797,6 +848,7 @@ userLastName: ${userLastName},
 uid: ${uid},
 userContactNumber: ${userContactNumber},
 userEmail: ${userEmail},
+referralCode: ${referralCode},
 userName: ${userName},
 latitude: ${latitude},
 longitude: ${longitude},
@@ -807,6 +859,7 @@ cityId: ${cityId},
 address: ${address},
 userId: ${userId},
 unreadCount: ${unreadCount},
+cartCount: ${cartCount},
 useMaterialYouTheme: ${useMaterialYouTheme},
 userType: ${userType},
 is24HourFormat: ${is24HourFormat},

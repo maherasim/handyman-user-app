@@ -19,6 +19,7 @@ class DashboardResponse {
   List<DashboardCustomerReview>? dashboardCustomerReview;
   BookingData? upcomingData;
   int? notificationUnreadCount;
+  int? cartCount;
   int? isEmailVerified;
   List<ShopModel> shops;
   bool? referralRule;
@@ -37,6 +38,7 @@ class DashboardResponse {
     this.dashboardCustomerReview,
     this.upcomingData,
     this.notificationUnreadCount,
+    this.cartCount,
     this.isEmailVerified,
     this.shops = const <ShopModel>[],
     this.referralRule
@@ -64,6 +66,7 @@ class DashboardResponse {
       dashboardCustomerReview: json['customer_review'] != null ? (json['customer_review'] as List).map((i) => DashboardCustomerReview.fromJson(i)).toList() : null,
       upcomingData: json['upcomming_confirmed_booking'] != null ? BookingData.fromJson(json['upcomming_confirmed_booking']) : null,
       notificationUnreadCount: json['notification_unread_count'],
+      cartCount: json['cart_count'],
       isEmailVerified: json['is_email_verified'] != null ? json['is_email_verified'] : 0,
       shops: json['shop'] != null ? (json['shop'] as List).map((i) => ShopModel.fromJson(i)).toList() : [],
         referralRule: json['referral_rule'] != null ? json['referral_rule'] : false

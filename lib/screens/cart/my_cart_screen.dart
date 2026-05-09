@@ -40,7 +40,10 @@ class _MyCartScreenState extends State<MyCartScreen> {
   }
 
   void init() {
-    future = getCartList();
+    future = getCartList().then((value) {
+      appStore.setCartCount(value.cartCount);
+      return value;
+    });
   }
 
   void setupRazorpay() {

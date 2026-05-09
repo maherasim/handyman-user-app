@@ -24,6 +24,7 @@ import '../newDashboard/dashboard_1/dashboard_fragment_1.dart';
 import '../newDashboard/dashboard_2/dashboard_fragment_2.dart';
 import '../newDashboard/dashboard_3/dashboard_fragment_3.dart';
 import '../newDashboard/dashboard_4/dashboard_fragment_4.dart';
+import '../../network/rest_apis.dart';
 
 
 class DashboardScreen extends StatefulWidget {
@@ -107,6 +108,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }*/
 
   void init() async {
+    if (appStore.isLoggedIn) {
+      getCartList().then((value) {
+        appStore.setCartCount(value.cartCount);
+      }).catchError((e) {
+        log(e.toString());
+      });
+    }
+
     await 3.seconds.delay;
     if (getIntAsync(FORCE_UPDATE_USER_APP).getBoolInt()) {
       showForceUpdateDialog(context);
@@ -163,17 +172,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 return Positioned(
                   top: context.statusBarHeight + 16,
                   right: appStore.isLoggedIn ? 64 : 16,
-                  child: Container(
-                    decoration: boxDecorationDefault(color: context.cardColor, shape: BoxShape.circle),
-                    height: 36,
-                    padding: const EdgeInsets.all(8),
-                    width: 36,
-                    child: Icon(MaterialCommunityIcons.cart_outline, size: 20, color: primaryColor).center(),
-                  ).onTap(() {
-                    doIfLoggedIn(context, () {
-                      const MyCartScreen().launch(context);
-                    });
-                  }),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        decoration: boxDecorationDefault(color: context.cardColor, shape: BoxShape.circle),
+                        height: 36,
+                        padding: const EdgeInsets.all(8),
+                        width: 36,
+                        child: Icon(MaterialCommunityIcons.cart_outline, size: 20, color: primaryColor).center(),
+                      ).onTap(() {
+                        doIfLoggedIn(context, () {
+                          const MyCartScreen().launch(context);
+                        });
+                      }),
+                      if (appStore.cartCount > 0)
+                        Positioned(
+                          top: -4,
+                          right: -4,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: boxDecorationDefault(color: Colors.red, shape: BoxShape.circle),
+                            constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                            child: Center(
+                              child: Text(
+                                appStore.cartCount.toString(),
+                                style: boldTextStyle(size: 10, color: white),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ).visible(currentIndex == 0);
               },
             ),

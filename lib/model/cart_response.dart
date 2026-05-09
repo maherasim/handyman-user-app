@@ -5,6 +5,7 @@ class CartResponse {
   final List<CartItemData> data;
   final CartSummary summary;
   final int cartCount;
+  final int cartEntries;
   final CartCheckout checkout;
 
   CartResponse({
@@ -12,6 +13,7 @@ class CartResponse {
     required this.data,
     required this.summary,
     required this.cartCount,
+    required this.cartEntries,
     required this.checkout,
   });
 
@@ -25,6 +27,7 @@ class CartResponse {
           (json['summary'] as Map?)?.cast<String, dynamic>() ??
               <String, dynamic>{}),
       cartCount: (json['cart_count'] ?? 0).toString().toInt(),
+      cartEntries: (json['cart_entries'] ?? 0).toString().toInt(),
       checkout: CartCheckout.fromJson(
           (json['checkout'] as Map?)?.cast<String, dynamic>() ??
               <String, dynamic>{}),

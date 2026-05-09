@@ -93,6 +93,9 @@ class _DashboardFragmentState extends State<DashboardFragment> {
                   },
                   loadingWidget: DashboardShimmer(),
                   onSuccess: (snap) {
+                    if (snap.cartCount != null) appStore.setCartCount(snap.cartCount!);
+                    if (snap.notificationUnreadCount != null) appStore.setUnreadCount(snap.notificationUnreadCount!);
+
                     return AnimatedScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       listAnimationType: ListAnimationType.FadeIn,

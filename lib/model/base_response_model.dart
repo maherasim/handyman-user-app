@@ -1,13 +1,15 @@
 class BaseResponseModel {
   String? message;
   bool? status;
+  int? cartCount;
 
-  BaseResponseModel({this.message, this.status});
+  BaseResponseModel({this.message, this.status, this.cartCount});
 
   factory BaseResponseModel.fromJson(Map<String, dynamic> json) {
     return BaseResponseModel(
       message: json['message'],
       status: json['status'],
+      cartCount: json['cart_count'],
     );
   }
 

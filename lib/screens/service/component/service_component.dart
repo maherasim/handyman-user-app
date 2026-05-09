@@ -272,6 +272,11 @@ class ServiceComponentState extends State<ServiceComponent> {
                                   if (res.containsKey('cart_id') || res.containsKey('cart_item_id')) {
                                     _currentCartItemId = (res['cart_id'] ?? res['cart_item_id']).toString().toInt();
                                   }
+                                  if (res.containsKey('cart_count')) {
+                                    appStore.setCartCount(res['cart_count'].toString().toInt());
+                                  } else {
+                                    getCartList().then((value) => appStore.setCartCount(value.cartCount)).catchError((e) => log(e.toString()));
+                                  }
                                   if (!mounted) return;
                                   finish(context);
                                   toast('Product added to cart');
@@ -306,6 +311,11 @@ class ServiceComponentState extends State<ServiceComponent> {
           _currentCartItemId = (res['cart_id'] ?? res['cart_item_id']).toString().toInt();
         }
         toast('Product added to cart');
+        if (res.containsKey('cart_count')) {
+          appStore.setCartCount(res['cart_count'].toString().toInt());
+        } else {
+          getCartList().then((value) => appStore.setCartCount(value.cartCount)).catchError((e) => log(e.toString()));
+        }
       } catch (e) {
         toast(e.toString());
       } finally {
@@ -323,9 +333,14 @@ class ServiceComponentState extends State<ServiceComponent> {
       _isCartActionLoading = true;
       setState(() {});
       try {
-        await removeCartItem(cartItemId: _currentCartItemId!);
+        final value = await removeCartItem(cartItemId: _currentCartItemId!);
         _currentCartItemId = null;
         toast('Product removed from cart');
+        if (value.cartCount != null) {
+          appStore.setCartCount(value.cartCount!);
+        } else {
+          getCartList().then((val) => appStore.setCartCount(val.cartCount)).catchError((e) => log(e.toString()));
+        }
       } catch (e) {
         toast(e.toString());
       } finally {
@@ -358,7 +373,7 @@ class ServiceComponentState extends State<ServiceComponent> {
               children: [
                 CachedImageWidget(
                   url: widget.serviceData.firstServiceImage.validate(),
-                  height: 180,
+                  height: 150,
                   width: widget.width ?? context.width(),
                   fit: BoxFit.cover,
                 ).cornerRadiusWithClipRRectOnly(topLeft: 12, topRight: 12),
@@ -499,7 +514,7 @@ class ServiceComponentState extends State<ServiceComponent> {
                     PriceWidget(
                       price: widget.serviceData.price.validate(),
                       color: context.primaryColor,
-                      size: 16,
+                      size: 14,
                     ),
                     if (widget.serviceData.discount.validate() > 0) ...[
                       8.width,
@@ -513,9 +528,9 @@ class ServiceComponentState extends State<ServiceComponent> {
                 4.height,
                 Row(
                   children: [
-                    DisabledRatingBarWidget(rating: widget.serviceData.totalRating.validate(), size: 12),
+                    DisabledRatingBarWidget(rating: widget.serviceData.totalRating.validate(), size: 10),
                     4.width,
-                    Text("(${widget.serviceData.totalReview.validate().toInt()})", style: secondaryTextStyle(size: 10)),
+                    Text("(${widget.serviceData.totalReview.validate().toInt()})", style: secondaryTextStyle(size: 8)),
                   ],
                 ),
                 8.height,
@@ -538,7 +553,7 @@ class ServiceComponentState extends State<ServiceComponent> {
                   ),
                 ),
               ],
-            ).paddingSymmetric(horizontal: 8, vertical: 8),
+            ).paddingSymmetric(horizontal: 8, vertical: 4),
           ],
         ),
       );
