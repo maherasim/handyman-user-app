@@ -17,8 +17,11 @@ class ProductFragment extends StatefulWidget {
   _ProductFragmentState createState() => _ProductFragmentState();
 }
 
-class _ProductFragmentState extends State<ProductFragment> {
+class _ProductFragmentState extends State<ProductFragment> with AutomaticKeepAliveClientMixin {
   ScrollController scrollController = ScrollController();
+
+  @override
+  bool get wantKeepAlive => true;
 
   Future<List<ServiceData>>? future;
   List<ServiceData> products = [];
@@ -69,6 +72,7 @@ class _ProductFragmentState extends State<ProductFragment> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: appBarWidget(
         "Products",
@@ -134,6 +138,7 @@ class _ProductFragmentState extends State<ProductFragment> {
                     runSpacing: 16,
                     itemCount: list.length,
                     listAnimationType: ListAnimationType.FadeIn,
+                    fadeInConfiguration: FadeInConfiguration(duration: 0.milliseconds),
                     itemBuilder: (context, index) {
                       return ServiceComponent(
                         serviceData: list[index],

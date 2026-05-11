@@ -24,8 +24,11 @@ class DashboardFragment1 extends StatefulWidget {
   _DashboardFragment1State createState() => _DashboardFragment1State();
 }
 
-class _DashboardFragment1State extends State<DashboardFragment1> {
+class _DashboardFragment1State extends State<DashboardFragment1> with AutomaticKeepAliveClientMixin {
   Future<DashboardResponse>? future;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -71,6 +74,7 @@ class _DashboardFragment1State extends State<DashboardFragment1> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       body: Stack(
         children: [
@@ -93,7 +97,7 @@ class _DashboardFragment1State extends State<DashboardFragment1> {
                 return AnimatedScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   listAnimationType: ListAnimationType.FadeIn,
-                  fadeInConfiguration: FadeInConfiguration(duration: 2.seconds),
+                  fadeInConfiguration: FadeInConfiguration(duration: 0.milliseconds),
                   onSwipeRefresh: () async {
                     setValue(LAST_APP_CONFIGURATION_SYNCED_TIME, 0);
                     await init();

@@ -21,8 +21,11 @@ class PostListScreen extends StatefulWidget {
   _PostListScreenState createState() => _PostListScreenState();
 }
 
-class _PostListScreenState extends State<PostListScreen> {
+class _PostListScreenState extends State<PostListScreen> with AutomaticKeepAliveClientMixin {
   ScrollController scrollController = ScrollController();
+
+  @override
+  bool get wantKeepAlive => true;
 
   Future<List<ServiceData>>? future;
   List<ServiceData> posts = [];
@@ -79,6 +82,7 @@ class _PostListScreenState extends State<PostListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: appBarWidget(
         "Posts",
@@ -236,6 +240,7 @@ class _PostListScreenState extends State<PostListScreen> {
                       runSpacing: 16,
                       itemCount: list.length,
                       listAnimationType: ListAnimationType.FadeIn,
+                      fadeInConfiguration: FadeInConfiguration(duration: 0.milliseconds),
                       itemBuilder: (context, index) {
                         return ServiceComponent(
                           serviceData: list[index],

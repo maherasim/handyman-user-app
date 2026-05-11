@@ -31,8 +31,11 @@ class DashboardFragment3 extends StatefulWidget {
   _DashboardFragment3State createState() => _DashboardFragment3State();
 }
 
-class _DashboardFragment3State extends State<DashboardFragment3> {
+class _DashboardFragment3State extends State<DashboardFragment3> with AutomaticKeepAliveClientMixin {
   Future<DashboardResponse>? future;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -68,6 +71,7 @@ log("URL  : $uri");
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       body: Stack(
         children: [
@@ -90,7 +94,7 @@ log("URL  : $uri");
                 return AnimatedScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   listAnimationType: ListAnimationType.FadeIn,
-                  fadeInConfiguration: FadeInConfiguration(duration: 2.seconds),
+                  fadeInConfiguration: FadeInConfiguration(duration: 0.milliseconds),
                   onSwipeRefresh: () async {
                     setValue(LAST_APP_CONFIGURATION_SYNCED_TIME, 0);
                     await init();
