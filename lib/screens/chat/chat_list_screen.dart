@@ -1,11 +1,11 @@
 import 'package:booking_system_flutter/component/loader_widget.dart';
 import 'package:booking_system_flutter/main.dart';
+import 'package:booking_system_flutter/model/contact_model.dart';
 import 'package:booking_system_flutter/model/user_data_model.dart';
 import 'package:booking_system_flutter/screens/auth/sign_in_screen.dart';
 import 'package:booking_system_flutter/screens/chat/widget/user_item_widget.dart';
-import 'package:booking_system_flutter/utils/constant.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_pagination/firebase_pagination.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -40,7 +40,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       appBarTitle: language.lblChat,
       child: Observer(builder: (context) {
         return SnapHelperWidget(
-          future: Future.value(FirebaseAuth.instance.currentUser != null && appStore.uid.isNotEmpty),
+          future: Future.value(FirebaseAuth.instance.currentUser != null &&
+              appStore.uid.isNotEmpty),
           onSuccess: (isLoggedIn) {
             if (!isLoggedIn) {
               return NoDataWidget(
@@ -63,26 +64,57 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 imageWidget: const EmptyStateWidget(),
               ).paddingSymmetric(horizontal: 16);
             } else {
-              return FirestorePagination(
-                query: chatServices.fetchChatListQuery(userId: appStore.uid),
-                physics: const AlwaysScrollableScrollPhysics(),
-                isLive: true,
-                shrinkWrap: true,
-                itemBuilder: (context, snap, index) {
-                  UserData contact = UserData.fromJson(snap[index].data() as Map<String, dynamic>);
-                  return UserItemWidget(userUid: contact.uid.validate());
+              return StreamBuilder<QuerySnapshot>(
+                stream: chatServices
+                    .fetchChatListQuery(userId: appStore.uid)
+                    .snapshots(),
+                builder: (context, snap) {
+                  if (snap.hasError) {
+                    return NoDataWidget(
+                      title: snap.error.toString(),
+                      imageWidget: const ErrorStateWidget(),
+                    ).paddingSymmetric(horizontal: 16);
+                  }
+
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return LoaderWidget().center();
+                  }
+
+                  final docs = snap.data?.docs ?? [];
+                  if (docs.isEmpty) {
+                    return NoDataWidget(
+                      title: language.noConversation,
+                      subTitle: language.noConversationSubTitle,
+                      imageWidget: const EmptyStateWidget(),
+                    ).paddingSymmetric(horizontal: 16);
+                  }
+
+                  return AnimatedListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(top: 8),
+                    itemCount: docs.length,
+                    listAnimationType: ListAnimationType.FadeIn,
+                    itemBuilder: (context, index) {
+                      final data = docs[index].data() as Map<String, dynamic>;
+                      final contact = ContactModel.fromJson(data);
+                      final userUid = contact.uid.validate();
+
+                      if (userUid.isEmpty) return const Offstage();
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          UserItemWidget(userUid: userUid, contact: contact),
+                          if (index != docs.length - 1)
+                            Divider(
+                                height: 0,
+                                indent: 82,
+                                color: context.dividerColor),
+                        ],
+                      );
+                    },
+                  );
                 },
-                initialLoader: LoaderWidget(),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 10),
-                padding: const EdgeInsets.only(left: 0, top: 8, right: 0, bottom: 0),
-                limit: PER_PAGE_CHAT_LIST_COUNT,
-                separatorBuilder: (_, i) => Divider(height: 0, indent: 82, color: context.dividerColor),
-                viewType: ViewType.list,
-                onEmpty: NoDataWidget(
-                  title: language.noConversation,
-                  subTitle: language.noConversationSubTitle,
-                  imageWidget: const EmptyStateWidget(),
-                ).paddingSymmetric(horizontal: 16),
               );
             }
           },

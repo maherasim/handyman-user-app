@@ -40,6 +40,29 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
+  Future<UserData?> _resolveChatReceiver(UserData provider) async {
+    UserData receiverUser = UserData(
+      id: provider.id,
+      uid: provider.uid,
+      firstName: provider.firstName ?? provider.displayName,
+      lastName: provider.lastName,
+      displayName: provider.displayName,
+      profileImage: provider.profileImage,
+      email: provider.email,
+    );
+
+    if (receiverUser.uid.validate().isEmpty && provider.id.validate() > 0) {
+      receiverUser = await getUserDetail(provider.id.validate());
+    }
+
+    if (receiverUser.uid.validate().isEmpty &&
+        receiverUser.email.validate().isNotEmpty) {
+      receiverUser = await userService.getUser(email: receiverUser.email);
+    }
+
+    return receiverUser.uid.validate().isNotEmpty ? receiverUser : null;
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -74,9 +97,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           final serviceDetail = snap.data!.serviceDetail!;
           final provider = snap.data!.provider;
 
-          final List<String> sliderUrls = serviceDetail.attachmentsArray.validate().isNotEmpty
-              ? serviceDetail.attachmentsArray.validate().map((e) => e.url.validate()).where((e) => e.isNotEmpty).toList()
-              : serviceDetail.attachments.validate().where((e) => e.isNotEmpty).toList();
+          final List<String> sliderUrls =
+              serviceDetail.attachmentsArray.validate().isNotEmpty
+                  ? serviceDetail.attachmentsArray
+                      .validate()
+                      .map((e) => e.url.validate())
+                      .where((e) => e.isNotEmpty)
+                      .toList()
+                  : serviceDetail.attachments
+                      .validate()
+                      .where((e) => e.isNotEmpty)
+                      .toList();
 
           return Stack(
             children: [
@@ -111,14 +142,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             bottom: 12,
                             right: 12,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 6),
                               decoration: boxDecorationDefault(
                                 color: Colors.black.withValues(alpha: 0.5),
                                 borderRadius: radius(20),
                               ),
                               child: Text(
                                 '${_pageIndex + 1}/${sliderUrls.length}',
-                                style: secondaryTextStyle(color: Colors.white, size: 12),
+                                style: secondaryTextStyle(
+                                    color: Colors.white, size: 12),
                               ),
                             ),
                           ),
@@ -134,21 +167,29 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         children: [
                           if (serviceDetail.categoryName != null)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                              decoration: boxDecorationDefault(color: context.primaryColor.withValues(alpha: 0.1)),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              decoration: boxDecorationDefault(
+                                  color: context.primaryColor
+                                      .withValues(alpha: 0.1)),
                               child: Text(
                                 serviceDetail.categoryName!,
-                                style: boldTextStyle(color: context.primaryColor, size: 12),
+                                style: boldTextStyle(
+                                    color: context.primaryColor, size: 12),
                               ),
                             ),
                           8.width,
                           if (serviceDetail.subCategoryName != null)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                              decoration: boxDecorationDefault(color: context.primaryColor.withValues(alpha: 0.1)),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              decoration: boxDecorationDefault(
+                                  color: context.primaryColor
+                                      .withValues(alpha: 0.1)),
                               child: Text(
                                 serviceDetail.subCategoryName!,
-                                style: boldTextStyle(color: context.primaryColor, size: 12),
+                                style: boldTextStyle(
+                                    color: context.primaryColor, size: 12),
                               ),
                             ),
                         ],
@@ -170,7 +211,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           if (serviceDetail.priceFormat.validate().isNotEmpty)
                             Text(
                               serviceDetail.priceFormat.validate(),
-                              style: boldTextStyle(size: 18, color: context.primaryColor),
+                              style: boldTextStyle(
+                                  size: 18, color: context.primaryColor),
                             )
                           else
                             PriceWidget(
@@ -182,7 +224,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       16.height,
 
                       // Description
-                      if (serviceDetail.description != null && serviceDetail.description!.isNotEmpty)
+                      if (serviceDetail.description != null &&
+                          serviceDetail.description!.isNotEmpty)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -207,7 +250,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
                       // Order Detail
                       if (serviceDetail.postOrderDetail != null) ...[
-                        Text("Order Detail", style: boldTextStyle(size: 16)).paddingSymmetric(horizontal: 16),
+                        Text("Order Detail", style: boldTextStyle(size: 16))
+                            .paddingSymmetric(horizontal: 16),
                         8.height,
                         Container(
                           margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -222,10 +266,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text("Post Name", style: secondaryTextStyle()),
+                                  Text("Post Name",
+                                      style: secondaryTextStyle()),
                                   16.width,
                                   Text(
-                                    serviceDetail.postOrderDetail!.postName.validate(),
+                                    serviceDetail.postOrderDetail!.postName
+                                        .validate(),
                                     style: boldTextStyle(size: 14),
                                     textAlign: TextAlign.end,
                                   ).expand(),
@@ -233,28 +279,53 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               ),
                               8.height,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text("Price", style: secondaryTextStyle()),
-                                  Text(serviceDetail.postOrderDetail!.priceFormat.validate(), style: boldTextStyle(size: 14)),
+                                  Text(
+                                      serviceDetail.postOrderDetail!.priceFormat
+                                          .validate(),
+                                      style: boldTextStyle(size: 14)),
                                 ],
                               ),
-                              if (serviceDetail.postOrderDetail!.discountAmount != null && serviceDetail.postOrderDetail!.discountAmount! > 0) ...[
+                              if (serviceDetail
+                                          .postOrderDetail!.discountAmount !=
+                                      null &&
+                                  serviceDetail
+                                          .postOrderDetail!.discountAmount! >
+                                      0) ...[
                                 8.height,
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text("Discount", style: secondaryTextStyle()),
-                                    Text('-' + serviceDetail.postOrderDetail!.discountAmountFormat.validate(), style: boldTextStyle(size: 14, color: Colors.green)),
+                                    Text("Discount",
+                                        style: secondaryTextStyle()),
+                                    Text(
+                                        '-' +
+                                            serviceDetail.postOrderDetail!
+                                                .discountAmountFormat
+                                                .validate(),
+                                        style: boldTextStyle(
+                                            size: 14, color: Colors.green)),
                                   ],
                                 ),
                               ],
                               Divider(color: context.dividerColor, height: 24),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("Subtotal", style: boldTextStyle(size: 14)),
-                                  Text(serviceDetail.postOrderDetail!.subtotalFormat.validate(), style: boldTextStyle(size: 16, color: context.primaryColor)),
+                                  Text("Subtotal",
+                                      style: boldTextStyle(size: 14)),
+                                  Text(
+                                      serviceDetail
+                                          .postOrderDetail!.subtotalFormat
+                                          .validate(),
+                                      style: boldTextStyle(
+                                          size: 16,
+                                          color: context.primaryColor)),
                                 ],
                               ),
                             ],
@@ -265,7 +336,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
                       // Seller Info Card
                       if (provider != null) ...[
-                        Text("Seller Info", style: boldTextStyle(size: 16)).paddingSymmetric(horizontal: 16),
+                        Text("Seller Info", style: boldTextStyle(size: 16))
+                            .paddingSymmetric(horizontal: 16),
                         8.height,
                         Container(
                           margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -286,8 +358,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(provider.displayName.validate(), style: boldTextStyle()),
-                                  Text("Tap Chat to message seller", style: secondaryTextStyle(size: 12)),
+                                  Text(provider.displayName.validate(),
+                                      style: boldTextStyle()),
+                                  Text("Tap Chat to message seller",
+                                      style: secondaryTextStyle(size: 12)),
                                 ],
                               ).expand(),
                             ],
@@ -299,39 +373,46 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   ),
                 ],
               ),
-              
+
               // Sticky "Chat with Seller" button
-              if (provider != null)
+              if (provider != null && provider.id != appStore.userId)
                 Positioned(
                   bottom: 16,
                   left: 16,
                   right: 16,
                   child: AppButton(
-                    onTap: () {
-                      doIfLoggedIn(context, () {
-                        // We must ensure provider has a uid. If not, fallback to provider.id string.
-                        UserData receiverUser = UserData(
-                          id: provider.id,
-                          uid: provider.uid ?? provider.id.toString(),
-                          firstName: provider.firstName ?? provider.displayName,
-                          lastName: provider.lastName,
-                          displayName: provider.displayName,
-                          profileImage: provider.profileImage,
-                          email: provider.email,
-                        );
+                    onTap: () async {
+                      doIfLoggedIn(context, () async {
+                        appStore.setLoading(true);
+                        final receiverUser =
+                            await _resolveChatReceiver(provider)
+                                .catchError((e) {
+                          log(e.toString());
+                          return null;
+                        }).whenComplete(() => appStore.setLoading(false));
 
-                        UserChatScreen(receiverUser: receiverUser).launch(context);
+                        if (receiverUser == null) {
+                          toast(
+                              'Seller chat account is not ready. Please ask seller to login once.');
+                          return;
+                        }
+
+                        UserChatScreen(
+                                receiverUser: receiverUser, chatType: 'post')
+                            .launch(context);
                       });
                     },
                     color: context.primaryColor,
-                      textColor: Colors.white,
+                    textColor: Colors.white,
                     width: context.width(),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                          const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
+                        const Icon(Icons.chat_bubble_outline,
+                            color: Colors.white, size: 20),
                         8.width,
-                          Text("Chat with Seller", style: boldTextStyle(color: Colors.white)),
+                        Text("Chat with Seller",
+                            style: boldTextStyle(color: Colors.white)),
                       ],
                     ),
                   ),

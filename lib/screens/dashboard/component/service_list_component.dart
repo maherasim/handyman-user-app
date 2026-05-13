@@ -12,8 +12,14 @@ class ServiceListComponent extends StatelessWidget {
   final List<ServiceData> serviceList;
   final String? title;
   final VoidCallback? onViewAll;
+  final bool alwaysShowViewAll;
 
-  ServiceListComponent({required this.serviceList, this.title, this.onViewAll});
+  ServiceListComponent({
+    required this.serviceList,
+    this.title,
+    this.onViewAll,
+    this.alwaysShowViewAll = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +30,7 @@ class ServiceListComponent extends StatelessWidget {
         ViewAllLabel(
           label: title ?? language.service,
           list: serviceList,
+          alwaysShowViewAll: alwaysShowViewAll,
           onTap: () {
             if (onViewAll != null) {
               onViewAll!.call();
@@ -37,7 +44,8 @@ class ServiceListComponent extends StatelessWidget {
             ? HorizontalList(
                 itemCount: serviceList.length,
                 spacing: 12,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemBuilder: (context, index) {
                   final double cardWidth = (context.width() - 44) / 2.21;
                   return ServiceComponent(

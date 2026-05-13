@@ -18,14 +18,12 @@ import 'package:nb_utils/nb_utils.dart';
 
 import '../../component/voice_search_component.dart';
 import '../../utils/app_configuration.dart';
-import '../cart/my_cart_screen.dart';
 import '../product/product_fragment.dart';
 import '../newDashboard/dashboard_1/dashboard_fragment_1.dart';
 import '../newDashboard/dashboard_2/dashboard_fragment_2.dart';
 import '../newDashboard/dashboard_3/dashboard_fragment_3.dart';
 import '../newDashboard/dashboard_4/dashboard_fragment_4.dart';
 import '../../network/rest_apis.dart';
-
 
 class DashboardScreen extends StatefulWidget {
   final bool? redirectToBooking;
@@ -53,9 +51,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         appStore.setDarkMode(context.platformBrightness() == Brightness.dark);
       }
 
-      View.of(context).platformDispatcher.onPlatformBrightnessChanged = () async {
+      View.of(context).platformDispatcher.onPlatformBrightnessChanged =
+          () async {
         if (getIntAsync(THEME_MODE_INDEX) == THEME_MODE_SYSTEM) {
-          appStore.setDarkMode(MediaQuery.of(context).platformBrightness == Brightness.light);
+          appStore.setDarkMode(
+              MediaQuery.of(context).platformBrightness == Brightness.light);
         }
       };
     });
@@ -66,6 +66,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         currentIndex = 3;
         setState(() {});
       }
+    });
+
+    /// Handle tab change from home page View All buttons
+    LiveStream().on('CHANGE_TAB', (tabIndex) {
+      if (tabIndex is! int) return;
+
+      currentIndex = tabIndex;
+      setState(() {});
     });
 
     // Firebase.initializeApp().then((value) {
@@ -119,7 +127,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     await 3.seconds.delay;
     if (getIntAsync(FORCE_UPDATE_USER_APP).getBoolInt()) {
       showForceUpdateDialog(context);
-    }/* else if (getBoolAsync(AUTO_UPDATE, defaultValue:false)) {
+    } /* else if (getBoolAsync(AUTO_UPDATE, defaultValue:false)) {
       checkAndShowCustomForceUpdateDialog(context);
     }*/
   }
@@ -133,6 +141,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void dispose() {
     super.dispose();
     LiveStream().dispose(LIVESTREAM_FIREBASE);
+    LiveStream().dispose('CHANGE_TAB');
   }
 
   @override
@@ -148,13 +157,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: [
                 Observer(
                   builder: (context) {
-                    if (appConfigurationStore.userDashboardType == DASHBOARD_1) {
+                    if (appConfigurationStore.userDashboardType ==
+                        DASHBOARD_1) {
                       return DashboardFragment1();
-                    } else if (appConfigurationStore.userDashboardType == DASHBOARD_2) {
+                    } else if (appConfigurationStore.userDashboardType ==
+                        DASHBOARD_2) {
                       return DashboardFragment2();
-                    } else if (appConfigurationStore.userDashboardType == DASHBOARD_3) {
+                    } else if (appConfigurationStore.userDashboardType ==
+                        DASHBOARD_3) {
                       return DashboardFragment3();
-                    } else if (appConfigurationStore.userDashboardType == DASHBOARD_4) {
+                    } else if (appConfigurationStore.userDashboardType ==
+                        DASHBOARD_4) {
                       return DashboardFragment4();
                     } else {
                       return DashboardFragment();
@@ -163,49 +176,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 ProductFragment(),
                 PostListScreen(),
-                if (appConfigurationStore.isEnableChat) Observer(builder: (context) => appStore.isLoggedIn ? ChatListScreen() : const SignInScreen(isFromDashboard: true)),
+                if (appConfigurationStore.isEnableChat)
+                  Observer(
+                      builder: (context) => appStore.isLoggedIn
+                          ? ChatListScreen()
+                          : const SignInScreen(isFromDashboard: true)),
                 ProfileFragment(),
               ][currentIndex],
-            ),
-            Observer(
-              builder: (context) {
-                return Positioned(
-                  top: context.statusBarHeight + 16,
-                  right: appStore.isLoggedIn ? 64 : 16,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        decoration: boxDecorationDefault(color: context.cardColor, shape: BoxShape.circle),
-                        height: 36,
-                        padding: const EdgeInsets.all(8),
-                        width: 36,
-                        child: Icon(MaterialCommunityIcons.cart_outline, size: 20, color: primaryColor).center(),
-                      ).onTap(() {
-                        doIfLoggedIn(context, () {
-                          const MyCartScreen().launch(context);
-                        });
-                      }),
-                      if (appStore.cartCount > 0)
-                        Positioned(
-                          top: -4,
-                          right: -4,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: boxDecorationDefault(color: Colors.red, shape: BoxShape.circle),
-                            constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                            child: Center(
-                              child: Text(
-                                appStore.cartCount.toString(),
-                                style: boldTextStyle(size: 10, color: white),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ).visible(currentIndex == 0);
-              },
             ),
           ],
         ),
@@ -216,7 +193,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             data: NavigationBarThemeData(
               backgroundColor: context.primaryColor.withValues(alpha: 0.02),
               indicatorColor: context.primaryColor.withValues(alpha: 0.1),
-              labelTextStyle: WidgetStateProperty.all(primaryTextStyle(size: 12)),
+              labelTextStyle:
+                  WidgetStateProperty.all(primaryTextStyle(size: 12)),
               surfaceTintColor: Colors.transparent,
               shadowColor: Colors.transparent,
             ),
@@ -229,26 +207,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   label: language.home,
                 ),
                 NavigationDestination(
-                  icon: Icon(MaterialCommunityIcons.shopping_outline, color: appTextSecondaryColor),
-                  selectedIcon: Icon(MaterialCommunityIcons.shopping, color: context.primaryColor),
+                  icon: Icon(MaterialCommunityIcons.shopping_outline,
+                      color: appTextSecondaryColor),
+                  selectedIcon: Icon(MaterialCommunityIcons.shopping,
+                      color: context.primaryColor),
                   label: "Product",
                 ),
                 NavigationDestination(
-                  icon: Icon(MaterialCommunityIcons.post_outline, color: appTextSecondaryColor),
-                  selectedIcon: Icon(MaterialCommunityIcons.post, color: context.primaryColor),
+                  icon: Icon(MaterialCommunityIcons.post_outline,
+                      color: appTextSecondaryColor),
+                  selectedIcon: Icon(MaterialCommunityIcons.post,
+                      color: context.primaryColor),
                   label: "Posts",
                 ),
                 if (appConfigurationStore.isEnableChat)
                   NavigationDestination(
                     icon: ic_chat.iconImage(color: appTextSecondaryColor),
-                    selectedIcon: ic_chat.iconImage(color: context.primaryColor),
+                    selectedIcon:
+                        ic_chat.iconImage(color: context.primaryColor),
                     label: language.lblChat,
                   ),
                 Observer(
                   builder: (context) {
                     return NavigationDestination(
-                      icon: (appStore.isLoggedIn && appStore.userProfileImage.isNotEmpty) ? IgnorePointer(ignoring: true, child: ImageBorder(src: appStore.userProfileImage, height: 26)) : ic_profile2.iconImage(color: appTextSecondaryColor),
-                      selectedIcon: (appStore.isLoggedIn && appStore.userProfileImage.isNotEmpty) ? IgnorePointer(ignoring: true, child: ImageBorder(src: appStore.userProfileImage, height: 26)) : ic_profile2.iconImage(color: context.primaryColor),
+                      icon: (appStore.isLoggedIn &&
+                              appStore.userProfileImage.isNotEmpty)
+                          ? IgnorePointer(
+                              ignoring: true,
+                              child: ImageBorder(
+                                  src: appStore.userProfileImage, height: 26))
+                          : ic_profile2.iconImage(color: appTextSecondaryColor),
+                      selectedIcon: (appStore.isLoggedIn &&
+                              appStore.userProfileImage.isNotEmpty)
+                          ? IgnorePointer(
+                              ignoring: true,
+                              child: ImageBorder(
+                                  src: appStore.userProfileImage, height: 26))
+                          : ic_profile2.iconImage(color: context.primaryColor),
                       label: language.profile,
                     );
                   },

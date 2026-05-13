@@ -34,6 +34,7 @@ import '../../bankDetails/view/bank_details.dart';
 import '../../favourite_provider_screen.dart';
 import '../../helpDesk/help_desk_list_screen.dart';
 import '../../referral_loyalty_points/referral_loyalty_screen.dart';
+import '../../subscription/subscription_plan_screen.dart';
 import '../component/wallet_history.dart';
 import 'booking_fragment.dart';
 
@@ -251,6 +252,23 @@ class ProfileFragmentState extends State<ProfileFragment> {
                               trailing: trailing,
                               onTap: () {
                                 MyPostListScreen().launch(context);
+                              },
+                            ),
+                          if (appStore.isLoggedIn)
+                            SettingItemWidget(
+                              decoration: boxDecorationDefault(
+                                  color: context.cardColor,
+                                  borderRadius:
+                                      const BorderRadiusDirectional.vertical(
+                                          bottom: Radius.circular(0))),
+                              leading: const Icon(MaterialCommunityIcons.crown, size: SETTING_ICON_SIZE, color: Color(0xFF6C757D)),
+                              title: "Subscription Plans",
+                              titleTextStyle: boldTextStyle(size: 12),
+                              padding: const EdgeInsets.only(
+                                  top: 20, left: 16, right: 16),
+                              trailing: trailing,
+                              onTap: () {
+                                const SubscriptionPlanScreen().launch(context);
                               },
                             ),
                           if (appStore.isLoggedIn &&

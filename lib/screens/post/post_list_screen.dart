@@ -8,6 +8,7 @@ import 'package:booking_system_flutter/screens/post/post_category_screen.dart';
 import 'package:booking_system_flutter/screens/post/add_post_screen.dart';
 import 'package:booking_system_flutter/screens/post/my_post_list_screen.dart';
 import 'package:booking_system_flutter/screens/service/component/service_component.dart';
+import 'package:booking_system_flutter/screens/subscription/subscription_plan_screen.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/constant.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,8 @@ class PostListScreen extends StatefulWidget {
   _PostListScreenState createState() => _PostListScreenState();
 }
 
-class _PostListScreenState extends State<PostListScreen> with AutomaticKeepAliveClientMixin {
+class _PostListScreenState extends State<PostListScreen>
+    with AutomaticKeepAliveClientMixin {
   ScrollController scrollController = ScrollController();
 
   @override
@@ -75,6 +77,35 @@ class _PostListScreenState extends State<PostListScreen> with AutomaticKeepAlive
     }).whenComplete(() => appStore.setLoading(false));
   }
 
+  void openCreatePostFlow() {
+    doIfLoggedIn(context, () async {
+      appStore.setLoading(true);
+      bool allowToCreateFeatured = false;
+      try {
+        final response = await getUserPostList(1, perPage: 1);
+        allowToCreateFeatured =
+            response.allowToCreateFeatured.validate().toLowerCase() == 'yes';
+      } catch (e) {
+        toast(e.toString());
+      } finally {
+        appStore.setLoading(false);
+      }
+
+      if (!allowToCreateFeatured) {
+        toast('Please purchase a subscription plan to create more posts');
+        SubscriptionPlanScreen().launch(context);
+        return;
+      }
+
+      AddPostScreen().launch(context).then((value) {
+        if (value ?? false) {
+          page = 1;
+          init();
+        }
+      });
+    });
+  }
+
   @override
   void setState(fn) {
     if (mounted) super.setState(fn);
@@ -93,16 +124,7 @@ class _PostListScreenState extends State<PostListScreen> with AutomaticKeepAlive
           IconButton(
             icon: const Icon(Icons.add, color: Colors.white),
             tooltip: 'Add Post',
-            onPressed: () {
-              doIfLoggedIn(context, () {
-                AddPostScreen().launch(context).then((value) {
-                  if (value ?? false) {
-                    page = 1;
-                    init();
-                  }
-                });
-              });
-            },
+            onPressed: openCreatePostFlow,
           ),
         ],
       ),
@@ -165,7 +187,10 @@ class _PostListScreenState extends State<PostListScreen> with AutomaticKeepAlive
                                   width: 60,
                                   decoration: boxDecorationDefault(
                                     shape: BoxShape.circle,
-                                    color: isSelected ? context.primaryColor.withValues(alpha: 0.20) : const Color(0xFF3D4044),
+                                    color: isSelected
+                                        ? context.primaryColor
+                                            .withValues(alpha: 0.20)
+                                        : const Color(0xFF3D4044),
                                   ),
                                   child: Center(
                                     child: Container(
@@ -173,7 +198,10 @@ class _PostListScreenState extends State<PostListScreen> with AutomaticKeepAlive
                                       width: 40,
                                       decoration: boxDecorationDefault(
                                         shape: BoxShape.circle,
-                                        color: isSelected ? context.primaryColor.withValues(alpha: 0.15) : const Color(0xFFE9ECEF),
+                                        color: isSelected
+                                            ? context.primaryColor
+                                                .withValues(alpha: 0.15)
+                                            : const Color(0xFFE9ECEF),
                                       ),
                                       child: imageUrl.isNotEmpty
                                           ? CachedImageWidget(
@@ -185,7 +213,9 @@ class _PostListScreenState extends State<PostListScreen> with AutomaticKeepAlive
                                             )
                                           : Icon(
                                               Icons.image_outlined,
-                                              color: isSelected ? context.primaryColor : const Color(0xFF9AA0A6),
+                                              color: isSelected
+                                                  ? context.primaryColor
+                                                  : const Color(0xFF9AA0A6),
                                               size: 20,
                                             ),
                                     ),
@@ -196,7 +226,9 @@ class _PostListScreenState extends State<PostListScreen> with AutomaticKeepAlive
                                   c.name.validate(),
                                   style: secondaryTextStyle(
                                     size: 12,
-                                    color: isSelected ? context.primaryColor : textPrimaryColorGlobal,
+                                    color: isSelected
+                                        ? context.primaryColor
+                                        : textPrimaryColorGlobal,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -212,7 +244,8 @@ class _PostListScreenState extends State<PostListScreen> with AutomaticKeepAlive
                               return;
                             }
 
-                            final bool hasSubCategories = c.subcategories.validate().isNotEmpty;
+                            final bool hasSubCategories =
+                                c.subcategories.validate().isNotEmpty;
                             if (hasSubCategories) {
                               PostCategoryScreen(category: c).launch(context);
                               return;
@@ -240,7 +273,8 @@ class _PostListScreenState extends State<PostListScreen> with AutomaticKeepAlive
                       runSpacing: 16,
                       itemCount: list.length,
                       listAnimationType: ListAnimationType.FadeIn,
-                      fadeInConfiguration: FadeInConfiguration(duration: 0.milliseconds),
+                      fadeInConfiguration:
+                          FadeInConfiguration(duration: 0.milliseconds),
                       itemBuilder: (context, index) {
                         return ServiceComponent(
                           serviceData: list[index],
@@ -254,7 +288,8 @@ class _PostListScreenState extends State<PostListScreen> with AutomaticKeepAlive
               );
             },
           ),
-          Observer(builder: (context) => LoaderWidget().visible(appStore.isLoading)),
+          Observer(
+              builder: (context) => LoaderWidget().visible(appStore.isLoading)),
         ],
       ),
     );

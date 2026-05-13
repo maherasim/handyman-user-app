@@ -24,7 +24,8 @@ class DashboardFragment extends StatefulWidget {
   _DashboardFragmentState createState() => _DashboardFragmentState();
 }
 
-class _DashboardFragmentState extends State<DashboardFragment> with AutomaticKeepAliveClientMixin {
+class _DashboardFragmentState extends State<DashboardFragment>
+    with AutomaticKeepAliveClientMixin {
   Future<DashboardResponse>? future;
 
   @override
@@ -44,7 +45,10 @@ class _DashboardFragmentState extends State<DashboardFragment> with AutomaticKee
 
   Future<void> init({bool showLoader = true}) async {
     appStore.setLoading(showLoader);
-    future = userDashboard(isCurrentLocation: appStore.isCurrentLocation, lat: getDoubleAsync(LATITUDE), long: getDoubleAsync(LONGITUDE));
+    future = userDashboard(
+        isCurrentLocation: appStore.isCurrentLocation,
+        lat: getDoubleAsync(LATITUDE),
+        long: getDoubleAsync(LONGITUDE));
     setStatusBarColorChange();
     setState(() {});
   }
@@ -97,13 +101,16 @@ class _DashboardFragmentState extends State<DashboardFragment> with AutomaticKee
                   },
                   loadingWidget: DashboardShimmer(),
                   onSuccess: (snap) {
-                    if (snap.cartCount != null) appStore.setCartCount(snap.cartCount!);
-                    if (snap.notificationUnreadCount != null) appStore.setUnreadCount(snap.notificationUnreadCount!);
+                    if (snap.cartCount != null)
+                      appStore.setCartCount(snap.cartCount!);
+                    if (snap.notificationUnreadCount != null)
+                      appStore.setUnreadCount(snap.notificationUnreadCount!);
 
                     return AnimatedScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       listAnimationType: ListAnimationType.FadeIn,
-                      fadeInConfiguration: FadeInConfiguration(duration: 0.milliseconds),
+                      fadeInConfiguration:
+                          FadeInConfiguration(duration: 0.milliseconds),
                       onSwipeRefresh: () async {
                         setValue(LAST_APP_CONFIGURATION_SYNCED_TIME, 0);
                         await init();
@@ -119,7 +126,8 @@ class _DashboardFragmentState extends State<DashboardFragment> with AutomaticKee
                           },
                         ),
                         30.height,
-                        PendingBookingComponent(upcomingConfirmedBooking: snap.upcomingData),
+                        PendingBookingComponent(
+                            upcomingConfirmedBooking: snap.upcomingData),
                         CategoryComponent(
                           categoryList: snap.category.validate(),
                           isHorizontal: true,
@@ -137,21 +145,36 @@ class _DashboardFragmentState extends State<DashboardFragment> with AutomaticKee
                           isHorizontal: true,
                           title: 'Classified Categories',
                         ),
-                        if (appStore.isLoggedIn && snap.referralRule.validate()) DashboardReferralComponent().paddingTop(16),
-                        if (snap.promotionalBanner.validate().isNotEmpty && appConfigurationStore.isPromotionalBanner)
+                        if (appStore.isLoggedIn && snap.referralRule.validate())
+                          DashboardReferralComponent().paddingTop(16),
+                        if (snap.promotionalBanner.validate().isNotEmpty &&
+                            appConfigurationStore.isPromotionalBanner)
                           PromotionalBannerSliderComponent(
-                            promotionalBannerList: snap.promotionalBanner.validate(),
+                            promotionalBannerList:
+                                snap.promotionalBanner.validate(),
                           ).paddingTop(16),
                         16.height,
-                        FeaturedServiceListComponent(serviceList: snap.featuredServices.validate()),
-                        ServiceListComponent(serviceList: snap.service.validate()),
+                        FeaturedServiceListComponent(
+                            serviceList: snap.featuredServices.validate()),
+                        ServiceListComponent(
+                          serviceList: snap.service.validate(),
+                          alwaysShowViewAll: true,
+                        ),
                         ServiceListComponent(
                           serviceList: snap.product.validate(),
                           title: 'Products',
+                          alwaysShowViewAll: true,
+                          onViewAll: () {
+                            LiveStream().emit('CHANGE_TAB', 1);
+                          },
                         ),
                         ServiceListComponent(
                           serviceList: snap.post.validate(),
                           title: 'Posts',
+                          alwaysShowViewAll: true,
+                          onViewAll: () {
+                            LiveStream().emit('CHANGE_TAB', 2);
+                          },
                         ),
                         16.height,
                         HorizontalShopListComponent(
@@ -159,7 +182,8 @@ class _DashboardFragmentState extends State<DashboardFragment> with AutomaticKee
                           showServices: false,
                         ),
                         16.height,
-                        if (appConfigurationStore.jobRequestStatus) const NewJobRequestComponent(),
+                        if (appConfigurationStore.jobRequestStatus)
+                          const NewJobRequestComponent(),
                       ],
                     );
                   },
@@ -171,7 +195,9 @@ class _DashboardFragmentState extends State<DashboardFragment> with AutomaticKee
           /// 🔒 Loader Overlay and Interaction Block
           Observer(
             builder: (context) {
-              return appStore.isLoading ? LoaderWidget().center() : const SizedBox();
+              return appStore.isLoading
+                  ? LoaderWidget().center()
+                  : const SizedBox();
             },
           ),
         ],

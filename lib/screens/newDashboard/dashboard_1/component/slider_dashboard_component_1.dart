@@ -15,6 +15,7 @@ import '../../../../utils/configs.dart';
 import '../../../../utils/constant.dart';
 import '../../../../utils/images.dart';
 import '../../../notification/notification_screen.dart';
+import '../../../cart/my_cart_screen.dart';
 import '../../../service/search_service_screen.dart';
 import '../../../service/service_detail_screen.dart';
 
@@ -23,10 +24,12 @@ class SliderDashboardComponent1 extends StatefulWidget {
   final List<ServiceData>? featuredList;
   final VoidCallback? callback;
 
-  SliderDashboardComponent1({required this.sliderList, this.callback, this.featuredList});
+  SliderDashboardComponent1(
+      {required this.sliderList, this.callback, this.featuredList});
 
   @override
-  _SliderDashboardComponent1State createState() => _SliderDashboardComponent1State();
+  _SliderDashboardComponent1State createState() =>
+      _SliderDashboardComponent1State();
 }
 
 class _SliderDashboardComponent1State extends State<SliderDashboardComponent1> {
@@ -37,14 +40,18 @@ class _SliderDashboardComponent1State extends State<SliderDashboardComponent1> {
   @override
   void initState() {
     super.initState();
-    if (getBoolAsync(AUTO_SLIDER_STATUS, defaultValue: true) && widget.sliderList.length >= 2) {
-      _timer = Timer.periodic(const Duration(seconds: DASHBOARD_AUTO_SLIDER_SECOND), (Timer timer) {
+    if (getBoolAsync(AUTO_SLIDER_STATUS, defaultValue: true) &&
+        widget.sliderList.length >= 2) {
+      _timer = Timer.periodic(
+          const Duration(seconds: DASHBOARD_AUTO_SLIDER_SECOND), (Timer timer) {
         if (_currentPage < widget.sliderList.length - 1) {
           _currentPage++;
         } else {
           _currentPage = 0;
         }
-        sliderPageController.animateToPage(_currentPage, duration: const Duration(milliseconds: 950), curve: Curves.easeOutQuart);
+        sliderPageController.animateToPage(_currentPage,
+            duration: const Duration(milliseconds: 950),
+            curve: Curves.easeOutQuart);
       });
 
       sliderPageController.addListener(() {
@@ -73,9 +80,17 @@ class _SliderDashboardComponent1State extends State<SliderDashboardComponent1> {
                     widget.sliderList.length,
                     (index) {
                       SliderModel data = widget.sliderList[index];
-                      return CachedImageWidget(url: data.sliderImage.validate(), height: 200, width: context.width(), fit: BoxFit.cover).onTap(() {
+                      return CachedImageWidget(
+                              url: data.sliderImage.validate(),
+                              height: 200,
+                              width: context.width(),
+                              fit: BoxFit.cover)
+                          .onTap(() {
                         if (data.type == SERVICE) {
-                          ServiceDetailScreen(serviceId: data.typeId.validate().toInt()).launch(context, pageRouteAnimation: PageRouteAnimation.Fade);
+                          ServiceDetailScreen(
+                                  serviceId: data.typeId.validate().toInt())
+                              .launch(context,
+                                  pageRouteAnimation: PageRouteAnimation.Fade);
                         }
                       });
                     },
@@ -104,36 +119,87 @@ class _SliderDashboardComponent1State extends State<SliderDashboardComponent1> {
             Positioned(
               top: context.statusBarHeight + 16,
               right: 16,
-              child: Container(
-                decoration: boxDecorationDefault(color: context.cardColor, shape: BoxShape.circle),
-                height: 36,
-                padding: const EdgeInsets.all(8),
-                width: 36,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    ic_notification.iconImage(size: 24, color: primaryColor).center(),
-                    Observer(builder: (context) {
-                      return Positioned(
-                        top: -20,
-                        right: -10,
-                        child: appStore.unreadCount.validate() > 0
-                            ? Container(
-                                padding: const EdgeInsets.all(4),
-                                child: FittedBox(
-                                  child: Text(appStore.unreadCount.toString(), style: primaryTextStyle(size: 12, color: Colors.white)),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    decoration: boxDecorationDefault(
+                        color: context.cardColor, shape: BoxShape.circle),
+                    height: 36,
+                    padding: const EdgeInsets.all(8),
+                    width: 36,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Icon(Icons.shopping_cart_outlined,
+                                size: 20, color: primaryColor)
+                            .center(),
+                        if (appStore.cartCount > 0)
+                          Positioned(
+                            top: -4,
+                            right: -4,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: boxDecorationDefault(
+                                  color: Colors.red, shape: BoxShape.circle),
+                              constraints: const BoxConstraints(
+                                  minWidth: 16, minHeight: 16),
+                              child: Center(
+                                child: Text(
+                                  appStore.cartCount.toString(),
+                                  style: boldTextStyle(size: 10, color: white),
                                 ),
-                                decoration: boxDecorationDefault(color: Colors.red, shape: BoxShape.circle),
-                              )
-                            : const Offstage(),
-                      );
-                    })
-                  ],
-                ),
-              ).onTap(() {
-                NotificationScreen().launch(context);
-              }),
-            )
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ).onTap(() {
+                    doIfLoggedIn(context, () {
+                      MyCartScreen().launch(context);
+                    });
+                  }),
+                  12.width,
+                  Container(
+                    decoration: boxDecorationDefault(
+                        color: context.cardColor, shape: BoxShape.circle),
+                    height: 36,
+                    padding: const EdgeInsets.all(8),
+                    width: 36,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        ic_notification
+                            .iconImage(size: 24, color: primaryColor)
+                            .center(),
+                        Observer(builder: (context) {
+                          return Positioned(
+                            top: -20,
+                            right: -10,
+                            child: appStore.unreadCount.validate() > 0
+                                ? Container(
+                                    padding: const EdgeInsets.all(4),
+                                    child: FittedBox(
+                                      child: Text(
+                                          appStore.unreadCount.toString(),
+                                          style: primaryTextStyle(
+                                              size: 12, color: Colors.white)),
+                                    ),
+                                    decoration: boxDecorationDefault(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle),
+                                  )
+                                : const Offstage(),
+                          );
+                        })
+                      ],
+                    ),
+                  ).onTap(() {
+                    NotificationScreen().launch(context);
+                  }),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -168,16 +234,25 @@ class _SliderDashboardComponent1State extends State<SliderDashboardComponent1> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          ic_location.iconImage(color: appStore.isDarkMode ? Colors.white : Colors.black),
+                          ic_location.iconImage(
+                              color: appStore.isDarkMode
+                                  ? Colors.white
+                                  : Colors.black),
                           8.width,
                           Text(
-                            appStore.isCurrentLocation ? getStringAsync(CURRENT_ADDRESS) : language.lblLocationOff,
+                            appStore.isCurrentLocation
+                                ? getStringAsync(CURRENT_ADDRESS)
+                                : language.lblLocationOff,
                             style: secondaryTextStyle(),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ).expand(),
                           8.width,
-                          ic_active_location.iconImage(size: 24, color: appStore.isCurrentLocation ? primaryColor : grey),
+                          ic_active_location.iconImage(
+                              size: 24,
+                              color: appStore.isCurrentLocation
+                                  ? primaryColor
+                                  : grey),
                         ],
                       ),
                     ),
@@ -192,7 +267,8 @@ class _SliderDashboardComponent1State extends State<SliderDashboardComponent1> {
               16.width,
               GestureDetector(
                 onTap: () {
-                  SearchServiceScreen(featuredList: widget.featuredList).launch(context);
+                  SearchServiceScreen(featuredList: widget.featuredList)
+                      .launch(context);
                 },
                 child: Container(
                   padding: const EdgeInsets.all(16),

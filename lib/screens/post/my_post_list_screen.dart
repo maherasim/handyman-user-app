@@ -4,7 +4,9 @@ import 'package:booking_system_flutter/model/service_data_model.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
 import 'package:booking_system_flutter/screens/post/add_post_screen.dart';
 import 'package:booking_system_flutter/screens/service/component/service_component.dart';
+import 'package:booking_system_flutter/screens/subscription/subscription_plan_screen.dart';
 import 'package:booking_system_flutter/utils/constant.dart';
+import 'package:booking_system_flutter/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -46,6 +48,35 @@ class _MyPostListScreenState extends State<MyPostListScreen> {
       toast(e.toString());
       throw e;
     }).whenComplete(() => appStore.setLoading(false));
+  }
+
+  void openCreatePostFlow() {
+    doIfLoggedIn(context, () async {
+      appStore.setLoading(true);
+      bool allowToCreateFeatured = false;
+      try {
+        final response = await getUserPostList(1, perPage: 1);
+        allowToCreateFeatured =
+            response.allowToCreateFeatured.validate().toLowerCase() == 'yes';
+      } catch (e) {
+        toast(e.toString());
+      } finally {
+        appStore.setLoading(false);
+      }
+
+      if (!allowToCreateFeatured) {
+        toast('Please purchase a subscription plan to create more posts');
+        SubscriptionPlanScreen().launch(context);
+        return;
+      }
+
+      AddPostScreen().launch(context).then((value) {
+        if (value ?? false) {
+          page = 1;
+          init();
+        }
+      });
+    });
   }
 
   @override
@@ -123,18 +154,12 @@ class _MyPostListScreenState extends State<MyPostListScreen> {
               );
             },
           ),
-          Observer(builder: (context) => LoaderWidget().visible(appStore.isLoading)),
+          Observer(
+              builder: (context) => LoaderWidget().visible(appStore.isLoading)),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          AddPostScreen().launch(context).then((value) {
-            if (value ?? false) {
-              page = 1;
-              init();
-            }
-          });
-        },
+        onPressed: openCreatePostFlow,
         child: Icon(Icons.add, color: white),
         backgroundColor: context.primaryColor,
       ),

@@ -14,6 +14,7 @@ import '../../../../utils/common.dart';
 import '../../../../utils/constant.dart';
 import '../../../../utils/images.dart';
 import '../../../notification/notification_screen.dart';
+import '../../../cart/my_cart_screen.dart';
 import '../../../service/search_service_screen.dart';
 
 class AppBarDashboardComponent4 extends StatefulWidget {
@@ -23,7 +24,8 @@ class AppBarDashboardComponent4 extends StatefulWidget {
   AppBarDashboardComponent4({this.callback, this.featuredList});
 
   @override
-  _AppBarDashboardComponent4State createState() => _AppBarDashboardComponent4State();
+  _AppBarDashboardComponent4State createState() =>
+      _AppBarDashboardComponent4State();
 }
 
 class _AppBarDashboardComponent4State extends State<AppBarDashboardComponent4> {
@@ -33,7 +35,8 @@ class _AppBarDashboardComponent4State extends State<AppBarDashboardComponent4> {
   String lastStatus = '';
 
   void startListening() async {
-    bool available = await speech.initialize(onStatus: statusListener, onError: errorListener);
+    bool available = await speech.initialize(
+        onStatus: statusListener, onError: errorListener);
 
     if (available) {
       speech.listen(onResult: resultListener);
@@ -71,7 +74,8 @@ class _AppBarDashboardComponent4State extends State<AppBarDashboardComponent4> {
     appStore.setSpeechStatus(false);
     if (result.finalResult) {
       lastWords = result.recognizedWords;
-      SearchServiceScreen(search: lastWords, featuredList: widget.featuredList).launch(context);
+      SearchServiceScreen(search: lastWords, featuredList: widget.featuredList)
+          .launch(context);
     }
     log("LastWords: $lastWords");
   }
@@ -115,7 +119,8 @@ class _AppBarDashboardComponent4State extends State<AppBarDashboardComponent4> {
           width: context.width(),
           height: context.height() * 0.18,
           decoration: boxDecorationDefault(color: primaryColor),
-          padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 16),
+          padding:
+              const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -129,31 +134,81 @@ class _AppBarDashboardComponent4State extends State<AppBarDashboardComponent4> {
                       });
                     },
                     padding: EdgeInsets.zero,
-                    margin: EdgeInsets.only(left: 20, right: appStore.isLoggedIn ? 20 : 0, top: 16, bottom: 16),
-                    shapeBorder: RoundedRectangleBorder(borderRadius: radius(36)),
+                    margin: EdgeInsets.only(
+                        left: 20,
+                        right: appStore.isLoggedIn ? 20 : 0,
+                        top: 16,
+                        bottom: 16),
+                    shapeBorder:
+                        RoundedRectangleBorder(borderRadius: radius(36)),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: boxDecorationDefault(color: context.cardColor, borderRadius: radius(36)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      decoration: boxDecorationDefault(
+                          color: context.cardColor, borderRadius: radius(36)),
                       child: Row(
                         children: [
-                          ic_location.iconImage(color: appStore.isDarkMode ? Colors.white : Colors.black),
+                          ic_location.iconImage(
+                              color: appStore.isDarkMode
+                                  ? Colors.white
+                                  : Colors.black),
                           8.width,
                           Marquee(
                             child: Text(
-                              appStore.isCurrentLocation ? getStringAsync(CURRENT_ADDRESS) : language.lblLocationOff,
+                              appStore.isCurrentLocation
+                                  ? getStringAsync(CURRENT_ADDRESS)
+                                  : language.lblLocationOff,
                               style: secondaryTextStyle(),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ).expand(),
                           8.width,
-                          Icon(Icons.keyboard_arrow_down, size: 24, color: context.iconColor),
+                          Icon(Icons.keyboard_arrow_down,
+                              size: 24, color: context.iconColor),
                         ],
                       ),
                     ),
                   );
                 },
               ).expand(flex: 4),
+              Container(
+                height: 25,
+                width: 25,
+                margin: const EdgeInsets.only(right: 12),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(Icons.shopping_cart_outlined,
+                        color: Colors.white, size: 22),
+                    Observer(
+                      builder: (context) {
+                        return Positioned(
+                          top: appStore.cartCount.validate() > 0 ? -16 : -10,
+                          right: appStore.cartCount.validate() > 0 ? -1 : 1,
+                          child: appStore.cartCount.validate() > 0
+                              ? Container(
+                                  padding: const EdgeInsets.all(3),
+                                  child: FittedBox(
+                                    child: Text(appStore.cartCount.toString(),
+                                        style: primaryTextStyle(
+                                            size: 12, color: Colors.white)),
+                                  ),
+                                  decoration: boxDecorationDefault(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle),
+                                )
+                              : const Offstage(),
+                        );
+                      },
+                    )
+                  ],
+                ),
+              ).onTap(() {
+                doIfLoggedIn(context, () {
+                  MyCartScreen().launch(context);
+                });
+              }),
               if (appStore.isLoggedIn)
                 SizedBox(
                   height: 25,
@@ -165,15 +220,24 @@ class _AppBarDashboardComponent4State extends State<AppBarDashboardComponent4> {
                       Observer(
                         builder: (context) {
                           return Positioned(
-                            top: appStore.unreadCount.validate() > 0 ? -16 : -10,
+                            top:
+                                appStore.unreadCount.validate() > 0 ? -16 : -10,
                             right: appStore.unreadCount.validate() > 0 ? -1 : 1,
                             child: appStore.unreadCount.validate() > 0
                                 ? Container(
-                                    padding: EdgeInsets.all(appStore.unreadCount.validate() > 0 ? 3 : 4),
+                                    padding: EdgeInsets.all(
+                                        appStore.unreadCount.validate() > 0
+                                            ? 3
+                                            : 4),
                                     child: FittedBox(
-                                      child: Text(appStore.unreadCount.toString(), style: primaryTextStyle(size: 12, color: Colors.white)),
+                                      child: Text(
+                                          appStore.unreadCount.toString(),
+                                          style: primaryTextStyle(
+                                              size: 12, color: Colors.white)),
                                     ),
-                                    decoration: boxDecorationDefault(color: Colors.red, shape: BoxShape.circle),
+                                    decoration: boxDecorationDefault(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle),
                                   )
                                 : const Offstage(),
                           );
@@ -200,20 +264,23 @@ class _AppBarDashboardComponent4State extends State<AppBarDashboardComponent4> {
                 textFieldType: TextFieldType.NAME,
                 readOnly: true,
                 onTap: () {
-                  SearchServiceScreen(featuredList: widget.featuredList).launch(context);
+                  SearchServiceScreen(featuredList: widget.featuredList)
+                      .launch(context);
                 },
                 decoration: inputDecoration(
                   context,
                   hintText: language.eGCleaningPlumberPest,
-                  prefixIcon: ic_search.iconImage(size: 10, color: context.iconColor).paddingAll(14),
+                  prefixIcon: ic_search
+                      .iconImage(size: 10, color: context.iconColor)
+                      .paddingAll(14),
                 ),
                 suffix: IconButton(
                   icon: appStore.isSpeechActivated
                       ? Icon(Icons.stop, color: context.iconColor)
                       : Icon(
-                    Icons.mic_none_outlined,
-                    color: context.iconColor,
-                  ),
+                          Icons.mic_none_outlined,
+                          color: context.iconColor,
+                        ),
                   color: context.iconColor,
                   onPressed: () async {
                     if (appStore.isSpeechActivated) {

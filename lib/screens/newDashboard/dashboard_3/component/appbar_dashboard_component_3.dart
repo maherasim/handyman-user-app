@@ -7,7 +7,9 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../../model/service_data_model.dart';
+import '../../../../utils/common.dart';
 import '../../../notification/notification_screen.dart';
+import '../../../cart/my_cart_screen.dart';
 import '../../../service/search_service_screen.dart';
 
 class AppbarDashboardComponent3 extends StatefulWidget {
@@ -17,7 +19,8 @@ class AppbarDashboardComponent3 extends StatefulWidget {
   AppbarDashboardComponent3({required this.featuredList, this.callback});
 
   @override
-  State<AppbarDashboardComponent3> createState() => _AppbarDashboardComponent3State();
+  State<AppbarDashboardComponent3> createState() =>
+      _AppbarDashboardComponent3State();
 }
 
 class _AppbarDashboardComponent3State extends State<AppbarDashboardComponent3> {
@@ -50,12 +53,15 @@ class _AppbarDashboardComponent3State extends State<AppbarDashboardComponent3> {
               overflow: TextOverflow.ellipsis,
               style: boldTextStyle(),
             ),
-            appStore.isLoggedIn ? const Offstage() : Image.asset(ic_hi, height: 20, fit: BoxFit.cover),
+            appStore.isLoggedIn
+                ? const Offstage()
+                : Image.asset(ic_hi, height: 20, fit: BoxFit.cover),
           ],
         ).expand(),
         16.width,
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: appStore.unreadCount > 0 ? 10 : 8),
+          padding: EdgeInsets.symmetric(
+              horizontal: 12, vertical: appStore.unreadCount > 0 ? 10 : 8),
           decoration: boxDecorationDefault(
             color: context.cardColor,
             borderRadius: radius(28),
@@ -63,8 +69,36 @@ class _AppbarDashboardComponent3State extends State<AppbarDashboardComponent3> {
           child: Row(
             children: [
               ic_search.iconImage(size: 18).onTap(() {
-                SearchServiceScreen(featuredList: widget.featuredList).launch(context).then((value) {
-                  setStatusBarColor(Colors.transparent, statusBarIconBrightness: Brightness.dark);
+                SearchServiceScreen(featuredList: widget.featuredList)
+                    .launch(context)
+                    .then((value) {
+                  setStatusBarColor(Colors.transparent,
+                      statusBarIconBrightness: Brightness.dark);
+                });
+              }),
+              Container(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(Icons.shopping_cart_outlined, size: 18).center(),
+                    if (appStore.cartCount.validate() > 0)
+                      Positioned(
+                        top: -2,
+                        right: -2,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: boxDecorationDefault(
+                              color: Colors.red, shape: BoxShape.circle),
+                          child: Text(appStore.cartCount.toString(),
+                              style: primaryTextStyle(
+                                  size: 10, color: Colors.white)),
+                        ),
+                      ),
+                  ],
+                ),
+              ).paddingLeft(12).onTap(() {
+                doIfLoggedIn(context, () {
+                  MyCartScreen().launch(context);
                 });
               }),
               if (appStore.isLoggedIn)
@@ -73,23 +107,27 @@ class _AppbarDashboardComponent3State extends State<AppbarDashboardComponent3> {
                     clipBehavior: Clip.none,
                     children: [
                       ic_notification.iconImage(size: 18).center(),
-                      Observer(builder: (context) {
-                        if (appStore.unreadCount.validate() > 0)
-                          return Positioned(
-                            top: -2,
-                            right: 2,
-                            child: Container(
-                              padding: const EdgeInsets.all(3),
-                              decoration: boxDecorationDefault(color: Colors.red, shape: BoxShape.circle),
-                            ),
-                          );
-                        return const Offstage();
-                      },),
+                      Observer(
+                        builder: (context) {
+                          if (appStore.unreadCount.validate() > 0)
+                            return Positioned(
+                              top: -2,
+                              right: 2,
+                              child: Container(
+                                padding: const EdgeInsets.all(3),
+                                decoration: boxDecorationDefault(
+                                    color: Colors.red, shape: BoxShape.circle),
+                              ),
+                            );
+                          return const Offstage();
+                        },
+                      ),
                     ],
                   ),
                 ).paddingLeft(12).onTap(() {
                   NotificationScreen().launch(context).then((value) {
-                    setStatusBarColor(Colors.transparent, statusBarIconBrightness: Brightness.dark);
+                    setStatusBarColor(Colors.transparent,
+                        statusBarIconBrightness: Brightness.dark);
                   });
                 }),
             ],

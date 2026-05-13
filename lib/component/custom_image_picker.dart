@@ -49,6 +49,7 @@ class _CustomImagePickerState extends State<CustomImagePicker> {
 
   void init() async {
     if (widget.selectedImages.validate().isNotEmpty) {
+      imageFiles.clear();
       widget.selectedImages.validate().forEach((element) {
         if (element.validate().contains("http")) {
           imageFiles.add(File(element.validate()));
@@ -85,7 +86,7 @@ class _CustomImagePickerState extends State<CustomImagePicker> {
               if (file != null) {
                 if (file == GalleryFileTypes.CAMERA) {
                   await getCameraImage().then((value) {
-                    imageFiles = [value]; // Replace any existing image
+                    imageFiles.add(value);
                     setState(() {});
 
                     /// Select Multiple Image
@@ -97,22 +98,10 @@ class _CustomImagePickerState extends State<CustomImagePicker> {
                     setState(() {});*/
                   });
                 } else if (file == GalleryFileTypes.GALLERY) {
-                  await getCameraImage(isCamera: false).then((value) {
-                    imageFiles = [value]; // Replace any existing image
+                  await getMultipleImageSource().then((value) {
+                    imageFiles.addAll(value);
                     setState(() {});
                   });
-
-                  /// Select Multiple Image
-                  /*await getMultipleImageSource().then((value) {
-                    if (imageFiles.validate().isNotEmpty) {
-                      value.forEach((element) {
-                        imageFiles.add(element);
-                      });
-                    } else {
-                      imageFiles = value;
-                    }
-                    setState(() {});
-                  });*/
                 }
                 widget.onFileSelected.call(imageFiles);
               }
@@ -126,18 +115,23 @@ class _CustomImagePickerState extends State<CustomImagePicker> {
               alignment: Alignment.center,
               height: widget.height,
               width: widget.weight,
-              decoration: boxDecorationWithShadow(blurRadius: 0, backgroundColor: context.cardColor, borderRadius: radius()),
+              decoration: boxDecorationWithShadow(
+                  blurRadius: 0,
+                  backgroundColor: context.cardColor,
+                  borderRadius: radius()),
               child: Column(
                 children: [
                   ic_no_photo.iconImage(size: widget.iconSize ?? 46),
                   8.height,
-                  Text(language.chooseImage, style: secondaryTextStyle(size: widget.textSize)),
+                  Text(language.chooseImage,
+                      style: secondaryTextStyle(size: widget.textSize)),
                 ],
               ),
             ),
           ),
         ),
         16.height,
+
         /// Uncomment when multiple images upload and set condition
         // Text('Note: You can upload images with \'jpg\', \'png\', \'jpeg\' extensions & you can select multiple images', style: secondaryTextStyle(size: 10)),
         Text(language.noteYouCanUpload, style: secondaryTextStyle(size: 10)),
@@ -165,7 +159,8 @@ class _CustomImagePickerState extends State<CustomImagePicker> {
                     width: widget.imageSize ?? 80,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return const PlaceHolderWidget(height: 80, alignment: Alignment.center);
+                      return const PlaceHolderWidget(
+                          height: 80, alignment: Alignment.center);
                     },
                   ).cornerRadiusWithClipRRect(defaultRadius),
                 Positioned(
@@ -173,9 +168,12 @@ class _CustomImagePickerState extends State<CustomImagePicker> {
                   right: -20,
                   child: IconButton(
                     onPressed: () {
-                      widget.onRemoveClick!.call(imageFiles[index].path);
+                      widget.onRemoveClick?.call(imageFiles[index].path);
+                      imageFiles.removeAt(index);
+                      setState(() {});
                     },
-                    icon: const Icon(Icons.dangerous_outlined, color: Colors.red),
+                    icon:
+                        const Icon(Icons.dangerous_outlined, color: Colors.red),
                   ),
                 )
               ],

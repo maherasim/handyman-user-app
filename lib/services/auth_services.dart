@@ -19,15 +19,19 @@ class AuthService {
     UserCredential? userCredential;
     try {
       /// login with Firebase
-      userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: appStore.userEmail, password: DEFAULT_FIREBASE_PASSWORD);
+      userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: appStore.userEmail, password: DEFAULT_FIREBASE_PASSWORD);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         /// register user in Firebase
-        userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: appStore.userEmail, password: DEFAULT_FIREBASE_PASSWORD);
+        userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+                email: appStore.userEmail, password: DEFAULT_FIREBASE_PASSWORD);
       }
     }
     if (userCredential != null && userCredential.user == null) {
-      userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: appStore.userEmail, password: DEFAULT_FIREBASE_PASSWORD);
+      userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: appStore.userEmail, password: DEFAULT_FIREBASE_PASSWORD);
     }
 
     if (userCredential != null) {
@@ -57,18 +61,21 @@ class AuthService {
       /// add user data in Firestore
       userData.uid = userCredential.user!.uid;
 
-      bool isUserExistWithUid = await userService.isUserExistWithUid(userCredential.user!.uid);
+      bool isUserExistWithUid =
+          await userService.isUserExistWithUid(userCredential.user!.uid);
 
       if (!isUserExistWithUid) {
         userData.createdAt = Timestamp.now().toDate().toString();
-        await userService.addDocumentWithCustomId(userCredential.user!.uid, userData.toFirebaseJson());
+        await userService.addDocumentWithCustomId(
+            userCredential.user!.uid, userData.toFirebaseJson());
       } else {
         /// Update user details in Firebase
-        await userService.updateDocument(userData.toFirebaseJson(), userCredential.user!.uid);
+        await userService.updateDocument(
+            userData.toFirebaseJson(), userCredential.user!.uid);
       }
 
       /// Update UID & Profile Image in Laravel DB
-      updateProfile({'uid': userCredential.user!.uid});
+      await updateProfile({'uid': userCredential.user!.uid});
 
       await appStore.setUId(userCredential.user!.uid);
     } catch (e) {
@@ -83,7 +90,8 @@ class AuthService {
     final GoogleSignIn googleSignIn = GoogleSignIn.instance;
     await googleSignIn.initialize(serverClientId: FIREBASE_SERVER_CLIENT_ID);
 
-    final GoogleSignInAccount? googleSignInAuthentication = await googleSignIn.authenticate();
+    final GoogleSignInAccount? googleSignInAuthentication =
+        await googleSignIn.authenticate();
 
     // Check if user cancelled the sign-in
     if (googleSignInAuthentication == null) {
@@ -95,7 +103,8 @@ class AuthService {
       idToken: authentication.idToken,
     );
 
-    final UserCredential authResult = await FirebaseAuth.instance.signInWithCredential(credential);
+    final UserCredential authResult =
+        await FirebaseAuth.instance.signInWithCredential(credential);
     final User user = authResult.user!;
 
     assert(!user.isAnonymous);
@@ -104,7 +113,8 @@ class AuthService {
     assert(user.uid == currentUser.uid);
 
     try {
-      AuthCredential emailAuthCredential = EmailAuthProvider.credential(email: user.email!, password: DEFAULT_FIREBASE_PASSWORD);
+      AuthCredential emailAuthCredential = EmailAuthProvider.credential(
+          email: user.email!, password: DEFAULT_FIREBASE_PASSWORD);
       user.linkWithCredential(emailAuthCredential);
     } catch (e) {
       log(e);
@@ -130,21 +140,26 @@ class AuthService {
           final oAuthProvider = OAuthProvider('apple.com');
           final credential = oAuthProvider.credential(
             idToken: String.fromCharCodes(appleIdCredential.identityToken!),
-            accessToken: String.fromCharCodes(appleIdCredential.authorizationCode!),
+            accessToken:
+                String.fromCharCodes(appleIdCredential.authorizationCode!),
           );
 
-          final authResult = await FirebaseAuth.instance.signInWithCredential(credential);
+          final authResult =
+              await FirebaseAuth.instance.signInWithCredential(credential);
           final user = authResult.user!;
 
           log('User:- $user');
 
           /// TODO verify that email is stored or not
-          if (result.credential != null && result.credential!.email.validate().isNotEmpty) {
+          if (result.credential != null &&
+              result.credential!.email.validate().isNotEmpty) {
             appStore.setLoading(true);
 
             await setValue(APPLE_EMAIL, result.credential!.email);
-            await setValue(APPLE_GIVE_NAME, result.credential!.fullName!.givenName);
-            await setValue(APPLE_FAMILY_NAME, result.credential!.fullName!.familyName);
+            await setValue(
+                APPLE_GIVE_NAME, result.credential!.fullName!.givenName);
+            await setValue(
+                APPLE_FAMILY_NAME, result.credential!.fullName!.familyName);
           } else {
             await setValue(APPLE_EMAIL, user.email.validate());
           }

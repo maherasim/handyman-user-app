@@ -69,6 +69,9 @@ class UserData {
   int? loyalty_points;
   int? referrer_points;
   int? referred_user_points;
+  int? freePosts;
+  int? featuredClassifiedLimit;
+  int? featuredPostsUsedCount;
 
   ///Local
   bool get isHandyman => userType == USER_TYPE_HANDYMAN;
@@ -168,7 +171,10 @@ class UserData {
       this.referral_code,
       this.loyalty_points,
       this.referrer_points,
-      this.referred_user_points});
+      this.referred_user_points,
+      this.freePosts,
+      this.featuredClassifiedLimit,
+      this.featuredPostsUsedCount});
 
   factory UserData.fromJson(Map<String, dynamic> json) {
     return UserData(
@@ -191,7 +197,9 @@ class UserData {
         stateId: json['state_id'],
         status: json['status'],
         updatedAt: json['updated_at'],
-        userRole: json['user_role'] != null ? new List<String>.from(json['user_role']) : null,
+        userRole: json['user_role'] != null
+            ? new List<String>.from(json['user_role'])
+            : null,
         userType: json['user_type'],
         username: json['username'],
         isOnline: json['isOnline'],
@@ -210,7 +218,9 @@ class UserData {
         lastNotificationSeen: json['last_notification_seen'],
         providersServiceRating: json['providers_service_rating'],
         handymanRating: json['handyman_rating'],
-        handymanReview: json['handyman_review'] != null ? new HandymanReview.fromJson(json['handyman_review']) : null,
+        handymanReview: json['handyman_review'] != null
+            ? new HandymanReview.fromJson(json['handyman_review'])
+            : null,
         timeZone: json['time_zone'],
         isVerifyProvider: json['is_verify_provider'],
         isUserExist: json['is_user_exist'],
@@ -227,7 +237,14 @@ class UserData {
         loyalty_points: json['loyalty_points'],
         referral_code: json['referral_code'],
         referrer_points: json['referrer_points'],
-        referred_user_points: json['referred_user_points']);
+        referred_user_points: json['referred_user_points'],
+        freePosts: json['free_posts'] != null
+            ? json['free_posts'].toString().toInt()
+            : 0,
+        featuredClassifiedLimit: _parseFeaturedClassifiedLimit(json),
+        featuredPostsUsedCount: json['featured_posts_used_count'] != null
+            ? json['featured_posts_used_count'].toString().toInt()
+            : 0);
   }
 
   Map<String, dynamic> toJson() {
@@ -266,8 +283,10 @@ class UserData {
     if (timeZone != null) data['time_zone'] = timeZone;
     if (loginType != null) data['login_type'] = loginType;
     if (serviceAddressId != null) data['service_address_id'] = serviceAddressId;
-    if (lastNotificationSeen != null) data['last_notification_seen'] = lastNotificationSeen;
-    if (providersServiceRating != null) data['providers_service_rating'] = providersServiceRating;
+    if (lastNotificationSeen != null)
+      data['last_notification_seen'] = lastNotificationSeen;
+    if (providersServiceRating != null)
+      data['providers_service_rating'] = providersServiceRating;
     if (handymanRating != null) data['handyman_rating'] = handymanRating;
     if (isVerifyProvider != null) data['is_verify_provider'] = isVerifyProvider;
     if (isUserExist != null) data['is_user_exist'] = isUserExist;
@@ -276,7 +295,8 @@ class UserData {
     if (otpCode != null) data['otpCode'] = otpCode;
     if (isFavourite != null) data['is_favourite'] = isFavourite;
     if (totalBooking != null) data['total_services_booked'] = totalBooking;
-    if (totalCompletedBooking != null) data['total_completed_services'] = totalCompletedBooking;
+    if (totalCompletedBooking != null)
+      data['total_completed_services'] = totalCompletedBooking;
 
     if (emailVerified != null) data['is_email_verified'] = emailVerified;
     if (handymanImage != null) data['handyman_image'] = handymanImage;
@@ -286,7 +306,13 @@ class UserData {
     if (referral_code != null) data['referral_code'] = referral_code;
     if (loyalty_points != null) data['loyalty_points'] = loyalty_points;
     if (referrer_points != null) data['referrer_points'] = referrer_points;
-    if (referred_user_points != null) data['referred_user_points'] = referred_user_points;
+    if (referred_user_points != null)
+      data['referred_user_points'] = referred_user_points;
+    if (freePosts != null) data['free_posts'] = freePosts;
+    if (featuredClassifiedLimit != null)
+      data['featured_posts_limit'] = featuredClassifiedLimit;
+    if (featuredPostsUsedCount != null)
+      data['featured_posts_used_count'] = featuredPostsUsedCount;
     if (handymanReview != null) {
       data['handyman_review'] = handymanReview!.toJson();
     }
@@ -314,9 +340,36 @@ class UserData {
     if (referral_code != null) data['referral_code'] = referral_code;
     if (loyalty_points != null) data['loyalty_points'] = loyalty_points;
     if (referrer_points != null) data['referrer_points'] = referrer_points;
-    if (referred_user_points != null) data['referred_user_points'] = referred_user_points;
+    if (referred_user_points != null)
+      data['referred_user_points'] = referred_user_points;
     return data;
   }
+}
+
+int _parseFeaturedClassifiedLimit(Map<String, dynamic> json) {
+  final dynamic directLimit = json['featured_posts_limit'];
+  if (directLimit != null) return directLimit.toString().toInt();
+
+  final dynamic userSubscription =
+      json['user_subscription'] ?? json['subscription'];
+  if (userSubscription is Map) {
+    final dynamic subscriptionLimit = userSubscription['featured_posts_limit'];
+    if (subscriptionLimit != null) return subscriptionLimit.toString().toInt();
+
+    final dynamic planLimitation = userSubscription['plan_limitation'];
+    if (planLimitation is Map) {
+      final dynamic featuredClassified = planLimitation['featured_classified'];
+      if (featuredClassified is Map) {
+        final String isChecked =
+            featuredClassified['is_checked'].toString().toLowerCase();
+        if (isChecked == 'on' || isChecked == '1' || isChecked == 'true') {
+          return featuredClassified['limit'].toString().toInt();
+        }
+      }
+    }
+  }
+
+  return 0;
 }
 
 class HandymanReview {
@@ -395,8 +448,11 @@ class WhyChooseMe {
   factory WhyChooseMe.fromJson(Map<String, dynamic> json) {
     return WhyChooseMe(
       title: json['title'] is String ? json['title'] : "",
-      aboutDescription: json['about_description'] is String ? json['about_description'] : "",
-      reason: json['why_choose_me_reason'] is List ? List<String>.from(json['why_choose_me_reason'].map((x) => x)) : [],
+      aboutDescription:
+          json['about_description'] is String ? json['about_description'] : "",
+      reason: json['why_choose_me_reason'] is List
+          ? List<String>.from(json['why_choose_me_reason'].map((x) => x))
+          : [],
     );
   }
 

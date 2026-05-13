@@ -11,18 +11,44 @@ class ServiceResponse {
   List<ServiceData>? userServices;
   List<CategoryData>? categoryList;
   List<CategoryData>? subCategoryList;
+  String? allowToCreateFeatured;
 
-  ServiceResponse({this.serviceList, this.pagination, this.max, this.min, this.userServices, this.categoryList, this.subCategoryList});
+  ServiceResponse(
+      {this.serviceList,
+      this.pagination,
+      this.max,
+      this.min,
+      this.userServices,
+      this.categoryList,
+      this.subCategoryList,
+      this.allowToCreateFeatured});
 
   factory ServiceResponse.fromJson(Map<String, dynamic> json) {
     return ServiceResponse(
-      serviceList: json['data'] != null ? (json['data'] as List).map((i) => ServiceData.fromJson(i)).toList() : null,
+      serviceList: json['data'] != null
+          ? (json['data'] as List).map((i) => ServiceData.fromJson(i)).toList()
+          : null,
       max: json['max'] != null ? num.parse(json['max'].toString()) : 0.0,
       min: json['min'] != null ? num.parse(json['min'].toString()) : 0.0,
-      pagination: json['pagination'] != null ? Pagination.fromJson(json['pagination']) : null,
-      userServices: json['user_services'] != null ? (json['user_services'] as List).map((i) => ServiceData.fromJson(i)).toList() : null,
-      categoryList: json['category'] != null ? (json['category'] as List).map((i) => CategoryData.fromJson(i)).toList() : null,
-      subCategoryList: json['subcategory'] != null ? (json['subcategory'] as List).map((i) => CategoryData.fromJson(i)).toList() : null,
+      pagination: json['pagination'] != null
+          ? Pagination.fromJson(json['pagination'])
+          : null,
+      userServices: json['user_services'] != null
+          ? (json['user_services'] as List)
+              .map((i) => ServiceData.fromJson(i))
+              .toList()
+          : null,
+      categoryList: json['category'] != null
+          ? (json['category'] as List)
+              .map((i) => CategoryData.fromJson(i))
+              .toList()
+          : null,
+      subCategoryList: json['subcategory'] != null
+          ? (json['subcategory'] as List)
+              .map((i) => CategoryData.fromJson(i))
+              .toList()
+          : null,
+      allowToCreateFeatured: json['allow_to_create_featured']?.toString(),
     );
   }
 
@@ -30,6 +56,7 @@ class ServiceResponse {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['max'] = max;
     data['min'] = min;
+    data['allow_to_create_featured'] = allowToCreateFeatured;
     if (serviceList != null) {
       data['data'] = serviceList!.map((v) => v.toJson()).toList();
     }

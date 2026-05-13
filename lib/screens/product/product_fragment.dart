@@ -17,7 +17,8 @@ class ProductFragment extends StatefulWidget {
   _ProductFragmentState createState() => _ProductFragmentState();
 }
 
-class _ProductFragmentState extends State<ProductFragment> with AutomaticKeepAliveClientMixin {
+class _ProductFragmentState extends State<ProductFragment>
+    with AutomaticKeepAliveClientMixin {
   ScrollController scrollController = ScrollController();
 
   @override
@@ -83,7 +84,9 @@ class _ProductFragmentState extends State<ProductFragment> with AutomaticKeepAli
           IconButton(
             icon: Icon(Icons.filter_list, color: white),
             onPressed: () async {
-              await FilterScreen(isFromProvider: true, categories: categoryList).launch(context).then((value) {
+              await FilterScreen(isFromProvider: true, categories: categoryList)
+                  .launch(context)
+                  .then((value) {
                 if (value != null) {
                   page = 1;
                   init();
@@ -138,11 +141,13 @@ class _ProductFragmentState extends State<ProductFragment> with AutomaticKeepAli
                     runSpacing: 16,
                     itemCount: list.length,
                     listAnimationType: ListAnimationType.FadeIn,
-                    fadeInConfiguration: FadeInConfiguration(duration: 0.milliseconds),
+                    fadeInConfiguration:
+                        FadeInConfiguration(duration: 0.milliseconds),
                     itemBuilder: (context, index) {
                       return ServiceComponent(
                         serviceData: list[index],
                         width: (context.width() - 48) / 2,
+                        showFavouriteAction: false,
                         onUpdate: () {
                           // Optional: refresh if needed
                         },
@@ -153,7 +158,8 @@ class _ProductFragmentState extends State<ProductFragment> with AutomaticKeepAli
               );
             },
           ),
-          Observer(builder: (context) => LoaderWidget().visible(appStore.isLoading)),
+          Observer(
+              builder: (context) => LoaderWidget().visible(appStore.isLoading)),
         ],
       ),
     );

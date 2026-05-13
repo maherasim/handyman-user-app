@@ -5,8 +5,14 @@ class ContactModel {
   Timestamp? addedOn;
   int? lastMessageTime;
   int? unReadFromUser;
+  String? chatType; // 'post' or 'service'
 
-  ContactModel({this.uid, this.addedOn, this.lastMessageTime, this.unReadFromUser});
+  ContactModel(
+      {this.uid,
+      this.addedOn,
+      this.lastMessageTime,
+      this.unReadFromUser,
+      this.chatType});
 
   factory ContactModel.fromJson(Map<String, dynamic> json) {
     return ContactModel(
@@ -14,6 +20,7 @@ class ContactModel {
       lastMessageTime: json['lastMessageTime'],
       unReadFromUser: json['unReadFromUser'],
       addedOn: json['addedOn'],
+      chatType: json['chatType'],
     );
   }
 
@@ -23,6 +30,7 @@ class ContactModel {
     if (addedOn != null) data['addedOn'] = addedOn;
     if (unReadFromUser != null) data['unReadFromUser'] = unReadFromUser;
     if (lastMessageTime != null) data['lastMessageTime'] = lastMessageTime;
+    if (chatType != null) data['chatType'] = chatType;
 
     return data;
   }

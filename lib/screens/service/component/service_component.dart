@@ -33,9 +33,11 @@ class ServiceComponent extends StatefulWidget {
   final bool isFromDashboard;
   final bool isFromViewAllService;
   final bool isFromServiceDetail;
+
   /// Shorter grid card height for Posts listings (classified).
   final bool isCompactPostListing;
   final bool isMyPost;
+  final bool showFavouriteAction;
 
   ServiceComponent({
     required this.serviceData,
@@ -48,6 +50,7 @@ class ServiceComponent extends StatefulWidget {
     this.isFromServiceDetail = false,
     this.isCompactPostListing = false,
     this.isMyPost = false,
+    this.showFavouriteAction = true,
   });
 
   @override
@@ -55,7 +58,8 @@ class ServiceComponent extends StatefulWidget {
 }
 
 class ServiceComponentState extends State<ServiceComponent> {
-  final TextEditingController _quantityController = TextEditingController(text: '1');
+  final TextEditingController _quantityController =
+      TextEditingController(text: '1');
   bool _isCartActionLoading = false;
   int _cardQuantity = 1;
   bool _showInlineQuantityControl = false;
@@ -83,12 +87,14 @@ class ServiceComponentState extends State<ServiceComponent> {
   }
 
   bool get _isProductCard {
-    final String itemType = widget.serviceData.serviceType.validate().toLowerCase();
+    final String itemType =
+        widget.serviceData.serviceType.validate().toLowerCase();
     return itemType == 'ecommerce' || itemType == 'product';
   }
 
   bool get _requiresVariantSelection {
-    return widget.serviceData.hasVariants == true || widget.serviceData.requiresVariantSelection == true;
+    return widget.serviceData.hasVariants == true ||
+        widget.serviceData.requiresVariantSelection == true;
   }
 
   Future<void> _onProductActionTap() async {
@@ -99,15 +105,18 @@ class ServiceComponentState extends State<ServiceComponent> {
       setState(() {});
       try {
         if (_requiresVariantSelection) {
-          final ProductDetailOptionResponse detail = await getProductDetailOptions(
+          final ProductDetailOptionResponse detail =
+              await getProductDetailOptions(
             productId: widget.serviceData.id.validate(),
           );
           if (!mounted) return;
           await _showVariantPicker(detail);
         } else {
-          final res = await addToCart(productId: widget.serviceData.id.validate(), quantity: 1);
+          final res = await addToCart(
+              productId: widget.serviceData.id.validate(), quantity: 1);
           if (res.containsKey('cart_id') || res.containsKey('cart_item_id')) {
-            _currentCartItemId = (res['cart_id'] ?? res['cart_item_id']).toString().toInt();
+            _currentCartItemId =
+                (res['cart_id'] ?? res['cart_item_id']).toString().toInt();
           }
           toast('Product added to cart');
         }
@@ -144,7 +153,8 @@ class ServiceComponentState extends State<ServiceComponent> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: boxDecorationDefault(shape: BoxShape.circle, color: Colors.black54),
+                  decoration: boxDecorationDefault(
+                      shape: BoxShape.circle, color: Colors.black54),
                   child: const Icon(Icons.close, color: white),
                 ).onTap(() => finish(context)),
                 16.height,
@@ -165,7 +175,9 @@ class ServiceComponentState extends State<ServiceComponent> {
                             fit: BoxFit.cover,
                           ).cornerRadiusWithClipRRect(12),
                           16.width,
-                          Text(detail.product.name.validate(), style: boldTextStyle(size: 18)).expand(),
+                          Text(detail.product.name.validate(),
+                                  style: boldTextStyle(size: 18))
+                              .expand(),
                         ],
                       ).paddingAll(16),
                       Container(
@@ -175,12 +187,16 @@ class ServiceComponentState extends State<ServiceComponent> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Select variant', style: boldTextStyle(size: 18)).paddingSymmetric(horizontal: 16),
+                            Text('Select variant',
+                                    style: boldTextStyle(size: 18))
+                                .paddingSymmetric(horizontal: 16),
                             4.height,
-                            Text('Select any 1', style: secondaryTextStyle()).paddingSymmetric(horizontal: 16),
+                            Text('Select any 1', style: secondaryTextStyle())
+                                .paddingSymmetric(horizontal: 16),
                             16.height,
                             Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 16),
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               decoration: boxDecorationDefault(
                                 color: context.scaffoldBackgroundColor,
                                 borderRadius: radius(12),
@@ -188,31 +204,42 @@ class ServiceComponentState extends State<ServiceComponent> {
                               ),
                               child: Column(
                                 children: variants.map((variant) {
-                                  final bool isSelected = selectedVariant.id == variant.id;
+                                  final bool isSelected =
+                                      selectedVariant.id == variant.id;
                                   return Column(
                                     children: [
                                       Row(
                                         children: [
-                                          const Icon(Icons.stop_circle_outlined, color: Colors.green, size: 24),
+                                          const Icon(Icons.stop_circle_outlined,
+                                              color: Colors.green, size: 24),
                                           12.width,
                                           Text(
                                             variant.label.isNotEmpty
                                                 ? variant.label
-                                                : (variant.optionValue.isNotEmpty ? variant.optionValue : variant.attributeName),
+                                                : (variant
+                                                        .optionValue.isNotEmpty
+                                                    ? variant.optionValue
+                                                    : variant.attributeName),
                                             style: boldTextStyle(size: 16),
                                           ).expand(),
-                                          Text(variant.priceFormat, style: boldTextStyle(size: 16)),
+                                          Text(variant.priceFormat,
+                                              style: boldTextStyle(size: 16)),
                                           16.width,
                                           Icon(
-                                            isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                                            color: isSelected ? context.primaryColor : context.dividerColor,
+                                            isSelected
+                                                ? Icons.radio_button_checked
+                                                : Icons.radio_button_off,
+                                            color: isSelected
+                                                ? context.primaryColor
+                                                : context.dividerColor,
                                           ),
                                         ],
                                       ).paddingAll(16).onTap(() {
                                         selectedVariant = variant;
                                         modalSetState(() {});
                                       }),
-                                      if (variant != variants.last) const Divider(height: 0),
+                                      if (variant != variants.last)
+                                        const Divider(height: 0),
                                     ],
                                   );
                                 }).toList(),
@@ -228,7 +255,8 @@ class ServiceComponentState extends State<ServiceComponent> {
                           top: 16,
                           bottom: context.navigationBarHeight + 16,
                         ),
-                        decoration: boxDecorationDefault(color: context.scaffoldBackgroundColor),
+                        decoration: boxDecorationDefault(
+                            color: context.scaffoldBackgroundColor),
                         child: Row(
                           children: [
                             Container(
@@ -242,7 +270,8 @@ class ServiceComponentState extends State<ServiceComponent> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: Icon(Icons.remove, color: context.primaryColor),
+                                    icon: Icon(Icons.remove,
+                                        color: context.primaryColor),
                                     onPressed: () {
                                       if (quantity > 1) {
                                         quantity--;
@@ -250,11 +279,16 @@ class ServiceComponentState extends State<ServiceComponent> {
                                       }
                                     },
                                   ),
-                                  Text('$quantity', style: boldTextStyle(color: context.primaryColor, size: 18)),
+                                  Text('$quantity',
+                                      style: boldTextStyle(
+                                          color: context.primaryColor,
+                                          size: 18)),
                                   IconButton(
-                                    icon: Icon(Icons.add, color: context.primaryColor),
+                                    icon: Icon(Icons.add,
+                                        color: context.primaryColor),
                                     onPressed: () {
-                                      if (quantity < selectedVariant.quantityLimit) {
+                                      if (quantity <
+                                          selectedVariant.quantityLimit) {
                                         quantity++;
                                         modalSetState(() {});
                                       }
@@ -267,22 +301,32 @@ class ServiceComponentState extends State<ServiceComponent> {
                             AppButton(
                               height: 48,
                               color: context.primaryColor,
-                              text: 'Add | ${appConfigurationStore.currencySymbol}${selectedVariant.price * quantity}',
+                              text:
+                                  'Add | ${appConfigurationStore.currencySymbol}${selectedVariant.price * quantity}',
                               textStyle: boldTextStyle(color: white),
                               onTap: () async {
                                 try {
                                   final res = await addToCart(
                                     productId: detail.product.id.validate(),
-                                    productVariantId: selectedVariant.productVariantId,
+                                    productVariantId:
+                                        selectedVariant.productVariantId,
                                     quantity: quantity,
                                   );
-                                  if (res.containsKey('cart_id') || res.containsKey('cart_item_id')) {
-                                    _currentCartItemId = (res['cart_id'] ?? res['cart_item_id']).toString().toInt();
+                                  if (res.containsKey('cart_id') ||
+                                      res.containsKey('cart_item_id')) {
+                                    _currentCartItemId =
+                                        (res['cart_id'] ?? res['cart_item_id'])
+                                            .toString()
+                                            .toInt();
                                   }
                                   if (res.containsKey('cart_count')) {
-                                    appStore.setCartCount(res['cart_count'].toString().toInt());
+                                    appStore.setCartCount(
+                                        res['cart_count'].toString().toInt());
                                   } else {
-                                    getCartList().then((value) => appStore.setCartCount(value.cartCount)).catchError((e) => log(e.toString()));
+                                    getCartList()
+                                        .then((value) => appStore
+                                            .setCartCount(value.cartCount))
+                                        .catchError((e) => log(e.toString()));
                                   }
                                   if (!mounted) return;
                                   finish(context);
@@ -313,15 +357,20 @@ class ServiceComponentState extends State<ServiceComponent> {
       _isCartActionLoading = true;
       setState(() {});
       try {
-        final res = await addToCart(productId: widget.serviceData.id.validate(), quantity: quantity ?? _cardQuantity);
+        final res = await addToCart(
+            productId: widget.serviceData.id.validate(),
+            quantity: quantity ?? _cardQuantity);
         if (res.containsKey('cart_id') || res.containsKey('cart_item_id')) {
-          _currentCartItemId = (res['cart_id'] ?? res['cart_item_id']).toString().toInt();
+          _currentCartItemId =
+              (res['cart_id'] ?? res['cart_item_id']).toString().toInt();
         }
         toast('Product added to cart');
         if (res.containsKey('cart_count')) {
           appStore.setCartCount(res['cart_count'].toString().toInt());
         } else {
-          getCartList().then((value) => appStore.setCartCount(value.cartCount)).catchError((e) => log(e.toString()));
+          getCartList()
+              .then((value) => appStore.setCartCount(value.cartCount))
+              .catchError((e) => log(e.toString()));
         }
       } catch (e) {
         toast(e.toString());
@@ -346,7 +395,9 @@ class ServiceComponentState extends State<ServiceComponent> {
         if (value.cartCount != null) {
           appStore.setCartCount(value.cartCount!);
         } else {
-          getCartList().then((val) => appStore.setCartCount(val.cartCount)).catchError((e) => log(e.toString()));
+          getCartList()
+              .then((val) => appStore.setCartCount(val.cartCount))
+              .catchError((e) => log(e.toString()));
         }
       } catch (e) {
         toast(e.toString());
@@ -360,7 +411,8 @@ class ServiceComponentState extends State<ServiceComponent> {
   @override
   Widget build(BuildContext context) {
     String resolveDetailType() {
-      final String itemType = widget.serviceData.serviceType.validate().toLowerCase();
+      final String itemType =
+          widget.serviceData.serviceType.validate().toLowerCase();
       if (itemType == 'ecommerce' || itemType == 'product') return 'product';
       if (itemType == 'classified' || itemType == 'post') return 'post';
       return 'service';
@@ -389,7 +441,8 @@ class ServiceComponentState extends State<ServiceComponent> {
                     top: 12,
                     left: 0,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: boxDecorationWithRoundedCorners(
                         backgroundColor: Colors.orange.withValues(alpha: 0.9),
                         borderRadius: radiusOnly(topRight: 8, bottomRight: 8),
@@ -405,7 +458,8 @@ class ServiceComponentState extends State<ServiceComponent> {
                     top: widget.serviceData.isFeatured == 1 ? 40 : 12,
                     left: 0,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: boxDecorationWithRoundedCorners(
                         backgroundColor: Colors.green.withValues(alpha: 0.9),
                         borderRadius: radiusOnly(topRight: 8, bottomRight: 8),
@@ -416,92 +470,119 @@ class ServiceComponentState extends State<ServiceComponent> {
                       ),
                     ),
                   ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: boxDecorationWithShadow(boxShape: BoxShape.circle, backgroundColor: context.cardColor),
-                    child: widget.serviceData.isFavourite == 1 ? Icon(Icons.bookmark, color: context.primaryColor, size: 20) : Icon(Icons.bookmark_border, color: context.dividerColor, size: 20),
-                  ).onTap(() async {
-                    if (widget.serviceData.isFavourite != 0) {
-                      widget.serviceData.isFavourite = 1;
-                      setState(() {});
+                if (widget.showFavouriteAction)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: boxDecorationWithShadow(
+                          boxShape: BoxShape.circle,
+                          backgroundColor: context.cardColor),
+                      child: widget.serviceData.isFavourite == 1
+                          ? Icon(Icons.bookmark,
+                              color: context.primaryColor, size: 20)
+                          : Icon(Icons.bookmark_border,
+                              color: context.dividerColor, size: 20),
+                    ).onTap(() async {
+                      if (widget.serviceData.isFavourite != 0) {
+                        widget.serviceData.isFavourite = 1;
+                        setState(() {});
 
-                      await removeToWishList(serviceId: widget.serviceData.serviceId.validate().toInt()).then((value) {
-                        if (!value) {
-                          widget.serviceData.isFavourite = 1;
-                          setState(() {});
-                        }
-                      });
-                    } else {
-                      widget.serviceData.isFavourite = 0;
-                      setState(() {});
+                        await removeToWishList(
+                                serviceId: widget.serviceData.serviceId
+                                    .validate()
+                                    .toInt())
+                            .then((value) {
+                          if (!value) {
+                            widget.serviceData.isFavourite = 1;
+                            setState(() {});
+                          }
+                        });
+                      } else {
+                        widget.serviceData.isFavourite = 0;
+                        setState(() {});
 
-                      await addToWishList(serviceId: widget.serviceData.serviceId.validate().toInt()).then((value) {
-                        if (!value) {
-                          widget.serviceData.isFavourite = 1;
-                          setState(() {});
-                        }
-                      });
-                    }
-                    widget.onUpdate?.call();
-                  }),
-                ),
+                        await addToWishList(
+                                serviceId: widget.serviceData.serviceId
+                                    .validate()
+                                    .toInt())
+                            .then((value) {
+                          if (!value) {
+                            widget.serviceData.isFavourite = 1;
+                            setState(() {});
+                          }
+                        });
+                      }
+                      widget.onUpdate?.call();
+                    }),
+                  ),
                 Positioned(
                   bottom: 8,
                   right: 8,
-                  child: _requiresVariantSelection || !_showInlineQuantityControl
-                      ? Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: boxDecorationWithRoundedCorners(
-                            backgroundColor: white,
-                            border: Border.all(color: context.primaryColor),
-                            borderRadius: radius(8),
-                          ),
-                          child: Icon(Icons.add, color: context.primaryColor, size: 24),
-                        ).onTap(() {
-                          if (_requiresVariantSelection) {
-                            _onProductActionTap();
-                          } else {
-                            _cardQuantity = 1;
-                            _showInlineQuantityControl = true;
-                            setState(() {});
-                            _addSimpleProductToCart(quantity: 1);
-                          }
-                        })
-                      : Container(
-                          decoration: boxDecorationWithRoundedCorners(
-                            backgroundColor: white,
-                            border: Border.all(color: context.primaryColor),
-                            borderRadius: radius(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.remove, color: context.primaryColor, size: 20).paddingAll(4).onTap(() {
-                                if (_cardQuantity <= 1) {
-                                  _cardQuantity = 0;
-                                  _showInlineQuantityControl = false;
-                                  _removeProductFromCart();
-                                  setState(() {});
-                                  return;
-                                }
-                                _cardQuantity--;
+                  child:
+                      _requiresVariantSelection || !_showInlineQuantityControl
+                          ? Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: boxDecorationWithRoundedCorners(
+                                backgroundColor: white,
+                                border: Border.all(color: context.primaryColor),
+                                borderRadius: radius(8),
+                              ),
+                              child: Icon(Icons.add,
+                                  color: context.primaryColor, size: 24),
+                            ).onTap(() {
+                              if (_requiresVariantSelection) {
+                                _onProductActionTap();
+                              } else {
+                                _cardQuantity = 1;
+                                _showInlineQuantityControl = true;
                                 setState(() {});
-                                _addSimpleProductToCart(quantity: _cardQuantity);
-                              }),
-                              4.width,
-                              Text('$_cardQuantity', style: boldTextStyle(color: context.primaryColor)),
-                              4.width,
-                              Icon(Icons.add, color: context.primaryColor, size: 20).paddingAll(4).onTap(() {
-                                _cardQuantity++;
-                                setState(() {});
-                                _addSimpleProductToCart(quantity: _cardQuantity);
-                              }),
-                            ],
-                          ),
-                        ),
+                                _addSimpleProductToCart(quantity: 1);
+                              }
+                            })
+                          : Container(
+                              decoration: boxDecorationWithRoundedCorners(
+                                backgroundColor: white,
+                                border: Border.all(color: context.primaryColor),
+                                borderRadius: radius(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.remove,
+                                          color: context.primaryColor, size: 20)
+                                      .paddingAll(4)
+                                      .onTap(() {
+                                    if (_cardQuantity <= 1) {
+                                      _cardQuantity = 0;
+                                      _showInlineQuantityControl = false;
+                                      _removeProductFromCart();
+                                      setState(() {});
+                                      return;
+                                    }
+                                    _cardQuantity--;
+                                    setState(() {});
+                                    _addSimpleProductToCart(
+                                        quantity: _cardQuantity);
+                                  }),
+                                  4.width,
+                                  Text('$_cardQuantity',
+                                      style: boldTextStyle(
+                                          color: context.primaryColor)),
+                                  4.width,
+                                  Icon(Icons.add,
+                                          color: context.primaryColor, size: 20)
+                                      .paddingAll(4)
+                                      .onTap(() {
+                                    _cardQuantity++;
+                                    setState(() {});
+                                    _addSimpleProductToCart(
+                                        quantity: _cardQuantity);
+                                  }),
+                                ],
+                              ),
+                            ),
                 ),
               ],
             ),
@@ -527,7 +608,8 @@ class ServiceComponentState extends State<ServiceComponent> {
                       8.width,
                       Text(
                         "${appConfigurationStore.currencySymbol}${widget.serviceData.price.validate()}",
-                        style: secondaryTextStyle(decoration: TextDecoration.lineThrough),
+                        style: secondaryTextStyle(
+                            decoration: TextDecoration.lineThrough),
                       ),
                     ],
                   ],
@@ -535,26 +617,34 @@ class ServiceComponentState extends State<ServiceComponent> {
                 4.height,
                 Row(
                   children: [
-                    DisabledRatingBarWidget(rating: widget.serviceData.totalRating.validate(), size: 10),
+                    DisabledRatingBarWidget(
+                        rating: widget.serviceData.totalRating.validate(),
+                        size: 10),
                     4.width,
-                    Text("(${widget.serviceData.totalReview.validate().toInt()})", style: secondaryTextStyle(size: 8)),
+                    Text(
+                        "(${widget.serviceData.totalReview.validate().toInt()})",
+                        style: secondaryTextStyle(size: 8)),
                   ],
                 ),
                 8.height,
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: boxDecorationWithRoundedCorners(
-                    backgroundColor: context.primaryColor.withValues(alpha: 0.1),
+                    backgroundColor:
+                        context.primaryColor.withValues(alpha: 0.1),
                     borderRadius: radius(20),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.timer_outlined, size: 14, color: context.primaryColor),
+                      Icon(Icons.timer_outlined,
+                          size: 14, color: context.primaryColor),
                       4.width,
                       Text(
                         "${DateTime.parse(widget.serviceData.createdAt.validate(value: DateTime.now().toString())).timeAgo}",
-                        style: boldTextStyle(size: 10, color: context.primaryColor),
+                        style: boldTextStyle(
+                            size: 10, color: context.primaryColor),
                       ),
                     ],
                   ),
@@ -592,14 +682,20 @@ class ServiceComponentState extends State<ServiceComponent> {
                 clipBehavior: Clip.none,
                 children: [
                   CachedImageWidget(
-                    url: widget.isFavouriteService && widget.serviceData.serviceAttachments.validate().isNotEmpty
-                        ? widget.serviceData.serviceAttachments!.first.validate()
+                    url: widget.isFavouriteService &&
+                            widget.serviceData.serviceAttachments
+                                .validate()
+                                .isNotEmpty
+                        ? widget.serviceData.serviceAttachments!.first
+                            .validate()
                         : widget.serviceData.firstServiceImage.validate(),
                     fit: BoxFit.cover,
                     height: imageH,
                     width: widget.width ?? context.width(),
                     circle: false,
-                  ).cornerRadiusWithClipRRectOnly(topRight: defaultRadius.toInt(), topLeft: defaultRadius.toInt()),
+                  ).cornerRadiusWithClipRRectOnly(
+                      topRight: defaultRadius.toInt(),
+                      topLeft: defaultRadius.toInt()),
                   if (widget.isMyPost)
                     Positioned(
                       top: 8,
@@ -608,31 +704,47 @@ class ServiceComponentState extends State<ServiceComponent> {
                         children: [
                           Container(
                             padding: const EdgeInsets.all(4),
-                            decoration: boxDecorationWithShadow(backgroundColor: Colors.white, borderRadius: radius(), border: Border.all(color: context.dividerColor)),
-                            child: Icon(Icons.edit, size: 16, color: context.primaryColor),
+                            decoration: boxDecorationWithShadow(
+                                backgroundColor: Colors.white,
+                                borderRadius: radius(),
+                                border:
+                                    Border.all(color: context.dividerColor)),
+                            child: Icon(Icons.edit,
+                                size: 16, color: context.primaryColor),
                           ).onTap(() {
                             // Navigate to AddPostScreen to edit
-                            AddPostScreen(postId: widget.serviceData.id).launch(context).then((value) {
+                            AddPostScreen(
+                              postId: widget.serviceData.id,
+                              postData: widget.serviceData,
+                            ).launch(context).then((value) {
                               if (value ?? false) widget.onUpdate?.call();
                             });
                           }),
                           8.width,
                           Container(
                             padding: const EdgeInsets.all(4),
-                            decoration: boxDecorationWithShadow(backgroundColor: Colors.white, borderRadius: radius(), border: Border.all(color: context.dividerColor)),
-                            child: Icon(Icons.delete, size: 16, color: Colors.red),
+                            decoration: boxDecorationWithShadow(
+                                backgroundColor: Colors.white,
+                                borderRadius: radius(),
+                                border:
+                                    Border.all(color: context.dividerColor)),
+                            child:
+                                Icon(Icons.delete, size: 16, color: Colors.red),
                           ).onTap(() async {
                             showConfirmDialogCustom(
                               context,
-                              title: "Are you sure you want to delete this post?",
+                              title:
+                                  "Are you sure you want to delete this post?",
                               positiveText: language.lblYes,
                               negativeText: language.lblNo,
                               primaryColor: context.primaryColor,
                               onAccept: (c) {
                                 appStore.setLoading(true);
-                                deletePost(widget.serviceData.id.validate()).then((value) {
+                                deletePost(widget.serviceData.id.validate())
+                                    .then((value) {
                                   appStore.setLoading(false);
-                                  toast(value.message ?? 'Deleted successfully');
+                                  toast(
+                                      value.message ?? 'Deleted successfully');
                                   widget.onUpdate?.call();
                                 }).catchError((e) {
                                   appStore.setLoading(false);
@@ -649,7 +761,8 @@ class ServiceComponentState extends State<ServiceComponent> {
                       top: 6,
                       left: 0,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
                         decoration: boxDecorationWithRoundedCorners(
                           backgroundColor: Colors.orange.withValues(alpha: 0.9),
                           borderRadius: radiusOnly(topRight: 8, bottomRight: 8),
@@ -664,15 +777,23 @@ class ServiceComponentState extends State<ServiceComponent> {
                     top: widget.serviceData.isFeatured == 1 ? 32 : 6,
                     left: widget.serviceData.isFeatured == 1 ? 0 : 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-                      constraints: BoxConstraints(maxWidth: (widget.width ?? context.width()) * 0.45),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 2, vertical: 2),
+                      constraints: BoxConstraints(
+                          maxWidth: (widget.width ?? context.width()) * 0.45),
                       decoration: boxDecorationWithShadow(
-                        backgroundColor: context.cardColor.withValues(alpha: 0.9),
-                        borderRadius: widget.serviceData.isFeatured == 1 ? radiusOnly(topRight: 8, bottomRight: 8) : radius(20),
+                        backgroundColor:
+                            context.cardColor.withValues(alpha: 0.9),
+                        borderRadius: widget.serviceData.isFeatured == 1
+                            ? radiusOnly(topRight: 8, bottomRight: 8)
+                            : radius(20),
                       ),
                       child: Text(
-                        "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}".toUpperCase(),
-                        style: boldTextStyle(color: appStore.isDarkMode ? white : primaryColor, size: 10),
+                        "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}"
+                            .toUpperCase(),
+                        style: boldTextStyle(
+                            color: appStore.isDarkMode ? white : primaryColor,
+                            size: 10),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ).paddingSymmetric(horizontal: 6, vertical: 2),
@@ -682,11 +803,13 @@ class ServiceComponentState extends State<ServiceComponent> {
                     bottom: 8,
                     right: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: boxDecorationWithShadow(
                         backgroundColor: primaryColor,
                         borderRadius: radius(20),
-                        border: Border.all(color: context.cardColor, width: 1.5),
+                        border:
+                            Border.all(color: context.cardColor, width: 1.5),
                       ),
                       child: PriceWidget(
                         price: widget.serviceData.price.validate(),
@@ -694,7 +817,8 @@ class ServiceComponentState extends State<ServiceComponent> {
                         color: Colors.white,
                         hourlyTextColor: Colors.white,
                         size: 12,
-                        isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
+                        isFreeService: widget.serviceData.type.validate() ==
+                            SERVICE_TYPE_FREE,
                       ),
                     ),
                   ),
@@ -704,7 +828,10 @@ class ServiceComponentState extends State<ServiceComponent> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                DisabledRatingBarWidget(rating: widget.serviceData.totalRating.validate(), size: 11).paddingSymmetric(horizontal: 12),
+                DisabledRatingBarWidget(
+                        rating: widget.serviceData.totalRating.validate(),
+                        size: 11)
+                    .paddingSymmetric(horizontal: 12),
                 6.height,
                 Text(
                   widget.serviceData.name.validate(),
@@ -715,19 +842,29 @@ class ServiceComponentState extends State<ServiceComponent> {
                 6.height,
                 Row(
                   children: [
-                    ImageBorder(src: widget.serviceData.providerImage.validate(), height: 22),
+                    ImageBorder(
+                        src: widget.serviceData.providerImage.validate(),
+                        height: 22),
                     6.width,
                     if (widget.serviceData.providerName.validate().isNotEmpty)
                       Text(
                         widget.serviceData.providerName.validate(),
-                        style: secondaryTextStyle(size: 11, color: appStore.isDarkMode ? Colors.white : appTextSecondaryColor),
+                        style: secondaryTextStyle(
+                            size: 11,
+                            color: appStore.isDarkMode
+                                ? Colors.white
+                                : appTextSecondaryColor),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ).expand(),
                   ],
                 ).onTap(() async {
-                  if (widget.serviceData.providerId != appStore.userId.validate()) {
-                    await ProviderInfoScreen(providerId: widget.serviceData.providerId.validate()).launch(context);
+                  if (widget.serviceData.providerId !=
+                      appStore.userId.validate()) {
+                    await ProviderInfoScreen(
+                            providerId:
+                                widget.serviceData.providerId.validate())
+                        .launch(context);
                     setStatusBarColor(Colors.transparent);
                   }
                 }).paddingSymmetric(horizontal: 12),
@@ -811,23 +948,32 @@ class ServiceComponentState extends State<ServiceComponent> {
                     clipBehavior: Clip.none,
                     children: [
                       CachedImageWidget(
-                        url: widget.isFavouriteService && widget.serviceData.serviceAttachments.validate().isNotEmpty
-                            ? widget.serviceData.serviceAttachments!.first.validate()
+                        url: widget.isFavouriteService &&
+                                widget.serviceData.serviceAttachments
+                                    .validate()
+                                    .isNotEmpty
+                            ? widget.serviceData.serviceAttachments!.first
+                                .validate()
                             : widget.serviceData.firstServiceImage.validate(),
                         fit: BoxFit.cover,
                         height: 180,
                         width: widget.width ?? context.width(),
                         circle: false,
-                      ).cornerRadiusWithClipRRectOnly(topRight: defaultRadius.toInt(), topLeft: defaultRadius.toInt()),
+                      ).cornerRadiusWithClipRRectOnly(
+                          topRight: defaultRadius.toInt(),
+                          topLeft: defaultRadius.toInt()),
                       if (widget.serviceData.isFeatured == 1)
                         Positioned(
                           top: 12,
                           left: 0,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
                             decoration: boxDecorationWithRoundedCorners(
-                              backgroundColor: Colors.orange.withValues(alpha: 0.9),
-                              borderRadius: radiusOnly(topRight: 8, bottomRight: 8),
+                              backgroundColor:
+                                  Colors.orange.withValues(alpha: 0.9),
+                              borderRadius:
+                                  radiusOnly(topRight: 8, bottomRight: 8),
                             ),
                             child: Text(
                               "FEATURED",
@@ -839,15 +985,24 @@ class ServiceComponentState extends State<ServiceComponent> {
                         top: widget.serviceData.isFeatured == 1 ? 40 : 12,
                         left: widget.serviceData.isFeatured == 1 ? 0 : 12,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-                          constraints: BoxConstraints(maxWidth: context.width() * 0.3),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 2),
+                          constraints:
+                              BoxConstraints(maxWidth: context.width() * 0.3),
                           decoration: boxDecorationWithShadow(
-                            backgroundColor: context.cardColor.withValues(alpha: 0.9),
-                            borderRadius: widget.serviceData.isFeatured == 1 ? radiusOnly(topRight: 8, bottomRight: 8) : radius(24),
+                            backgroundColor:
+                                context.cardColor.withValues(alpha: 0.9),
+                            borderRadius: widget.serviceData.isFeatured == 1
+                                ? radiusOnly(topRight: 8, bottomRight: 8)
+                                : radius(24),
                           ),
                           child: Text(
-                            "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}".toUpperCase(),
-                            style: boldTextStyle(color: appStore.isDarkMode ? white : primaryColor, size: 12),
+                            "${widget.serviceData.subCategoryName.validate().isNotEmpty ? widget.serviceData.subCategoryName.validate() : widget.serviceData.categoryName.validate()}"
+                                .toUpperCase(),
+                            style: boldTextStyle(
+                                color:
+                                    appStore.isDarkMode ? white : primaryColor,
+                                size: 12),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ).paddingSymmetric(horizontal: 8, vertical: 4),
@@ -857,7 +1012,8 @@ class ServiceComponentState extends State<ServiceComponent> {
                         const Positioned(
                           top: 20,
                           right: 12,
-                          child: Icon(Icons.circle, color: Colors.green, size: 12),
+                          child:
+                              Icon(Icons.circle, color: Colors.green, size: 12),
                         ),
                       if (widget.serviceData.isOnShopService)
                         Positioned(
@@ -869,7 +1025,8 @@ class ServiceComponentState extends State<ServiceComponent> {
                               borderRadius: radius(20),
                             ),
                             child: Container(
-                              padding: EdgeInsets.all(6), // 🔹 Reduced from 6 to 4
+                              padding:
+                                  EdgeInsets.all(6), // 🔹 Reduced from 6 to 4
                               child: Image.asset(
                                 Assets.iconsIcDefaultShop,
                                 height: 12,
@@ -889,14 +1046,24 @@ class ServiceComponentState extends State<ServiceComponent> {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             margin: const EdgeInsets.only(right: 8),
-                            decoration: boxDecorationWithShadow(boxShape: BoxShape.circle, backgroundColor: context.cardColor),
-                            child: widget.serviceData.isFavourite == 1 ? ic_fill_heart.iconImage(color: favouriteColor, size: 18) : ic_heart.iconImage(color: unFavouriteColor, size: 18),
+                            decoration: boxDecorationWithShadow(
+                                boxShape: BoxShape.circle,
+                                backgroundColor: context.cardColor),
+                            child: widget.serviceData.isFavourite == 1
+                                ? ic_fill_heart.iconImage(
+                                    color: favouriteColor, size: 18)
+                                : ic_heart.iconImage(
+                                    color: unFavouriteColor, size: 18),
                           ).onTap(() async {
                             if (widget.serviceData.isFavourite != 0) {
                               widget.serviceData.isFavourite = 1;
                               setState(() {});
 
-                              await removeToWishList(serviceId: widget.serviceData.serviceId.validate().toInt()).then((value) {
+                              await removeToWishList(
+                                      serviceId: widget.serviceData.serviceId
+                                          .validate()
+                                          .toInt())
+                                  .then((value) {
                                 if (!value) {
                                   widget.serviceData.isFavourite = 1;
                                   setState(() {});
@@ -906,7 +1073,11 @@ class ServiceComponentState extends State<ServiceComponent> {
                               widget.serviceData.isFavourite = 0;
                               setState(() {});
 
-                              await addToWishList(serviceId: widget.serviceData.serviceId.validate().toInt()).then((value) {
+                              await addToWishList(
+                                      serviceId: widget.serviceData.serviceId
+                                          .validate()
+                                          .toInt())
+                                  .then((value) {
                                 if (!value) {
                                   widget.serviceData.isFavourite = 1;
                                   setState(() {});
@@ -920,11 +1091,13 @@ class ServiceComponentState extends State<ServiceComponent> {
                         bottom: 12,
                         right: 8,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: boxDecorationWithShadow(
                             backgroundColor: primaryColor,
                             borderRadius: radius(24),
-                            border: Border.all(color: context.cardColor, width: 2),
+                            border:
+                                Border.all(color: context.cardColor, width: 2),
                           ),
                           child: PriceWidget(
                             price: widget.serviceData.price.validate(),
@@ -932,7 +1105,8 @@ class ServiceComponentState extends State<ServiceComponent> {
                             color: Colors.white,
                             hourlyTextColor: Colors.white,
                             size: 14,
-                            isFreeService: widget.serviceData.type.validate() == SERVICE_TYPE_FREE,
+                            isFreeService: widget.serviceData.type.validate() ==
+                                SERVICE_TYPE_FREE,
                           ),
                         ),
                       ),
@@ -942,7 +1116,10 @@ class ServiceComponentState extends State<ServiceComponent> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    DisabledRatingBarWidget(rating: widget.serviceData.totalRating.validate(), size: 14).paddingSymmetric(horizontal: 16),
+                    DisabledRatingBarWidget(
+                            rating: widget.serviceData.totalRating.validate(),
+                            size: 14)
+                        .paddingSymmetric(horizontal: 16),
                     8.height,
                     Text(
                       widget.serviceData.name.validate(),
@@ -953,19 +1130,31 @@ class ServiceComponentState extends State<ServiceComponent> {
                     8.height,
                     Row(
                       children: [
-                        ImageBorder(src: widget.serviceData.providerImage.validate(), height: 30),
+                        ImageBorder(
+                            src: widget.serviceData.providerImage.validate(),
+                            height: 30),
                         8.width,
-                        if (widget.serviceData.providerName.validate().isNotEmpty)
+                        if (widget.serviceData.providerName
+                            .validate()
+                            .isNotEmpty)
                           Text(
                             widget.serviceData.providerName.validate(),
-                            style: secondaryTextStyle(size: 12, color: appStore.isDarkMode ? Colors.white : appTextSecondaryColor),
+                            style: secondaryTextStyle(
+                                size: 12,
+                                color: appStore.isDarkMode
+                                    ? Colors.white
+                                    : appTextSecondaryColor),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ).expand()
                       ],
                     ).onTap(() async {
-                      if (widget.serviceData.providerId != appStore.userId.validate()) {
-                        await ProviderInfoScreen(providerId: widget.serviceData.providerId.validate()).launch(context);
+                      if (widget.serviceData.providerId !=
+                          appStore.userId.validate()) {
+                        await ProviderInfoScreen(
+                                providerId:
+                                    widget.serviceData.providerId.validate())
+                            .launch(context);
                         setStatusBarColor(Colors.transparent);
                       }
                     }).paddingSymmetric(horizontal: 16),
@@ -989,7 +1178,9 @@ class ServiceComponentState extends State<ServiceComponent> {
             // If no variants, just go to detail or add to cart?
             // Usually detail is better on whole card tap
             ServiceDetailScreen(
-              serviceId: widget.isFavouriteService ? widget.serviceData.serviceId.validate().toInt() : widget.serviceData.id.validate(),
+              serviceId: widget.isFavouriteService
+                  ? widget.serviceData.serviceId.validate().toInt()
+                  : widget.serviceData.id.validate(),
               detailType: resolveDetailType(),
             ).launch(context).then((value) {
               setStatusBarColor(context.primaryColor);
@@ -999,7 +1190,9 @@ class ServiceComponentState extends State<ServiceComponent> {
           return;
         }
         final String detailType = resolveDetailType();
-        final int resolvedId = widget.isFavouriteService ? widget.serviceData.serviceId.validate().toInt() : widget.serviceData.id.validate();
+        final int resolvedId = widget.isFavouriteService
+            ? widget.serviceData.serviceId.validate().toInt()
+            : widget.serviceData.id.validate();
 
         if (detailType == 'post') {
           PostDetailScreen(postId: resolvedId).launch(context).then((value) {

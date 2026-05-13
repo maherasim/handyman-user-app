@@ -86,15 +86,22 @@ class _ViewAllServiceScreenState extends State<ViewAllServiceScreen> {
       page: page,
       list: serviceList,
       isZoneId: filterStore.zoneId.validate(),
-      categoryId: widget.categoryId != null ? widget.categoryId.validate().toString() : filterStore.categoryId.join(','),
+      categoryId: widget.categoryId != null
+          ? widget.categoryId.validate().toString()
+          : filterStore.categoryId.join(','),
       subCategory: subCategory != null ? subCategory.validate().toString() : '',
-      providerId: widget.providerId != null ? widget.providerId.toString() : filterStore.providerId.join(","),
+      providerId: widget.providerId != null
+          ? widget.providerId.toString()
+          : filterStore.providerId.join(","),
       isPriceMin: filterStore.isPriceMin,
       isPriceMax: filterStore.isPriceMax,
       ratingId: filterStore.ratingId.join(','),
       search: searchCont.text,
-      latitude: appStore.isCurrentLocation ? getDoubleAsync(LATITUDE).toString() : "",
-      longitude: appStore.isCurrentLocation ? getDoubleAsync(LONGITUDE).toString() : "",
+      latitude:
+          appStore.isCurrentLocation ? getDoubleAsync(LATITUDE).toString() : "",
+      longitude: appStore.isCurrentLocation
+          ? getDoubleAsync(LONGITUDE).toString()
+          : "",
       lastPageCallBack: (p0) {
         isLastPage = p0;
       },
@@ -118,7 +125,10 @@ class _ViewAllServiceScreenState extends State<ViewAllServiceScreen> {
   Widget subCategoryWidget() {
     return SnapHelperWidget<List<CategoryData>>(
       future: futureCategory,
-      initialData: cachedSubcategoryList.firstWhere((element) => element?.$1 == widget.categoryId.validate(), orElse: () => null)?.$2,
+      initialData: cachedSubcategoryList
+          .firstWhere((element) => element?.$1 == widget.categoryId.validate(),
+              orElse: () => null)
+          ?.$2,
       loadingWidget: const Offstage(),
       onSuccess: (list) {
         if (list.length == 1) return const Offstage();
@@ -128,7 +138,9 @@ class _ViewAllServiceScreenState extends State<ViewAllServiceScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             16.height,
-            Text(language.lblSubcategories, style: boldTextStyle(size: LABEL_TEXT_SIZE)).paddingLeft(16),
+            Text(language.lblSubcategories,
+                    style: boldTextStyle(size: LABEL_TEXT_SIZE))
+                .paddingLeft(16),
             HorizontalList(
               itemCount: list.validate().length,
               padding: const EdgeInsets.only(left: 16, right: 16),
@@ -139,7 +151,8 @@ class _ViewAllServiceScreenState extends State<ViewAllServiceScreen> {
 
                 return Observer(
                   builder: (_) {
-                    bool isSelected = filterStore.selectedSubCategoryId == index;
+                    bool isSelected =
+                        filterStore.selectedSubCategoryId == index;
 
                     return GestureDetector(
                       onTap: () {
@@ -165,40 +178,65 @@ class _ViewAllServiceScreenState extends State<ViewAllServiceScreen> {
                               offset: const Offset(0, 1),
                               label: Container(
                                 padding: const EdgeInsets.all(2),
-                                decoration: boxDecorationDefault(color: context.primaryColor),
-                                child: const Icon(Icons.done, size: 16, color: Colors.white),
+                                decoration: boxDecorationDefault(
+                                    color: context.primaryColor),
+                                child: const Icon(Icons.done,
+                                    size: 16, color: Colors.white),
                               ).visible(isSelected),
                               child: index == 0
                                   ? Container(
                                       height: CATEGORY_ICON_SIZE,
                                       width: CATEGORY_ICON_SIZE,
-                                      decoration: BoxDecoration(color: context.cardColor, shape: BoxShape.circle, border: Border.all(color: grey)),
+                                      decoration: BoxDecoration(
+                                          color: context.cardColor,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: grey)),
                                       alignment: Alignment.center,
-                                      child: Text(data.name.validate(), style: boldTextStyle(size: 12)),
+                                      child: Text(data.name.validate(),
+                                          style: boldTextStyle(size: 12)),
                                     )
                                   : index != 0
-                                      ? data.categoryImage.validate().endsWith('.svg')
+                                      ? data.categoryImage
+                                              .validate()
+                                              .endsWith('.svg')
                                           ? Container(
                                               width: CATEGORY_ICON_SIZE,
                                               height: CATEGORY_ICON_SIZE,
                                               //  padding: EdgeInsets.all(8),
-                                              decoration: BoxDecoration(color: context.cardColor, shape: BoxShape.circle),
+                                              decoration: BoxDecoration(
+                                                  color: context.cardColor,
+                                                  shape: BoxShape.circle),
                                               child: SvgPicture.network(
                                                 data.categoryImage.validate(),
                                                 height: CATEGORY_ICON_SIZE,
                                                 width: CATEGORY_ICON_SIZE,
                                                 colorFilter: ColorFilter.mode(
-                                                  appStore.isDarkMode ? Colors.white : data.color.validate(value: '000').toColor(),
+                                                  appStore.isDarkMode
+                                                      ? Colors.white
+                                                      : data.color
+                                                          .validate(
+                                                              value: '000')
+                                                          .toColor(),
                                                   BlendMode.srcIn,
                                                 ),
-                                                placeholderBuilder: (context) => const PlaceHolderWidget(height: CATEGORY_ICON_SIZE, width: CATEGORY_ICON_SIZE, color: transparentColor),
+                                                placeholderBuilder: (context) =>
+                                                    const PlaceHolderWidget(
+                                                        height:
+                                                            CATEGORY_ICON_SIZE,
+                                                        width:
+                                                            CATEGORY_ICON_SIZE,
+                                                        color:
+                                                            transparentColor),
                                               ),
                                             )
                                           : Container(
                                               padding: const EdgeInsets.all(12),
-                                              decoration: BoxDecoration(color: context.cardColor, shape: BoxShape.circle),
+                                              decoration: BoxDecoration(
+                                                  color: context.cardColor,
+                                                  shape: BoxShape.circle),
                                               child: CachedImageWidget(
-                                                url: data.categoryImage.validate(),
+                                                url: data.categoryImage
+                                                    .validate(),
                                                 fit: BoxFit.fitWidth,
                                                 width: SUBCATEGORY_ICON_SIZE,
                                                 height: SUBCATEGORY_ICON_SIZE,
@@ -208,8 +246,17 @@ class _ViewAllServiceScreenState extends State<ViewAllServiceScreen> {
                                       : const Offstage(),
                             ),
                             4.height,
-                            if (index == 0) Text(language.lblViewAll, style: boldTextStyle(size: 12), textAlign: TextAlign.center, maxLines: 1),
-                            if (index != 0) Marquee(child: Text('${data.name.validate()}', style: boldTextStyle(size: 12), textAlign: TextAlign.center, maxLines: 1)),
+                            if (index == 0)
+                              Text(language.lblViewAll,
+                                  style: boldTextStyle(size: 12),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1),
+                            if (index != 0)
+                              Marquee(
+                                  child: Text('${data.name.validate()}',
+                                      style: boldTextStyle(size: 12),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1)),
                           ],
                         ),
                       ),
@@ -279,14 +326,16 @@ class _ViewAllServiceScreenState extends State<ViewAllServiceScreen> {
                       },
                       decoration: inputDecoration(context).copyWith(
                         hintText: "${language.lblSearchFor} $setSearchString",
-                        prefixIcon: ic_search.iconImage(size: 10).paddingAll(14),
+                        prefixIcon:
+                            ic_search.iconImage(size: 10).paddingAll(14),
                         hintStyle: secondaryTextStyle(),
                       ),
                     ).expand(),
                     16.width,
                     Container(
                       padding: const EdgeInsets.all(10),
-                      decoration: boxDecorationDefault(color: context.primaryColor),
+                      decoration:
+                          boxDecorationDefault(color: context.primaryColor),
                       child: const CachedImageWidget(
                         url: ic_filter,
                         height: 26,
@@ -314,7 +363,8 @@ class _ViewAllServiceScreenState extends State<ViewAllServiceScreen> {
                 ),
               ),
               AnimatedScrollView(
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 onSwipeRefresh: () {
                   page = 1;
                   appStore.setLoading(true);
@@ -355,25 +405,35 @@ class _ViewAllServiceScreenState extends State<ViewAllServiceScreen> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(language.service, style: boldTextStyle(size: LABEL_TEXT_SIZE)).paddingSymmetric(horizontal: 16),
-                          AnimatedListView(
-                            itemCount: serviceList.length,
-                            listAnimationType: ListAnimationType.FadeIn,
-                            fadeInConfiguration: FadeInConfiguration(duration: 2.seconds),
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            emptyWidget: NoDataWidget(
+                          Text(language.service,
+                                  style: boldTextStyle(size: LABEL_TEXT_SIZE))
+                              .paddingSymmetric(horizontal: 16),
+                          if (serviceList.isEmpty)
+                            NoDataWidget(
                               title: language.lblNoServicesFound,
-                              subTitle: (searchCont.text.isNotEmpty || filterStore.providerId.isNotEmpty || filterStore.categoryId.isNotEmpty) ? language.noDataFoundInFilter : null,
+                              subTitle: (searchCont.text.isNotEmpty ||
+                                      filterStore.providerId.isNotEmpty ||
+                                      filterStore.categoryId.isNotEmpty)
+                                  ? language.noDataFoundInFilter
+                                  : null,
                               imageWidget: const EmptyStateWidget(),
-                            ),
-                            itemBuilder: (_, index) {
-                              return ServiceComponent(
-                                serviceData: serviceList[index],
-                                isFromViewAllService: true,
-                              ).paddingAll(8);
-                            },
-                          ).paddingAll(8),
+                            ).center()
+                          else
+                            AnimatedWrap(
+                              spacing: 16,
+                              runSpacing: 16,
+                              itemCount: serviceList.length,
+                              listAnimationType: ListAnimationType.FadeIn,
+                              fadeInConfiguration:
+                                  FadeInConfiguration(duration: 2.seconds),
+                              itemBuilder: (_, index) {
+                                return ServiceComponent(
+                                  serviceData: serviceList[index],
+                                  width: (context.width() - 48) / 2,
+                                  isFromViewAllService: true,
+                                );
+                              },
+                            ).paddingAll(16),
                         ],
                       );
                     },

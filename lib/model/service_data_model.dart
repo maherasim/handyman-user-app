@@ -13,6 +13,7 @@ import 'multi_language_request_model.dart';
 class ServiceData {
   int? id;
   int? categoryId;
+  int? subCategoryId;
   int? providerId;
   int? cityId;
   int? status;
@@ -76,19 +77,28 @@ class ServiceData {
 
   bool get isFreeService => price.validate() == 0;
 
-  bool get isAdvancePayment => isEnableAdvancePayment.validate() == 1 && getBoolAsync(IS_ADVANCE_PAYMENT_ALLOWED) && servicePackage.validate().isEmpty;
+  bool get isAdvancePayment =>
+      isEnableAdvancePayment.validate() == 1 &&
+      getBoolAsync(IS_ADVANCE_PAYMENT_ALLOWED) &&
+      servicePackage.validate().isEmpty;
 
-  bool get isOnlineService => visitType.validate().toLowerCase() == VISIT_OPTION_ONLINE;
+  bool get isOnlineService =>
+      visitType.validate().toLowerCase() == VISIT_OPTION_ONLINE;
 
-  bool get isOnSiteService => visitType.validate().toLowerCase() == VISIT_OPTION_ON_SITE;
+  bool get isOnSiteService =>
+      visitType.validate().toLowerCase() == VISIT_OPTION_ON_SITE;
 
-  bool get isOnShopService => visitType.validate().toLowerCase() == VISIT_OPTION_ON_SHOP;
+  bool get isOnShopService =>
+      visitType.validate().toLowerCase() == VISIT_OPTION_ON_SHOP;
 
-  num get getDiscountedPrice => price.validate().calculatePercentage(discount.validate().toInt());
+  num get getDiscountedPrice =>
+      price.validate().calculatePercentage(discount.validate().toInt());
 
   String? get firstServiceImage {
-    if (serviceAttachments != null && serviceAttachments!.isNotEmpty) return serviceAttachments!.first;
-    if (attachments != null && attachments!.isNotEmpty) return attachments!.first;
+    if (serviceAttachments != null && serviceAttachments!.isNotEmpty)
+      return serviceAttachments!.first;
+    if (attachments != null && attachments!.isNotEmpty)
+      return attachments!.first;
     return null;
   }
 
@@ -97,6 +107,7 @@ class ServiceData {
     this.bookingDate,
     this.bookingSlot,
     this.categoryId,
+    this.subCategoryId,
     this.categoryName,
     this.cityId,
     this.description,
@@ -148,11 +159,19 @@ class ServiceData {
 
   factory ServiceData.fromJson(Map<String, dynamic> json) {
     return ServiceData(
-      id: json['id'],
+      id: json['id'] != null ? json['id'].toString().toInt() : null,
       name: json['name'],
-      categoryId: json['category_id'],
-      providerId: json['provider_id'],
-      price: json['price'],
+      categoryId: json['category_id'] != null
+          ? json['category_id'].toString().toInt()
+          : null,
+      subCategoryId: json['subcategory_id'] != null
+          ? json['subcategory_id'].toString().toInt()
+          : null,
+      providerId: json['provider_id'] != null
+          ? json['provider_id'].toString().toInt()
+          : null,
+      price:
+          json['price'] != null ? num.tryParse(json['price'].toString()) : null,
       priceFormat: json['price_format'],
       type: json['type'],
       serviceType: json['service_type'] ?? json['type'],
@@ -163,46 +182,79 @@ class ServiceData {
       subCategoryName: json['subcategory_name'],
       discount: json['discount'] != null ? json['discount'] : 0,
       duration: json['duration'],
-      status: json['status'],
+      status: json['status'] != null ? json['status'].toString().toInt() : null,
       description: json['description'],
-      isFeatured: json['is_featured'],
+      isFeatured: json['is_featured'] != null
+          ? json['is_featured'].toString().toInt()
+          : null,
       providerName: json['provider_name'],
       categoryName: json['category_name'],
-      attachments: json['attchments'] != null ? new List<String>.from(json['attchments']) : null,
+      attachments: json['attchments'] != null
+          ? new List<String>.from(json['attchments'])
+          : null,
       totalReview: json['total_review'],
       totalRating: json['total_rating'],
       isFavourite: json['is_favourite'],
-      cityId: json['city_id'],
+      cityId:
+          json['city_id'] != null ? json['city_id'].toString().toInt() : null,
       providerImage: json['provider_image'],
-      serviceAddressMapping: json['service_address_mapping'] != null ? (json['service_address_mapping'] as List).map((i) => ServiceAddressMapping.fromJson(i)).toList() : null,
-      bookingSlots: json['slots'] != null ? (json['slots'] as List).map((i) => SlotData.fromJson(i)).toList() : null,
+      serviceAddressMapping: json['service_address_mapping'] != null
+          ? (json['service_address_mapping'] as List)
+              .map((i) => ServiceAddressMapping.fromJson(i))
+              .toList()
+          : null,
+      bookingSlots: json['slots'] != null
+          ? (json['slots'] as List).map((i) => SlotData.fromJson(i)).toList()
+          : null,
       createdAt: json['created_at'],
       customerName: json['customer_name'],
-      serviceAttachments: json['service_attchments'] != null ? new List<String>.from(json['service_attchments']) : null,
+      serviceAttachments: json['service_attchments'] != null
+          ? new List<String>.from(json['service_attchments'])
+          : null,
       serviceId: json['service_id'],
       userId: json['user_id'],
-      servicePackage: json['servicePackage'] != null ? (json['servicePackage'] as List).map((i) => BookingPackage.fromJson(i)).toList() : null,
+      servicePackage: json['servicePackage'] != null
+          ? (json['servicePackage'] as List)
+              .map((i) => BookingPackage.fromJson(i))
+              .toList()
+          : null,
       isEnableAdvancePayment: json[AdvancePaymentKey.isEnableAdvancePayment],
       advancePaymentPercentage: json[AdvancePaymentKey.advancePaymentAmount],
       advancePaymentAmount: json['advance_payment_amount'],
-      attachmentsArray: json['attchments_array'] != null ? (json['attchments_array'] as List).map((i) => Attachments.fromJson(i)).toList() : null,
+      attachmentsArray: json['attchments_array'] != null
+          ? (json['attchments_array'] as List)
+              .map((i) => Attachments.fromJson(i))
+              .toList()
+          : null,
       visitType: json['visit_type'],
       translations: _parseTranslations(json['translations']),
       hasVariants: _parseBool(json['has_variants']),
-      totalStock: json['total_stock'] != null ? json['total_stock'].toString().toInt() : null,
-      maxPurchaseQty: json['max_purchase_qty'] != null ? json['max_purchase_qty'].toString().toInt() : null,
-      maxAllowedQuantity: json['max_allowed_quantity'] != null ? json['max_allowed_quantity'].toString().toInt() : null,
+      totalStock: json['total_stock'] != null
+          ? json['total_stock'].toString().toInt()
+          : null,
+      maxPurchaseQty: json['max_purchase_qty'] != null
+          ? json['max_purchase_qty'].toString().toInt()
+          : null,
+      maxAllowedQuantity: json['max_allowed_quantity'] != null
+          ? json['max_allowed_quantity'].toString().toInt()
+          : null,
       requiresVariantSelection: _parseBool(json['requires_variant_selection']),
       variantAttributeName: json['variant_attribute_name'],
-      productUnitId: json['product_unit_id'] != null ? json['product_unit_id'].toString().toInt() : null,
+      productUnitId: json['product_unit_id'] != null
+          ? json['product_unit_id'].toString().toInt()
+          : null,
       productUnitName: json['product_unit_name'],
-      postOrderDetail: json['order_detail'] is Map ? PostOrderDetail.fromJson(json['order_detail'] as Map<String, dynamic>) : null,
+      postOrderDetail: json['order_detail'] is Map
+          ? PostOrderDetail.fromJson(
+              json['order_detail'] as Map<String, dynamic>)
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['category_id'] = categoryId;
+    data['subcategory_id'] = subCategoryId;
     data['category_name'] = categoryName;
     data['city_id'] = cityId;
     data['description'] = description;
@@ -240,10 +292,12 @@ class ServiceData {
     }
     data['is_favourite'] = isFavourite;
     if (serviceAddressMapping != null) {
-      data['service_address_mapping'] = serviceAddressMapping!.map((v) => v.toJson()).toList();
+      data['service_address_mapping'] =
+          serviceAddressMapping!.map((v) => v.toJson()).toList();
     }
     if (attachmentsArray != null) {
-      data['attchments_array'] = attachmentsArray!.map((v) => v.toJson()).toList();
+      data['attchments_array'] =
+          attachmentsArray!.map((v) => v.toJson()).toList();
     }
 
     if (servicePackage != null) {
@@ -254,7 +308,8 @@ class ServiceData {
     data['advance_payment_amount'] = advancePaymentAmount;
     data['visit_type'] = visitType;
     if (translations != null) {
-      data['translations'] = translations!.map((key, value) => MapEntry(key, value.toJson()));
+      data['translations'] =
+          translations!.map((key, value) => MapEntry(key, value.toJson()));
     }
     data['has_variants'] = hasVariants;
     data['total_stock'] = totalStock;
@@ -315,15 +370,27 @@ class ServiceAddressMapping {
   String? updatedAt;
   ProviderAddressMapping? providerAddressMapping;
 
-  ServiceAddressMapping({this.id, this.serviceId, this.providerAddressId, this.createdAt, this.updatedAt, this.providerAddressMapping});
+  ServiceAddressMapping(
+      {this.id,
+      this.serviceId,
+      this.providerAddressId,
+      this.createdAt,
+      this.updatedAt,
+      this.providerAddressMapping});
 
   ServiceAddressMapping.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    serviceId = json['service_id'];
-    providerAddressId = json['provider_address_id'];
+    id = json['id'] != null ? json['id'].toString().toInt() : null;
+    serviceId = json['service_id'] != null
+        ? json['service_id'].toString().toInt()
+        : null;
+    providerAddressId = json['provider_address_id'] != null
+        ? json['provider_address_id'].toString().toInt()
+        : null;
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    providerAddressMapping = json['provider_address_mapping'] != null ? new ProviderAddressMapping.fromJson(json['provider_address_mapping']) : null;
+    providerAddressMapping = json['provider_address_mapping'] != null
+        ? new ProviderAddressMapping.fromJson(json['provider_address_mapping'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -350,7 +417,15 @@ class ProviderAddressMapping {
   String? createdAt;
   String? updatedAt;
 
-  ProviderAddressMapping({this.id, this.providerId, this.address, this.latitude, this.longitude, this.status, this.createdAt, this.updatedAt});
+  ProviderAddressMapping(
+      {this.id,
+      this.providerId,
+      this.address,
+      this.latitude,
+      this.longitude,
+      this.status,
+      this.createdAt,
+      this.updatedAt});
 
   ProviderAddressMapping.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -422,4 +497,3 @@ class PostOrderDetail {
     return data;
   }
 }
-

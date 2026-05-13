@@ -45,6 +45,7 @@ import '../model/bank_list_response.dart';
 import '../model/coupon_list_model.dart';
 import '../model/payment_gateway_response.dart';
 import '../model/payment_list_reasponse.dart';
+import '../model/subscription_model.dart';
 import '../model/update_location_response.dart';
 import '../model/wallet_response.dart';
 import '../model/zone_model.dart';
@@ -137,6 +138,12 @@ Future<void> saveUserData(UserData data,
 
   await appStore.setUserProfile(data.profileImage.validate());
   await appStore.setReferralCode(data.referral_code.validate());
+  // Deprecated: post creation now uses `user-post-list.allow_to_create_featured`.
+  // await setValue(USER_FREE_POSTS, data.freePosts.validate());
+  // await setValue(
+  //     USER_FEATURED_CLASSIFIED_LIMIT, data.featuredClassifiedLimit.validate());
+  // await setValue(
+  //     USER_FEATURED_POSTS_USED_COUNT, data.featuredPostsUsedCount.validate());
 
   /// Subscribe Firebase Topic
   subscribeToFirebaseTopic();
@@ -145,6 +152,17 @@ Future<void> saveUserData(UserData data,
   if (forceSyncAppConfigurations)
     await setValue(LAST_APP_CONFIGURATION_SYNCED_TIME, 0);
   getAppConfigurations();
+}
+
+Future<void> refreshUserPostLimitData() async {
+  if (!appStore.isLoggedIn || appStore.userId == 0) return;
+
+  final UserData data = await getUserDetail(appStore.userId);
+  await setValue(USER_FREE_POSTS, data.freePosts.validate());
+  await setValue(
+      USER_FEATURED_CLASSIFIED_LIMIT, data.featuredClassifiedLimit.validate());
+  await setValue(
+      USER_FEATURED_POSTS_USED_COUNT, data.featuredPostsUsedCount.validate());
 }
 
 Future<void> clearPreferences() async {
@@ -182,6 +200,9 @@ Future<void> clearPreferences() async {
   await appStore.setToken('');
   await appStore.setLoginType('');
   await setValue(USER_PASSWORD, '');
+  await removeKey(USER_FREE_POSTS);
+  await removeKey(USER_FEATURED_CLASSIFIED_LIMIT);
+  await removeKey(USER_FEATURED_POSTS_USED_COUNT);
   await removeKey(IS_SUBSCRIBED_FOR_PUSH_NOTIFICATION);
 
   try {
@@ -501,7 +522,9 @@ Future<ServiceResponse> getProductList(Map<String, dynamic> request) async {
     }
   });
 
-  return ServiceResponse.fromJson(await handleResponse(await buildHttpResponse('product-list$params', method: HttpMethodType.GET)));
+  return ServiceResponse.fromJson(await handleResponse(await buildHttpResponse(
+      'product-list$params',
+      method: HttpMethodType.GET)));
 }
 
 Future<ServiceResponse> getPostList(Map<String, dynamic> request) async {
@@ -516,7 +539,8 @@ Future<ServiceResponse> getPostList(Map<String, dynamic> request) async {
     }
   });
 
-  return ServiceResponse.fromJson(await handleResponse(await buildHttpResponse('post-list$params', method: HttpMethodType.GET)));
+  return ServiceResponse.fromJson(await handleResponse(
+      await buildHttpResponse('post-list$params', method: HttpMethodType.GET)));
 }
 
 Future<ServiceDetailResponse> getProductDetails({
@@ -587,16 +611,23 @@ Future<ServiceDetailResponse> getPostDetails({
   }
 }
 
-Future<ServiceResponse> getUserPostList(int page, {var perPage = PER_PAGE_ITEM}) async {
-  return ServiceResponse.fromJson(await handleResponse(await buildHttpResponse('user-post-list?page=$page&per_page=$perPage', method: HttpMethodType.GET)));
+Future<ServiceResponse> getUserPostList(int page,
+    {var perPage = PER_PAGE_ITEM}) async {
+  return ServiceResponse.fromJson(await handleResponse(await buildHttpResponse(
+      'user-post-list?page=$page&per_page=$perPage',
+      method: HttpMethodType.GET)));
 }
 
-Future<Map<String, dynamic>> getPostFormConfig() async {
-  return await handleResponse(await buildHttpResponse('post-form-config', method: HttpMethodType.GET));
+Future<Map<String, dynamic>> getPostFormConfig({int? postId}) async {
+  return await handleResponse(await buildHttpResponse(
+      'post-form-config${postId != null ? '?post_id=$postId&id=$postId' : ''}',
+      method: HttpMethodType.GET));
 }
 
 Future<BaseResponseModel> deletePost(int id) async {
-  return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('delete-post', method: HttpMethodType.POST, request: {'id': id})));
+  return BaseResponseModel.fromJson(await handleResponse(
+      await buildHttpResponse('delete-post',
+          method: HttpMethodType.POST, request: {'id': id})));
 }
 
 Future<void> savePost({
@@ -618,18 +649,20 @@ Future<void> savePost({
   if (id != null) multiPartRequest.fields['id'] = id.toString();
   multiPartRequest.fields['name'] = name;
   multiPartRequest.fields['category_id'] = categoryId.toString();
-  if (subcategoryId != null) multiPartRequest.fields['subcategory_id'] = subcategoryId.toString();
+  if (subcategoryId != null)
+    multiPartRequest.fields['subcategory_id'] = subcategoryId.toString();
   if (description != null) multiPartRequest.fields['description'] = description;
   multiPartRequest.fields['price'] = price.toString();
   multiPartRequest.fields['is_featured'] = isFeatured.toString();
-  
+
   for (int i = 0; i < serviceZones.length; i++) {
     multiPartRequest.fields['service_zones[$i]'] = serviceZones[i].toString();
   }
 
   if (postAttachments != null && postAttachments.isNotEmpty) {
     for (int i = 0; i < postAttachments.length; i++) {
-      multiPartRequest.files.add(await MultipartFile.fromPath('post_attachment[$i]', postAttachments[i].path));
+      multiPartRequest.files.add(await MultipartFile.fromPath(
+          'post_attachment[$i]', postAttachments[i].path));
     }
   }
 
@@ -660,7 +693,7 @@ Map<String, dynamic> _normalizeCatalogDetailResponse(dynamic rawResponse) {
   if (rawData is! Map<String, dynamic>) return <String, dynamic>{};
 
   dynamic provider = rawData['provider'] ?? rawData['providers'];
-  
+
   if (provider == null && rawData['provider_id'] != null) {
     provider = {
       'id': rawData['provider_id'],
@@ -1929,5 +1962,34 @@ Future<int?> getServiceEarnPoints(
   }
 
   return null;
+}
+
+//region Subscription
+Future<SubscriptionConfigResponse> getSubscriptionConfig() async {
+  try {
+    var res = SubscriptionConfigResponse.fromJson(await handleResponse(
+        await buildHttpResponse('user-subscription-config',
+            method: HttpMethodType.GET)));
+    appStore.setLoading(false);
+    return res;
+  } catch (e) {
+    appStore.setLoading(false);
+    throw e;
+  }
+}
+
+Future<CheckoutResponse> userSubscriptionCheckout(
+    {required int planId, required String paymentMethod}) async {
+  try {
+    var res = CheckoutResponse.fromJson(await handleResponse(
+        await buildHttpResponse('user-subscription-checkout',
+            request: {'plan_id': planId, 'payment_method': paymentMethod},
+            method: HttpMethodType.POST)));
+    appStore.setLoading(false);
+    return res;
+  } catch (e) {
+    appStore.setLoading(false);
+    throw e;
+  }
 }
 //endregion

@@ -19,7 +19,8 @@ class ServiceDetailResponse {
 
   List<Zones> zones;
 
-  bool get isAvailableAtShop => serviceDetail?.visitType?.trim().toLowerCase() == VISIT_OPTION_ON_SHOP;
+  bool get isAvailableAtShop =>
+      serviceDetail?.visitType?.trim().toLowerCase() == VISIT_OPTION_ON_SHOP;
 
   ServiceDetailResponse(
       {this.couponData,
@@ -37,18 +38,53 @@ class ServiceDetailResponse {
 
   factory ServiceDetailResponse.fromJson(Map<String, dynamic> json) {
     return ServiceDetailResponse(
-      couponData: json['coupon_data'] != null ? (json['coupon_data'] as List).map((i) => CouponData.fromJson(i)).toList() : null,
-      provider: json['provider'] != null ? UserData.fromJson(json['provider']) : null,
-      ratingData: json['rating_data'] != null ? (json['rating_data'] as List).map((i) => RatingData.fromJson(i)).toList() : null,
-      serviceDetail: json['service_detail'] != null ? ServiceData.fromJson(json['service_detail']) : null,
-      taxes: json['taxes'] != null ? (json['taxes'] as List).map((i) => TaxData.fromJson(i)).toList() : null,
-      relatedService: json['related_service'] != null ? (json['related_service'] as List).map((i) => ServiceData.fromJson(i)).toList() : null,
-      serviceFaq: json['service_faq'] != null ? (json['service_faq'] as List).map((i) => ServiceFaq.fromJson(i)).toList() : null,
-      serviceaddon: json['serviceaddon'] != null ? (json['serviceaddon'] as List).map((i) => Serviceaddon.fromJson(i)).toList() : null,
-      zones: json['zones'] is List ? (json['zones'] as List).map((i) => Zones.fromJson(i)).toList() : [],
-      shops: json['shop'] is List ? (json['shop'] as List).map((i) => ShopModel.fromJson(i)).toList() : [],
-      redeemPoints: json['redeem_points'] != null ? RedeemPoints.fromJson(json['redeem_points']) : null,
-      userPoints: json['user_points'] != null ? (json['user_points'] is int ? json['user_points'] as int : int.tryParse(json['user_points'].toString())) : null,
+      couponData: json['coupon_data'] != null
+          ? (json['coupon_data'] as List)
+              .map((i) => CouponData.fromJson(i))
+              .toList()
+          : null,
+      provider:
+          json['provider'] != null ? UserData.fromJson(json['provider']) : null,
+      ratingData: json['rating_data'] != null
+          ? (json['rating_data'] as List)
+              .map((i) => RatingData.fromJson(i))
+              .toList()
+          : null,
+      serviceDetail: json['service_detail'] != null
+          ? ServiceData.fromJson(json['service_detail'])
+          : null,
+      taxes: json['taxes'] != null
+          ? (json['taxes'] as List).map((i) => TaxData.fromJson(i)).toList()
+          : null,
+      relatedService: json['related_service'] != null
+          ? (json['related_service'] as List)
+              .map((i) => ServiceData.fromJson(i))
+              .toList()
+          : null,
+      serviceFaq: json['service_faq'] != null
+          ? (json['service_faq'] as List)
+              .map((i) => ServiceFaq.fromJson(i))
+              .toList()
+          : null,
+      serviceaddon: json['serviceaddon'] != null
+          ? (json['serviceaddon'] as List)
+              .map((i) => Serviceaddon.fromJson(i))
+              .toList()
+          : null,
+      zones: json['zones'] is List
+          ? (json['zones'] as List).map((i) => Zones.fromJson(i)).toList()
+          : [],
+      shops: json['shop'] is List
+          ? (json['shop'] as List).map((i) => ShopModel.fromJson(i)).toList()
+          : [],
+      redeemPoints: json['redeem_points'] != null
+          ? RedeemPoints.fromJson(json['redeem_points'])
+          : null,
+      userPoints: json['user_points'] != null
+          ? (json['user_points'] is int
+              ? json['user_points'] as int
+              : int.tryParse(json['user_points'].toString()))
+          : null,
     );
   }
 
@@ -99,7 +135,13 @@ class TaxData {
   num? value;
   num? totalCalculatedValue;
 
-  TaxData({this.id, this.providerId, this.title, this.type, this.value, this.totalCalculatedValue});
+  TaxData(
+      {this.id,
+      this.providerId,
+      this.title,
+      this.type,
+      this.value,
+      this.totalCalculatedValue});
 
   factory TaxData.fromJson(Map<String, dynamic> json) {
     return TaxData(
@@ -131,7 +173,14 @@ class CouponData {
   int? status;
   bool isApplied;
 
-  CouponData({this.code, this.discount, this.discountType, this.expireDate, this.id, this.status, this.isApplied = false});
+  CouponData(
+      {this.code,
+      this.discount,
+      this.discountType,
+      this.expireDate,
+      this.id,
+      this.status,
+      this.isApplied = false});
 
   factory CouponData.fromJson(Map<String, dynamic> json) {
     return CouponData(
@@ -211,7 +260,9 @@ class RatingData {
       customerName: json['customer_name'],
       customerProfileImage: json['customer_profile_image'],
       serviceName: json['service_name'],
-      attachments: json['attchments'] != null ? List<String>.from(json['attchments']) : null,
+      attachments: json['attchments'] != null
+          ? List<String>.from(json['attchments'])
+          : null,
     );
   }
 
@@ -248,7 +299,14 @@ class ServiceFaq {
   String? title;
   String? updatedAt;
 
-  ServiceFaq({this.createdAt, this.description, this.id, this.serviceId, this.status, this.title, this.updatedAt});
+  ServiceFaq(
+      {this.createdAt,
+      this.description,
+      this.id,
+      this.serviceId,
+      this.status,
+      this.title,
+      this.updatedAt});
 
   factory ServiceFaq.fromJson(Map<String, dynamic> json) {
     return ServiceFaq(
@@ -303,7 +361,9 @@ class Serviceaddon {
     return Serviceaddon(
       id: json['id'] is int ? json['id'] : -1,
       name: json['name'] is String ? json['name'] : "",
-      serviceAddonImage: json['serviceaddon_image'] is String ? json['serviceaddon_image'] : "",
+      serviceAddonImage: json['serviceaddon_image'] is String
+          ? json['serviceaddon_image']
+          : "",
       serviceId: json['service_id'] is int ? json['service_id'] : -1,
       price: json['price'] is num ? json['price'] : 0,
       status: json['status'] is int ? json['status'] : -1,
@@ -339,7 +399,7 @@ class Zones {
 
   factory Zones.fromJson(Map<String, dynamic> json) {
     return Zones(
-      id: json['id'],
+      id: json['id'] != null ? json['id'].toString().toInt() : null,
       name: json['name'],
     );
   }
@@ -375,7 +435,11 @@ class RedeemPoints {
       thresholdPoints: json['threshold_points'],
       maxDiscount: json['max_discount'],
       maxPoints: json['max_points'],
-      ranges: json['ranges'] != null ? (json['ranges'] as List).map((e) => RedeemRange.fromJson(e)).toList() : null,
+      ranges: json['ranges'] != null
+          ? (json['ranges'] as List)
+              .map((e) => RedeemRange.fromJson(e))
+              .toList()
+          : null,
     );
   }
 
