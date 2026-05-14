@@ -383,3 +383,178 @@ class Subscription {
     return data;
   }
 }
+
+class SubscriptionHistoryResponse {
+  bool? status;
+  SubscriptionHistoryPagination? pagination;
+  List<SubscriptionHistoryData>? data;
+
+  SubscriptionHistoryResponse({this.status, this.pagination, this.data});
+
+  factory SubscriptionHistoryResponse.fromJson(Map<String, dynamic> json) {
+    return SubscriptionHistoryResponse(
+      status: json['status'],
+      pagination: json['pagination'] != null
+          ? SubscriptionHistoryPagination.fromJson(json['pagination'])
+          : null,
+      data: json['data'] != null
+          ? (json['data'] as List)
+              .map((i) => SubscriptionHistoryData.fromJson(i))
+              .toList()
+          : null,
+    );
+  }
+}
+
+class SubscriptionHistoryPagination {
+  int? totalItems;
+  int? perPage;
+  int? currentPage;
+  int? totalPages;
+  int? from;
+  int? to;
+  int? nextPage;
+  int? previousPage;
+
+  SubscriptionHistoryPagination({
+    this.totalItems,
+    this.perPage,
+    this.currentPage,
+    this.totalPages,
+    this.from,
+    this.to,
+    this.nextPage,
+    this.previousPage,
+  });
+
+  factory SubscriptionHistoryPagination.fromJson(Map<String, dynamic> json) {
+    return SubscriptionHistoryPagination(
+      totalItems: _parseInt(json['total_items']),
+      perPage: _parseInt(json['per_page']),
+      currentPage: _parseInt(json['currentPage']),
+      totalPages: _parseInt(json['totalPages']),
+      from: _parseInt(json['from']),
+      to: _parseInt(json['to']),
+      nextPage: _parseInt(json['next_page']),
+      previousPage: _parseInt(json['previous_page']),
+    );
+  }
+}
+
+class SubscriptionHistoryData {
+  int? id;
+  int? planId;
+  String? title;
+  String? identifier;
+  String? type;
+  num? amount;
+  String? status;
+  String? computedStatus;
+  bool? isActive;
+  bool? isExpired;
+  String? startAt;
+  String? endAt;
+  int? daysLeft;
+  int? duration;
+  String? planType;
+  String? module;
+  int? featuredPostsLimit;
+  PlanLimitation? planLimitation;
+  SubscriptionPayment? payment;
+  String? createdAt;
+  String? updatedAt;
+
+  SubscriptionHistoryData({
+    this.id,
+    this.planId,
+    this.title,
+    this.identifier,
+    this.type,
+    this.amount,
+    this.status,
+    this.computedStatus,
+    this.isActive,
+    this.isExpired,
+    this.startAt,
+    this.endAt,
+    this.daysLeft,
+    this.duration,
+    this.planType,
+    this.module,
+    this.featuredPostsLimit,
+    this.planLimitation,
+    this.payment,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory SubscriptionHistoryData.fromJson(Map<String, dynamic> json) {
+    return SubscriptionHistoryData(
+      id: _parseInt(json['id']),
+      planId: _parseInt(json['plan_id']),
+      title: json['title'],
+      identifier: json['identifier'],
+      type: json['type'],
+      amount: _parseNum(json['amount']),
+      status: json['status'],
+      computedStatus: json['computed_status'],
+      isActive: _parseBool(json['is_active']),
+      isExpired: _parseBool(json['is_expired']),
+      startAt: json['start_at'],
+      endAt: json['end_at'],
+      daysLeft: _parseInt(json['days_left']),
+      duration: _parseInt(json['duration']),
+      planType: json['plan_type'],
+      module: json['module'],
+      featuredPostsLimit: _parseInt(json['featured_posts_limit']),
+      planLimitation: json['plan_limitation'] != null
+          ? PlanLimitation.fromJson(json['plan_limitation'])
+          : null,
+      payment: json['payment'] != null
+          ? SubscriptionPayment.fromJson(json['payment'])
+          : null,
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
+    );
+  }
+}
+
+class SubscriptionPayment {
+  int? id;
+  num? amount;
+  String? paymentType;
+  String? paymentStatus;
+  String? txnId;
+  String? createdAt;
+
+  SubscriptionPayment({
+    this.id,
+    this.amount,
+    this.paymentType,
+    this.paymentStatus,
+    this.txnId,
+    this.createdAt,
+  });
+
+  factory SubscriptionPayment.fromJson(Map<String, dynamic> json) {
+    return SubscriptionPayment(
+      id: _parseInt(json['id']),
+      amount: _parseNum(json['amount']),
+      paymentType: json['payment_type'],
+      paymentStatus: json['payment_status'],
+      txnId: json['txn_id'],
+      createdAt: json['created_at'],
+    );
+  }
+}
+
+bool? _parseBool(dynamic value) {
+  if (value == null) return null;
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+
+  final String text = value.toString().trim().toLowerCase();
+  if (['true', '1', 'yes', 'on'].contains(text)) return true;
+  if (['false', '0', 'no', 'off'].contains(text)) return false;
+  return null;
+}

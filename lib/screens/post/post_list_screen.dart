@@ -6,9 +6,7 @@ import 'package:booking_system_flutter/model/service_data_model.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
 import 'package:booking_system_flutter/screens/post/post_category_screen.dart';
 import 'package:booking_system_flutter/screens/post/add_post_screen.dart';
-import 'package:booking_system_flutter/screens/post/my_post_list_screen.dart';
 import 'package:booking_system_flutter/screens/service/component/service_component.dart';
-import 'package:booking_system_flutter/screens/subscription/subscription_plan_screen.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/constant.dart';
 import 'package:flutter/material.dart';
@@ -78,25 +76,7 @@ class _PostListScreenState extends State<PostListScreen>
   }
 
   void openCreatePostFlow() {
-    doIfLoggedIn(context, () async {
-      appStore.setLoading(true);
-      bool allowToCreateFeatured = false;
-      try {
-        final response = await getUserPostList(1, perPage: 1);
-        allowToCreateFeatured =
-            response.allowToCreateFeatured.validate().toLowerCase() == 'yes';
-      } catch (e) {
-        toast(e.toString());
-      } finally {
-        appStore.setLoading(false);
-      }
-
-      if (!allowToCreateFeatured) {
-        toast('Please purchase a subscription plan to create more posts');
-        SubscriptionPlanScreen().launch(context);
-        return;
-      }
-
+    doIfLoggedIn(context, () {
       AddPostScreen().launch(context).then((value) {
         if (value ?? false) {
           page = 1;

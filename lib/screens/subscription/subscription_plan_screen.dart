@@ -5,6 +5,7 @@ import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/model/subscription_model.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
 import 'package:booking_system_flutter/utils/colors.dart';
+import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -20,8 +21,10 @@ class SubscriptionPlanScreen extends StatefulWidget {
 
 class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
   Future<SubscriptionConfigResponse>? future;
+  Future<SubscriptionHistoryResponse>? historyFuture;
   List<Plan> plans = [];
   List<PaymentMethod> paymentMethods = [];
+  List<SubscriptionHistoryData> history = [];
   int? selectedPlanId;
   String? selectedPaymentMethod;
 
@@ -33,6 +36,7 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
 
   Future<void> init() async {
     future = getSubscriptionConfig();
+    historyFuture = getUserSubscriptionHistory();
   }
 
   Future<void> handleCheckout(Plan plan) async {
@@ -167,21 +171,22 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
               plans = snap.plans ?? [];
               paymentMethods = snap.paymentMethods ?? [];
 
-              if (plans.isEmpty) {
-                return NoDataWidget(
-                  title: 'No plans available',
-                  imageWidget: const EmptyStateWidget(),
-                );
-              }
-
               return AnimatedScrollView(
                 padding: const EdgeInsets.all(16),
                 listAnimationType: ListAnimationType.FadeIn,
                 fadeInConfiguration: FadeInConfiguration(duration: 2.seconds),
                 children: [
-                  ...plans.map((plan) {
-                    return _buildPlanCard(plan).paddingBottom(16);
-                  }).toList(),
+                  if (plans.isEmpty)
+                    NoDataWidget(
+                      title: 'No plans available',
+                      imageWidget: const EmptyStateWidget(),
+                    ).paddingBottom(16)
+                  else
+                    ...plans.map((plan) {
+                      return _buildPlanCard(plan).paddingBottom(16);
+                    }).toList(),
+                  8.height,
+                  _buildSubscriptionHistorySection(),
                 ],
               );
             },
@@ -320,5 +325,159 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
         ),
       ],
     ).paddingSymmetric(vertical: 4);
+  }
+
+  Widget _buildSubscriptionHistorySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Subscription History',
+            style: boldTextStyle(size: 18, color: primaryColor)),
+        12.height,
+        SnapHelperWidget<SubscriptionHistoryResponse>(
+          future: historyFuture,
+          loadingWidget: LoaderWidget().paddingSymmetric(vertical: 24),
+          errorBuilder: (error) {
+            return NoDataWidget(
+              title: error,
+              imageWidget: const ErrorStateWidget(),
+              retryText: language.reload,
+              onRetry: () {
+                historyFuture = getUserSubscriptionHistory();
+                setState(() {});
+              },
+            );
+          },
+          onSuccess: (snap) {
+            history = snap.data ?? [];
+
+            if (history.isEmpty) {
+              return Container(
+                width: context.width(),
+                padding: const EdgeInsets.all(16),
+                decoration: boxDecorationDefault(
+                  color: context.cardColor,
+                  borderRadius: radius(12),
+                ),
+                child: Text('No subscription history',
+                    style: secondaryTextStyle(size: 14)),
+              );
+            }
+
+            return Column(
+              children: history
+                  .map((item) => _buildHistoryCard(item).paddingBottom(12))
+                  .toList(),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHistoryCard(SubscriptionHistoryData item) {
+    final bool isActive = item.isActive.validate();
+    final SubscriptionPayment? payment = item.payment;
+
+    return Container(
+      width: context.width(),
+      padding: const EdgeInsets.all(16),
+      decoration: boxDecorationWithRoundedCorners(
+        borderRadius: radius(12),
+        backgroundColor: context.cardColor,
+        border: Border.all(
+          color:
+              isActive ? primaryColor.withValues(alpha: 0.45) : viewLineColor,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(item.title.validate(),
+                    style: boldTextStyle(size: 16, color: primaryColor)),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: boxDecorationDefault(
+                  color: isActive
+                      ? primaryColor.withValues(alpha: 0.14)
+                      : Colors.red.withValues(alpha: 0.12),
+                  borderRadius: radius(20),
+                ),
+                child: Text(
+                  item.computedStatus
+                      .validate(value: item.status.validate())
+                      .capitalizeFirstLetter(),
+                  style: boldTextStyle(
+                    size: 12,
+                    color: isActive ? primaryColor : Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          12.height,
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              _historyMeta('Amount', item.amount?.toStringAsFixed(2) ?? '0.00'),
+              _historyMeta(
+                  'Featured', item.featuredPostsLimit.validate().toString()),
+              if (item.daysLeft != null)
+                _historyMeta('Days left', item.daysLeft.toString()),
+              if (item.module.validate().isNotEmpty)
+                _historyMeta('Module', item.module.validate()),
+            ],
+          ),
+          12.height,
+          if (item.startAt.validate().isNotEmpty)
+            Text(
+                'Start: ${formatDate(item.startAt.validate(), showDateWithTime: true)}',
+                style: secondaryTextStyle(size: 13)),
+          if (item.endAt.validate().isNotEmpty)
+            Text(
+                'End: ${formatDate(item.endAt.validate(), showDateWithTime: true)}',
+                style: secondaryTextStyle(size: 13)),
+          if (payment != null) ...[
+            12.height,
+            Divider(color: viewLineColor, height: 1),
+            12.height,
+            Row(
+              children: [
+                Icon(Icons.payment, size: 18, color: context.iconColor),
+                8.width,
+                Expanded(
+                  child: Text(
+                    '${payment.paymentType.validate()} - ${payment.paymentStatus.validate()}',
+                    style: secondaryTextStyle(size: 13),
+                  ),
+                ),
+              ],
+            ),
+            if (payment.txnId.validate().isNotEmpty)
+              Text('Txn: ${payment.txnId.validate()}',
+                      style: secondaryTextStyle(size: 12))
+                  .paddingTop(4),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _historyMeta(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: boxDecorationDefault(
+        color: context.primaryColor.withValues(alpha: 0.08),
+        borderRadius: radius(8),
+      ),
+      child: Text('$label: $value', style: secondaryTextStyle(size: 12)),
+    );
   }
 }

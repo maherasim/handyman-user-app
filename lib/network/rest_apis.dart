@@ -138,7 +138,7 @@ Future<void> saveUserData(UserData data,
 
   await appStore.setUserProfile(data.profileImage.validate());
   await appStore.setReferralCode(data.referral_code.validate());
-  // Deprecated: post creation now uses `user-post-list.allow_to_create_featured`.
+  // Deprecated: post creation now uses quota data from `post-form-config`.
   // await setValue(USER_FREE_POSTS, data.freePosts.validate());
   // await setValue(
   //     USER_FEATURED_CLASSIFIED_LIMIT, data.featuredClassifiedLimit.validate());
@@ -157,12 +157,7 @@ Future<void> saveUserData(UserData data,
 Future<void> refreshUserPostLimitData() async {
   if (!appStore.isLoggedIn || appStore.userId == 0) return;
 
-  final UserData data = await getUserDetail(appStore.userId);
-  await setValue(USER_FREE_POSTS, data.freePosts.validate());
-  await setValue(
-      USER_FEATURED_CLASSIFIED_LIMIT, data.featuredClassifiedLimit.validate());
-  await setValue(
-      USER_FEATURED_POSTS_USED_COUNT, data.featuredPostsUsedCount.validate());
+  await getUserDetail(appStore.userId);
 }
 
 Future<void> clearPreferences() async {
@@ -1969,6 +1964,21 @@ Future<SubscriptionConfigResponse> getSubscriptionConfig() async {
   try {
     var res = SubscriptionConfigResponse.fromJson(await handleResponse(
         await buildHttpResponse('user-subscription-config',
+            method: HttpMethodType.GET)));
+    appStore.setLoading(false);
+    return res;
+  } catch (e) {
+    appStore.setLoading(false);
+    throw e;
+  }
+}
+
+Future<SubscriptionHistoryResponse> getUserSubscriptionHistory(
+    {int page = 1, int perPage = 10}) async {
+  try {
+    var res = SubscriptionHistoryResponse.fromJson(await handleResponse(
+        await buildHttpResponse(
+            'user-subscription-history?per_page=$perPage&page=$page',
             method: HttpMethodType.GET)));
     appStore.setLoading(false);
     return res;

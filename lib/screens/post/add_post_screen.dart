@@ -7,6 +7,7 @@ import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/model/service_data_model.dart';
 import 'package:booking_system_flutter/model/service_detail_response.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
+import 'package:booking_system_flutter/screens/subscription/subscription_plan_screen.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -40,6 +41,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
   List<int> selectedZones = [];
   int? selectedZoneId;
+  FreePostQuota? freePostQuota;
+  FeaturedPostQuota? featuredPostQuota;
 
   List<File> imageFiles = [];
   List<String> selectedImages = [];
@@ -58,6 +61,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
         categories = value['data']['categories'] ?? [];
         subcategories = value['data']['subcategories'] ?? [];
         zones = value['data']['zones'] ?? [];
+        freePostQuota =
+            FreePostQuota.fromJson(value['data']['free_post_quota']);
+        featuredPostQuota =
+            FeaturedPostQuota.fromJson(value['data']['featured_post_quota']);
         if (widget.postData != null) {
           applyPostData(widget.postData!);
         }
@@ -249,6 +256,51 @@ class _AddPostScreenState extends State<AddPostScreen> {
     return value.map((e) => e.toString()).where((e) => e.isNotEmpty).toList();
   }
 
+  bool get canCreateNormalPost => freePostQuota?.allowToCreatePost ?? true;
+
+  bool get canCreateFeaturedPost =>
+      featuredPostQuota?.allowToCreateFeatured ?? true;
+
+  String get normalQuotaText {
+    final FreePostQuota? quota = freePostQuota;
+    if (quota == null) return 'Free posts remaining this month: --';
+    return 'Free posts remaining this month: ${quota.remaining.validate()}';
+  }
+
+  String get featuredQuotaText {
+    final FeaturedPostQuota? quota = featuredPostQuota;
+    if (quota == null) return 'Featured posts remaining: --';
+    if (quota.isUnlimited) return 'Featured posts remaining: Unlimited';
+    return 'Featured posts remaining: ${quota.remaining.validate()}';
+  }
+
+  void openPlanScreen() {
+    const SubscriptionPlanScreen().launch(context);
+  }
+
+  bool validatePostQuota() {
+    if (widget.postId != null) return true;
+
+    if (isFeatured) {
+      if (!canCreateFeaturedPost) {
+        toast('Please purchase a plan to create featured posts.');
+        openPlanScreen();
+        return false;
+      }
+      return true;
+    }
+
+    if (!canCreateNormalPost) {
+      String message = 'Your free post limit is finished for this month.';
+      final String resetAt = freePostQuota?.resetAt.validate() ?? '';
+      if (resetAt.isNotEmpty) message = '$message Reset at: $resetAt';
+      toast(message);
+      return false;
+    }
+
+    return true;
+  }
+
   void save() async {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
@@ -265,6 +317,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         toast("Please select at least one image");
         return;
       }
+      if (!validatePostQuota()) return;
       hideKeyboard(context);
 
       await savePost(
@@ -315,7 +368,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     dropdownColor: context.cardColor,
                     style: primaryTextStyle(),
                     iconEnabledColor: context.iconColor,
-                    value: selectedCategoryId,
+                    initialValue: selectedCategoryId,
                     items: categories
                         .map((e) => DropdownMenuItem<int>(
                               value: e['id'].toString().toInt(),
@@ -337,7 +390,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     dropdownColor: context.cardColor,
                     style: primaryTextStyle(),
                     iconEnabledColor: context.iconColor,
-                    value: selectedSubcategoryId,
+                    initialValue: selectedSubcategoryId,
                     items: subcategories
                         .where((e) =>
                             e['category_id'].toString().toInt() ==
@@ -369,12 +422,49 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         fillColor: context.cardColor, hintText: "Description"),
                   ),
                   16.height,
+                  Container(
+                    width: context.width(),
+                    padding: const EdgeInsets.all(12),
+                    decoration: boxDecorationDefault(
+                      color: context.cardColor,
+                      borderRadius: radius(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(normalQuotaText,
+                            style: primaryTextStyle(size: 13)),
+                        6.height,
+                        Text(featuredQuotaText,
+                            style: primaryTextStyle(size: 13)),
+                        if (featuredPostQuota?.hasActiveSubscription == false)
+                          TextButton(
+                            onPressed: openPlanScreen,
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(0, 32),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text('Purchase plan',
+                                style: boldTextStyle(
+                                    color: context.primaryColor, size: 13)),
+                          ),
+                      ],
+                    ),
+                  ),
+                  16.height,
                   Row(
                     children: [
                       Text("Is Featured?", style: primaryTextStyle()).expand(),
                       Switch(
                         value: isFeatured,
                         onChanged: (val) {
+                          if (val && !canCreateFeaturedPost) {
+                            toast(
+                                'Please purchase a plan to create featured posts.');
+                            openPlanScreen();
+                            return;
+                          }
                           isFeatured = val;
                           setState(() {});
                         },
@@ -390,7 +480,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     dropdownColor: context.cardColor,
                     style: primaryTextStyle(),
                     iconEnabledColor: context.iconColor,
-                    value: selectedZoneId,
+                    initialValue: selectedZoneId,
                     items: zones.map((zone) {
                       final int id = zone['id'].toString().toInt();
                       return DropdownMenuItem<int>(
@@ -440,4 +530,90 @@ class _AddPostScreenState extends State<AddPostScreen> {
       ),
     );
   }
+}
+
+class FreePostQuota {
+  final int monthlyLimit;
+  final int usedThisMonth;
+  final int remaining;
+  final bool allowToCreatePost;
+  final String? resetAt;
+
+  FreePostQuota({
+    required this.monthlyLimit,
+    required this.usedThisMonth,
+    required this.remaining,
+    required this.allowToCreatePost,
+    this.resetAt,
+  });
+
+  factory FreePostQuota.fromJson(dynamic json) {
+    final Map data = json is Map ? json : {};
+    return FreePostQuota(
+      monthlyLimit: _parseInt(data['monthly_limit']),
+      usedThisMonth: _parseInt(data['used_this_month']),
+      remaining: _parseInt(data['remaining']),
+      allowToCreatePost: _parseBool(data['allow_to_create_post'], true),
+      resetAt: data['reset_at']?.toString(),
+    );
+  }
+}
+
+class FeaturedPostQuota {
+  final int paidPlanLimit;
+  final int totalLimit;
+  final int used;
+  final int remaining;
+  final bool isUnlimited;
+  final bool allowToCreateFeatured;
+  final bool hasActiveSubscription;
+  final int? subscriptionId;
+  final String? resetAt;
+
+  FeaturedPostQuota({
+    required this.paidPlanLimit,
+    required this.totalLimit,
+    required this.used,
+    required this.remaining,
+    required this.isUnlimited,
+    required this.allowToCreateFeatured,
+    required this.hasActiveSubscription,
+    this.subscriptionId,
+    this.resetAt,
+  });
+
+  factory FeaturedPostQuota.fromJson(dynamic json) {
+    final Map data = json is Map ? json : {};
+    return FeaturedPostQuota(
+      paidPlanLimit: _parseInt(data['paid_plan_limit']),
+      totalLimit: _parseInt(data['total_limit']),
+      used: _parseInt(data['used']),
+      remaining: _parseInt(data['remaining']),
+      isUnlimited: _parseBool(data['is_unlimited'], false),
+      allowToCreateFeatured: _parseBool(data['allow_to_create_featured'], true),
+      hasActiveSubscription: _parseBool(data['has_active_subscription'], false),
+      subscriptionId: data['subscription_id'] == null
+          ? null
+          : _parseInt(data['subscription_id']),
+      resetAt: data['reset_at']?.toString(),
+    );
+  }
+}
+
+int _parseInt(dynamic value) {
+  if (value == null) return 0;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value.toString()) ?? 0;
+}
+
+bool _parseBool(dynamic value, bool fallback) {
+  if (value == null) return fallback;
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+
+  final String text = value.toString().trim().toLowerCase();
+  if (['true', '1', 'yes', 'on'].contains(text)) return true;
+  if (['false', '0', 'no', 'off'].contains(text)) return false;
+  return fallback;
 }
