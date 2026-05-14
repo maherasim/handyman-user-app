@@ -76,27 +76,29 @@ class _AppbarDashboardComponent3State extends State<AppbarDashboardComponent3> {
                       statusBarIconBrightness: Brightness.dark);
                 });
               }),
-              Container(
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Icon(Icons.shopping_cart_outlined, size: 18).center(),
-                    if (appStore.cartCount.validate() > 0)
-                      Positioned(
-                        top: -2,
-                        right: -2,
-                        child: Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: boxDecorationDefault(
-                              color: Colors.red, shape: BoxShape.circle),
-                          child: Text(appStore.cartCount.toString(),
-                              style: primaryTextStyle(
-                                  size: 10, color: Colors.white)),
+              Observer(builder: (context) {
+                return Container(
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Icon(Icons.shopping_cart_outlined, size: 18).center(),
+                      if (appStore.cartCount.validate() > 0)
+                        Positioned(
+                          top: -2,
+                          right: -2,
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: boxDecorationDefault(
+                                color: Colors.red, shape: BoxShape.circle),
+                            child: Text(appStore.cartCount.toString(),
+                                style: primaryTextStyle(
+                                    size: 10, color: Colors.white)),
+                          ),
                         ),
-                      ),
-                  ],
-                ),
-              ).paddingLeft(12).onTap(() {
+                    ],
+                  ),
+                );
+              }).paddingLeft(12).onTap(() {
                 doIfLoggedIn(context, () {
                   MyCartScreen().launch(context);
                 });

@@ -116,13 +116,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }*/
 
   void init() async {
-    if (appStore.isLoggedIn) {
-      getCartList().then((value) {
-        appStore.setCartCount(value.cartCount);
-      }).catchError((e) {
-        log(e.toString());
-      });
-    }
+    refreshCartCount();
 
     await 3.seconds.delay;
     if (getIntAsync(FORCE_UPDATE_USER_APP).getBoolInt()) {
@@ -130,6 +124,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } /* else if (getBoolAsync(AUTO_UPDATE, defaultValue:false)) {
       checkAndShowCustomForceUpdateDialog(context);
     }*/
+  }
+
+  void refreshCartCount() {
+    if (!appStore.isLoggedIn) {
+      appStore.setCartCount(0);
+      return;
+    }
+
+    getCartList().then((value) {
+      appStore.setCartCount(value.cartCount);
+    }).catchError((e) {
+      log(e.toString());
+    });
   }
 
   @override
@@ -251,6 +258,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
               onDestinationSelected: (index) {
                 currentIndex = index;
+                if (index == 0) refreshCartCount();
                 setState(() {});
               },
             ),

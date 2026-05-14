@@ -123,39 +123,42 @@ class _SliderLocationComponentState extends State<SliderLocationComponent> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    decoration: boxDecorationDefault(
-                        color: context.cardColor, shape: BoxShape.circle),
-                    height: 36,
-                    padding: const EdgeInsets.all(8),
-                    width: 36,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Icon(Icons.shopping_cart_outlined,
-                                size: 20, color: primaryColor)
-                            .center(),
-                        if (appStore.cartCount > 0)
-                          Positioned(
-                            top: -4,
-                            right: -4,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: boxDecorationDefault(
-                                  color: Colors.red, shape: BoxShape.circle),
-                              constraints: const BoxConstraints(
-                                  minWidth: 16, minHeight: 16),
-                              child: Center(
-                                child: Text(
-                                  appStore.cartCount.toString(),
-                                  style: boldTextStyle(size: 10, color: white),
+                  Observer(builder: (context) {
+                    return Container(
+                      decoration: boxDecorationDefault(
+                          color: context.cardColor, shape: BoxShape.circle),
+                      height: 36,
+                      padding: const EdgeInsets.all(8),
+                      width: 36,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Icon(Icons.shopping_cart_outlined,
+                                  size: 20, color: primaryColor)
+                              .center(),
+                          if (appStore.cartCount > 0)
+                            Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: boxDecorationDefault(
+                                    color: Colors.red, shape: BoxShape.circle),
+                                constraints: const BoxConstraints(
+                                    minWidth: 16, minHeight: 16),
+                                child: Center(
+                                  child: Text(
+                                    appStore.cartCount.toString(),
+                                    style:
+                                        boldTextStyle(size: 10, color: white),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                  ).onTap(() {
+                        ],
+                      ),
+                    );
+                  }).onTap(() {
                     doIfLoggedIn(context, () {
                       MyCartScreen().launch(context);
                     });
