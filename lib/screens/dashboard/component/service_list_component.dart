@@ -13,14 +13,12 @@ class ServiceListComponent extends StatelessWidget {
   final String? title;
   final VoidCallback? onViewAll;
   final bool alwaysShowViewAll;
-  final bool showFavouriteAction;
 
   ServiceListComponent({
     required this.serviceList,
     this.title,
     this.onViewAll,
     this.alwaysShowViewAll = false,
-    this.showFavouriteAction = true,
   });
 
   @override
@@ -53,7 +51,6 @@ class ServiceListComponent extends StatelessWidget {
                   return ServiceComponent(
                     serviceData: serviceList[index],
                     width: cardWidth,
-                    showFavouriteAction: showFavouriteAction,
                   );
                 },
               )

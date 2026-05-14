@@ -37,7 +37,6 @@ class ServiceComponent extends StatefulWidget {
   /// Shorter grid card height for Posts listings (classified).
   final bool isCompactPostListing;
   final bool isMyPost;
-  final bool showFavouriteAction;
 
   ServiceComponent({
     required this.serviceData,
@@ -50,7 +49,6 @@ class ServiceComponent extends StatefulWidget {
     this.isFromServiceDetail = false,
     this.isCompactPostListing = false,
     this.isMyPost = false,
-    this.showFavouriteAction = true,
   });
 
   @override
@@ -469,53 +467,6 @@ class ServiceComponentState extends State<ServiceComponent> {
                         style: boldTextStyle(color: white, size: 10),
                       ),
                     ),
-                  ),
-                if (widget.showFavouriteAction)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: boxDecorationWithShadow(
-                          boxShape: BoxShape.circle,
-                          backgroundColor: context.cardColor),
-                      child: widget.serviceData.isFavourite == 1
-                          ? Icon(Icons.bookmark,
-                              color: context.primaryColor, size: 20)
-                          : Icon(Icons.bookmark_border,
-                              color: context.dividerColor, size: 20),
-                    ).onTap(() async {
-                      if (widget.serviceData.isFavourite != 0) {
-                        widget.serviceData.isFavourite = 1;
-                        setState(() {});
-
-                        await removeToWishList(
-                                serviceId: widget.serviceData.serviceId
-                                    .validate()
-                                    .toInt())
-                            .then((value) {
-                          if (!value) {
-                            widget.serviceData.isFavourite = 1;
-                            setState(() {});
-                          }
-                        });
-                      } else {
-                        widget.serviceData.isFavourite = 0;
-                        setState(() {});
-
-                        await addToWishList(
-                                serviceId: widget.serviceData.serviceId
-                                    .validate()
-                                    .toInt())
-                            .then((value) {
-                          if (!value) {
-                            widget.serviceData.isFavourite = 1;
-                            setState(() {});
-                          }
-                        });
-                      }
-                      widget.onUpdate?.call();
-                    }),
                   ),
                 Positioned(
                   bottom: 8,

@@ -164,7 +164,6 @@ class _DashboardFragmentState extends State<DashboardFragment>
                           serviceList: snap.product.validate(),
                           title: 'Products',
                           alwaysShowViewAll: true,
-                          showFavouriteAction: false,
                           onViewAll: () {
                             LiveStream().emit('CHANGE_TAB', 1);
                           },

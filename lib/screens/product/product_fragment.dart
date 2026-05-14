@@ -147,7 +147,6 @@ class _ProductFragmentState extends State<ProductFragment>
                       return ServiceComponent(
                         serviceData: list[index],
                         width: (context.width() - 48) / 2,
-                        showFavouriteAction: false,
                         onUpdate: () {
                           // Optional: refresh if needed
                         },
