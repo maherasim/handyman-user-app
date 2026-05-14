@@ -4,7 +4,6 @@ import 'package:booking_system_flutter/component/loader_widget.dart';
 import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/model/cart_response.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
-import 'package:booking_system_flutter/screens/cart/razorpay_payment_options_screen.dart';
 import 'package:booking_system_flutter/utils/colors.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/configs.dart';
@@ -48,6 +47,7 @@ class _MyCartScreenState extends State<MyCartScreen> {
   }
 
   void setupRazorpay() {
+    razorpay?.clear();
     razorpay = Razorpay();
     razorpay!.on(Razorpay.EVENT_PAYMENT_SUCCESS, handleRazorpaySuccess);
     razorpay!.on(Razorpay.EVENT_PAYMENT_ERROR, handleRazorpayError);
@@ -454,7 +454,7 @@ class _MyCartScreenState extends State<MyCartScreen> {
     setState(() {});
 
     final Map<String, dynamic> request = {
-      'payment_method': selectedPaymentMethodType,
+      'payment_method': _checkoutPaymentMethod(),
       'shipping_name': shippingNameCont.text.trim(),
       'shipping_address': shippingAddressCont.text.trim(),
       'shipping_state': selectedShippingState.validate(),
@@ -474,16 +474,10 @@ class _MyCartScreenState extends State<MyCartScreen> {
   }
 
   Future<void> _handleCheckoutResponse(CartCheckoutResponse response) async {
-    final String actionType = response.paymentAction.type.toLowerCase();
+    final String actionType = response.paymentAction.type.toLowerCase().trim();
 
     if (actionType == 'razorpay') {
-      RazorpayPaymentOptionsScreen(
-        checkoutResponse: response,
-        onContinue: () {
-          finish(context);
-          300.milliseconds.delay.then((_) => _openRazorpay(response));
-        },
-      ).launch(context);
+      _openRazorpay(response);
       return;
     }
 
@@ -513,6 +507,14 @@ class _MyCartScreenState extends State<MyCartScreen> {
         'email': appStore.userEmail,
       },
     });
+  }
+
+  String _checkoutPaymentMethod() {
+    final String paymentMethod = selectedPaymentMethodType.validate();
+
+    return paymentMethod.toLowerCase() == 'razorpay'
+        ? 'razorpay'
+        : paymentMethod;
   }
 
   Future<void> handleRazorpaySuccess(PaymentSuccessResponse response) async {
@@ -756,7 +758,7 @@ class _MyCartScreenState extends State<MyCartScreen> {
       children: [
         _fieldLabel('State'),
         DropdownButtonFormField<String>(
-          initialValue: selectedShippingState,
+          value: selectedShippingState,
           isExpanded: true,
           dropdownColor: context.cardColor,
           decoration: inputDecoration(context, hintText: 'State'),

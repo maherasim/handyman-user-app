@@ -78,6 +78,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="apps.iqonic.design" />
+                <data android:scheme="https" />
             </intent-filter>
 
             <!-- Deep link for referral -->

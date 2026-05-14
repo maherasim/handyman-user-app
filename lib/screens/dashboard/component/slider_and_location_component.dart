@@ -138,19 +138,19 @@ class _SliderLocationComponentState extends State<SliderLocationComponent> {
                               .center(),
                           if (appStore.cartCount > 0)
                             Positioned(
-                              top: -4,
-                              right: -4,
+                              top: -20,
+                              right: -10,
                               child: Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: boxDecorationDefault(
-                                    color: Colors.red, shape: BoxShape.circle),
-                                constraints: const BoxConstraints(
-                                    minWidth: 16, minHeight: 16),
-                                child: Center(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: FittedBox(
                                   child: Text(
                                     appStore.cartCount.toString(),
-                                    style:
-                                        boldTextStyle(size: 10, color: white),
+                                    style: primaryTextStyle(
+                                        size: 12, color: Colors.white),
                                   ),
                                 ),
                               ),

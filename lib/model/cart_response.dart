@@ -353,11 +353,18 @@ class CartPaymentAction {
   factory CartPaymentAction.fromJson(Map<String, dynamic> json) {
     return CartPaymentAction(
       type: (json['type'] ?? '').toString(),
-      razorpayKey: (json['razorpay_key'] ?? '').toString(),
-      razorpayOrderId: (json['razorpay_order_id'] ?? '').toString(),
-      amount: (json['amount'] ?? 0).toString().toInt(),
+      razorpayKey:
+          (json['razorpay_key'] ?? json['razorpayKey'] ?? json['key'] ?? '')
+              .toString(),
+      razorpayOrderId: (json['razorpay_order_id'] ??
+              json['razorpayOrderId'] ??
+              json['order_id'] ??
+              '')
+          .toString(),
+      amount: _parseInt(json['amount']),
       currency: (json['currency'] ?? '').toString(),
-      verifyEndpoint: (json['verify_endpoint'] ?? '').toString(),
+      verifyEndpoint:
+          (json['verify_endpoint'] ?? json['verifyEndpoint'] ?? '').toString(),
     );
   }
 }
@@ -365,6 +372,12 @@ class CartPaymentAction {
 num _parseNum(dynamic value) {
   if (value is num) return value;
   return num.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+int _parseInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.round();
+  return num.tryParse(value?.toString() ?? '')?.round() ?? 0;
 }
 
 bool _parseBool(dynamic value) {

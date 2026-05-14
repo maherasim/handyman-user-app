@@ -4,7 +4,6 @@ import 'package:booking_system_flutter/component/loader_widget.dart';
 import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/model/subscription_model.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
-import 'package:booking_system_flutter/screens/cart/razorpay_payment_options_screen.dart';
 import 'package:booking_system_flutter/utils/colors.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/configs.dart';
@@ -34,6 +33,20 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
   CheckoutResponse? pendingRazorpayCheckout;
 
   @override
+  void dispose() {
+    razorpay?.clear();
+    super.dispose();
+  }
+
+  void setupRazorpay() {
+    razorpay?.clear();
+    razorpay = Razorpay();
+    razorpay!.on(Razorpay.EVENT_PAYMENT_SUCCESS, handleRazorpaySuccess);
+    razorpay!.on(Razorpay.EVENT_PAYMENT_ERROR, handleRazorpayError);
+    razorpay!.on(Razorpay.EVENT_EXTERNAL_WALLET, handleRazorpayExternalWallet);
+  }
+
+  @override
   void initState() {
     super.initState();
     init();
@@ -42,19 +55,6 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
   Future<void> init() async {
     future = getSubscriptionConfig();
     historyFuture = getUserSubscriptionHistory();
-  }
-
-  void setupRazorpay() {
-    razorpay = Razorpay();
-    razorpay!.on(Razorpay.EVENT_PAYMENT_SUCCESS, handleRazorpaySuccess);
-    razorpay!.on(Razorpay.EVENT_PAYMENT_ERROR, handleRazorpayError);
-    razorpay!.on(Razorpay.EVENT_EXTERNAL_WALLET, handleRazorpayExternalWallet);
-  }
-
-  @override
-  void dispose() {
-    razorpay?.clear();
-    super.dispose();
   }
 
   Future<void> handleCheckout(Plan plan) async {
@@ -137,7 +137,8 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
     ).then((value) async {
       if (value != null) {
         selectedPaymentMethod = value.type;
-        await processCheckout(plan, selectedPaymentMethod!);
+        await processCheckout(
+            plan, _checkoutPaymentMethod(selectedPaymentMethod!));
       }
     });
   }
@@ -150,11 +151,17 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
         paymentMethod: paymentMethod,
       );
 
-      if (response.status == true && _isRazorpay(paymentMethod)) {
-        appStore.setLoading(false);
-        _openSubscriptionPaymentOptions(response, plan);
+      if (_shouldOpenNativeRazorpay(response)) {
+        _openRazorpay(response);
       } else if (response.status == true && response.checkoutUrl != null) {
-        await _launchExternalCheckout(response.checkoutUrl!);
+        if (await canLaunchUrl(Uri.parse(response.checkoutUrl!))) {
+          await launchUrl(
+            Uri.parse(response.checkoutUrl!),
+            mode: LaunchMode.externalApplication,
+          );
+        } else {
+          toast(language.invalidURL);
+        }
       } else {
         toast(language.somethingWentWrong);
       }
@@ -165,36 +172,15 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
     }
   }
 
-  bool _isRazorpay(String paymentMethod) {
-    final String normalized = paymentMethod.toLowerCase();
-    return normalized == 'razorpay';
+  bool _shouldOpenNativeRazorpay(CheckoutResponse response) {
+    return response.paymentAction?.type.validate().toLowerCase().trim() ==
+        'razorpay';
   }
 
-  Future<void> _launchExternalCheckout(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } else {
-      toast(language.invalidURL);
-    }
-  }
-
-  void _openSubscriptionPaymentOptions(CheckoutResponse response, Plan plan) {
-    final SubscriptionPaymentAction? action = response.paymentAction;
-
-    if (action == null ||
-        action.razorpayKey.validate().isEmpty ||
-        action.razorpayOrderId.validate().isEmpty) {
-      toast('Subscription Razorpay details are missing from API');
-      return;
-    }
-
-    RazorpayPaymentOptionsScreen(
-      amountText: '${plan.amount?.toStringAsFixed(2) ?? '0.00'}',
-      onContinue: () {
-        finish(context);
-        300.milliseconds.delay.then((_) => _openRazorpay(response));
-      },
-    ).launch(context);
+  String _checkoutPaymentMethod(String paymentMethod) {
+    return paymentMethod.toLowerCase() == 'razorpay'
+        ? 'razorpay'
+        : paymentMethod;
   }
 
   void _openRazorpay(CheckoutResponse response) {
@@ -202,7 +188,7 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
     if (action == null ||
         action.razorpayKey.validate().isEmpty ||
         action.razorpayOrderId.validate().isEmpty) {
-      toast('Subscription Razorpay details are missing');
+      toast('Razorpay details are missing');
       return;
     }
 
@@ -213,7 +199,7 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
       'key': action.razorpayKey,
       'order_id': action.razorpayOrderId,
       'amount': action.amount.validate(),
-      'currency': action.currency.validate(value: 'INR'),
+      'currency': action.currency.validate(),
       'name': APP_NAME,
       'theme.color': primaryColor.toHex(),
       'prefill': {
@@ -225,20 +211,23 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
 
   Future<void> handleRazorpaySuccess(PaymentSuccessResponse response) async {
     final CheckoutResponse? checkoutResponse = pendingRazorpayCheckout;
-    final SubscriptionPaymentAction? action = checkoutResponse?.paymentAction;
     final Subscription? subscription = checkoutResponse?.subscription;
+    final String verifyEndpoint =
+        checkoutResponse?.paymentAction?.verifyEndpoint.validate() ?? '';
 
-    if (action == null || action.verifyEndpoint.validate().isEmpty) {
-      toast('Unable to verify subscription payment');
+    if (subscription?.id == null || verifyEndpoint.isEmpty) {
+      toast('Unable to verify Razorpay payment');
       return;
     }
 
     appStore.setLoading(true);
+
     try {
-      await subscriptionRazorpayVerify(
-        verifyEndpoint: action.verifyEndpoint!,
+      await userSubscriptionRazorpayVerify(
+        verifyEndpoint: verifyEndpoint,
         request: {
-          if (subscription?.id != null) 'subscription_id': subscription!.id,
+          'subscription_id': subscription!.id,
+          'order_id': subscription.id,
           'razorpay_payment_id': response.paymentId,
           'razorpay_order_id': response.orderId,
           'razorpay_signature': response.signature,
@@ -246,9 +235,9 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
       );
 
       pendingRazorpayCheckout = null;
+      toast('Subscription purchased successfully');
       historyFuture = getUserSubscriptionHistory();
       setState(() {});
-      toast('Subscription purchased successfully');
     } catch (e) {
       toast(e.toString());
     } finally {
@@ -257,6 +246,7 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
   }
 
   void handleRazorpayError(PaymentFailureResponse response) {
+    appStore.setLoading(false);
     toast(response.message.validate(value: 'Razorpay payment failed'));
   }
 

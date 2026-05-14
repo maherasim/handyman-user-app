@@ -366,17 +366,26 @@ Future<DashboardResponse> userDashboard(
   Completer<DashboardResponse> completer = Completer();
 
   String endPoint = 'dashboard-detail';
+  final List<String> queryParams = ['per_page=10'];
 
   if (isCurrentLocation &&
       appStore.isLoggedIn &&
       appStore.userId.validate() != 0) {
-    endPoint =
-        "$endPoint?latitude=$lat&longitude=$long&customer_id=${appStore.userId.validate()}";
+    queryParams.addAll([
+      'latitude=$lat',
+      'longitude=$long',
+      'customer_id=${appStore.userId.validate()}',
+    ]);
   } else if (isCurrentLocation) {
-    endPoint = "$endPoint?latitude=$lat&longitude=$long";
+    queryParams.addAll([
+      'latitude=$lat',
+      'longitude=$long',
+    ]);
   } else if (appStore.isLoggedIn && appStore.userId.validate() != 0) {
-    endPoint = "$endPoint?customer_id=${appStore.userId.validate()}";
+    queryParams.add('customer_id=${appStore.userId.validate()}');
   }
+
+  endPoint = '$endPoint?${queryParams.join('&')}';
 
   try {
     final dashboardResponse = DashboardResponse.fromJson(await handleResponse(
@@ -2003,16 +2012,14 @@ Future<CheckoutResponse> userSubscriptionCheckout(
   }
 }
 
-Future<dynamic> subscriptionRazorpayVerify({
+Future<CheckoutResponse> userSubscriptionRazorpayVerify({
   required String verifyEndpoint,
   required Map<String, dynamic> request,
 }) async {
   try {
-    var res = await handleResponse(await buildHttpResponse(
-      verifyEndpoint,
-      request: request,
-      method: HttpMethodType.POST,
-    ));
+    var res = CheckoutResponse.fromJson(await handleResponse(
+        await buildHttpResponse(verifyEndpoint,
+            request: request, method: HttpMethodType.POST)));
     appStore.setLoading(false);
     return res;
   } catch (e) {

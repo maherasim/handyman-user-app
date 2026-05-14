@@ -244,7 +244,10 @@ class ProfileFragmentState extends State<ProfileFragment> {
                                   borderRadius:
                                       const BorderRadiusDirectional.vertical(
                                           bottom: Radius.circular(0))),
-                              leading: const Icon(MaterialCommunityIcons.post_outline, size: SETTING_ICON_SIZE, color: Color(0xFF6C757D)),
+                              leading: const Icon(
+                                  MaterialCommunityIcons.post_outline,
+                                  size: SETTING_ICON_SIZE,
+                                  color: Color(0xFF6C757D)),
                               title: "My Posts",
                               titleTextStyle: boldTextStyle(size: 12),
                               padding: const EdgeInsets.only(
@@ -261,7 +264,9 @@ class ProfileFragmentState extends State<ProfileFragment> {
                                   borderRadius:
                                       const BorderRadiusDirectional.vertical(
                                           bottom: Radius.circular(0))),
-                              leading: const Icon(MaterialCommunityIcons.crown, size: SETTING_ICON_SIZE, color: Color(0xFF6C757D)),
+                              leading: const Icon(MaterialCommunityIcons.crown,
+                                  size: SETTING_ICON_SIZE,
+                                  color: Color(0xFF6C757D)),
                               title: "Subscription Plans",
                               titleTextStyle: boldTextStyle(size: 12),
                               padding: const EdgeInsets.only(
@@ -296,7 +301,8 @@ class ProfileFragmentState extends State<ProfileFragment> {
                                 borderRadius:
                                     const BorderRadiusDirectional.vertical(
                                         bottom: Radius.circular(0))),
-                            leading: ic_category.iconImage(size: SETTING_ICON_SIZE),
+                            leading:
+                                ic_category.iconImage(size: SETTING_ICON_SIZE),
                             title: language.category,
                             titleTextStyle: boldTextStyle(size: 12),
                             trailing: trailing,
@@ -312,7 +318,8 @@ class ProfileFragmentState extends State<ProfileFragment> {
                                 borderRadius:
                                     const BorderRadiusDirectional.vertical(
                                         bottom: Radius.circular(0))),
-                            leading: ic_ticket.iconImage(size: SETTING_ICON_SIZE),
+                            leading:
+                                ic_ticket.iconImage(size: SETTING_ICON_SIZE),
                             title: language.booking,
                             titleTextStyle: boldTextStyle(size: 12),
                             trailing: trailing,
@@ -320,30 +327,31 @@ class ProfileFragmentState extends State<ProfileFragment> {
                                 top: 20, left: 16, right: 16),
                             onTap: () {
                               doIfLoggedIn(context, () {
-                                BookingFragment(isFromDashboard: false).launch(context);
+                                BookingFragment(isFromDashboard: false)
+                                    .launch(context);
                               });
                             },
                           ),
-                          // SettingItemWidget(
-                          //   decoration: boxDecorationDefault(
-                          //       color: context.cardColor,
-                          //       borderRadius:
-                          //           const BorderRadiusDirectional.vertical(
-                          //               bottom: Radius.circular(0))),
-                          //   leading: Icon(MaterialCommunityIcons.cart_outline,
-                          //       size: SETTING_ICON_SIZE,
-                          //       color: context.iconColor),
-                          //   title: 'My Cart',
-                          //   titleTextStyle: boldTextStyle(size: 12),
-                          //   trailing: trailing,
-                          //   padding: const EdgeInsets.only(
-                          //       top: 20, left: 16, right: 16),
-                          //   onTap: () {
-                          //     doIfLoggedIn(context, () {
-                          //       const MyCartScreen().launch(context);
-                          //     });
-                          //   },
-                          // ),
+                          SettingItemWidget(
+                            decoration: boxDecorationDefault(
+                                color: context.cardColor,
+                                borderRadius:
+                                    const BorderRadiusDirectional.vertical(
+                                        bottom: Radius.circular(0))),
+                            leading: Icon(MaterialCommunityIcons.cart_outline,
+                                size: SETTING_ICON_SIZE,
+                                color: context.iconColor),
+                            title: 'My Cart',
+                            titleTextStyle: boldTextStyle(size: 12),
+                            trailing: trailing,
+                            padding: const EdgeInsets.only(
+                                top: 20, left: 16, right: 16),
+                            onTap: () {
+                              doIfLoggedIn(context, () {
+                                const MyCartScreen().launch(context);
+                              });
+                            },
+                          ),
                           SettingItemWidget(
                             decoration: boxDecorationDefault(
                                 color: context.cardColor,

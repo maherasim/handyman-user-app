@@ -3,7 +3,9 @@ import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/model/category_model.dart';
 import 'package:booking_system_flutter/model/service_data_model.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
+import 'package:booking_system_flutter/screens/cart/my_cart_screen.dart';
 import 'package:booking_system_flutter/screens/service/component/service_component.dart';
+import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -82,7 +84,15 @@ class _ProductFragmentState extends State<ProductFragment>
         color: context.primaryColor,
         actions: [
           IconButton(
-            icon: Icon(Icons.filter_list, color: white),
+            icon: const Icon(Icons.shopping_cart_outlined, color: white),
+            onPressed: () {
+              doIfLoggedIn(context, () {
+                const MyCartScreen().launch(context);
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.filter_list, color: white),
             onPressed: () async {
               await FilterScreen(isFromProvider: true, categories: categoryList)
                   .launch(context)

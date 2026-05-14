@@ -265,16 +265,16 @@ class CheckoutResponse {
   String? checkoutUrl;
   String? paymentType;
   String? sessionId;
-  SubscriptionPaymentAction? paymentAction;
   Subscription? subscription;
+  SubscriptionPaymentAction? paymentAction;
 
   CheckoutResponse({
     this.status,
     this.checkoutUrl,
     this.paymentType,
     this.sessionId,
-    this.paymentAction,
     this.subscription,
+    this.paymentAction,
   });
 
   factory CheckoutResponse.fromJson(Map<String, dynamic> json) {
@@ -283,11 +283,11 @@ class CheckoutResponse {
       checkoutUrl: json['checkout_url'],
       paymentType: json['payment_type'],
       sessionId: json['session_id'],
-      paymentAction: json['payment_action'] != null
-          ? SubscriptionPaymentAction.fromJson(json['payment_action'])
-          : null,
       subscription: json['subscription'] != null
           ? Subscription.fromJson(json['subscription'])
+          : null,
+      paymentAction: json['payment_action'] != null
+          ? SubscriptionPaymentAction.fromJson(json['payment_action'])
           : null,
     );
   }
@@ -298,11 +298,11 @@ class CheckoutResponse {
     data['checkout_url'] = checkoutUrl;
     data['payment_type'] = paymentType;
     data['session_id'] = sessionId;
-    if (paymentAction != null) {
-      data['payment_action'] = paymentAction!.toJson();
-    }
     if (subscription != null) {
       data['subscription'] = subscription!.toJson();
+    }
+    if (paymentAction != null) {
+      data['payment_action'] = paymentAction!.toJson();
     }
     return data;
   }
@@ -328,23 +328,28 @@ class SubscriptionPaymentAction {
   factory SubscriptionPaymentAction.fromJson(Map<String, dynamic> json) {
     return SubscriptionPaymentAction(
       type: json['type']?.toString(),
-      razorpayKey: json['razorpay_key']?.toString(),
-      razorpayOrderId: json['razorpay_order_id']?.toString(),
+      razorpayKey: (json['razorpay_key'] ?? json['razorpayKey'] ?? json['key'])
+          ?.toString(),
+      razorpayOrderId: (json['razorpay_order_id'] ??
+              json['razorpayOrderId'] ??
+              json['order_id'])
+          ?.toString(),
       amount: _parseInt(json['amount']),
       currency: json['currency']?.toString(),
-      verifyEndpoint: json['verify_endpoint']?.toString(),
+      verifyEndpoint:
+          (json['verify_endpoint'] ?? json['verifyEndpoint'])?.toString(),
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'type': type,
-      'razorpay_key': razorpayKey,
-      'razorpay_order_id': razorpayOrderId,
-      'amount': amount,
-      'currency': currency,
-      'verify_endpoint': verifyEndpoint,
-    };
+    final Map<String, dynamic> data = {};
+    data['type'] = type;
+    data['razorpay_key'] = razorpayKey;
+    data['razorpay_order_id'] = razorpayOrderId;
+    data['amount'] = amount;
+    data['currency'] = currency;
+    data['verify_endpoint'] = verifyEndpoint;
+    return data;
   }
 }
 

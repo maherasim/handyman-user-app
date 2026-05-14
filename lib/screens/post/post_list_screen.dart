@@ -67,6 +67,7 @@ class _PostListScreenState extends State<PostListScreen>
         subCategoryList = value.subCategoryList.validate();
       }
       posts.addAll(value.serviceList.validate());
+      _sortFeaturedPostsFirst(posts);
       setState(() {});
       return posts;
     }).catchError((e) {
@@ -84,6 +85,11 @@ class _PostListScreenState extends State<PostListScreen>
         }
       });
     });
+  }
+
+  void _sortFeaturedPostsFirst(List<ServiceData> list) {
+    list.sort(
+        (a, b) => b.isFeatured.validate().compareTo(a.isFeatured.validate()));
   }
 
   @override

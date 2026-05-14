@@ -1,5 +1,7 @@
 import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/model/dashboard_model.dart';
+import 'package:booking_system_flutter/model/service_data_model.dart';
+import 'package:booking_system_flutter/model/service_response.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
 import 'package:booking_system_flutter/screens/dashboard/component/category_component.dart';
 import 'package:booking_system_flutter/screens/dashboard/component/featured_service_list_component.dart';
@@ -30,6 +32,8 @@ class DashboardFragment extends StatefulWidget {
 
 class _DashboardFragmentState extends State<DashboardFragment>
     with AutomaticKeepAliveClientMixin {
+  static const int homeSectionItemLimit = 10;
+
   Future<DashboardResponse>? future;
 
   @override
@@ -49,12 +53,65 @@ class _DashboardFragmentState extends State<DashboardFragment>
 
   Future<void> init({bool showLoader = true}) async {
     appStore.setLoading(showLoader);
-    future = userDashboard(
+    future = loadDashboardData(
         isCurrentLocation: appStore.isCurrentLocation,
         lat: getDoubleAsync(LATITUDE),
         long: getDoubleAsync(LONGITUDE));
     setStatusBarColorChange();
     setState(() {});
+  }
+
+  Future<DashboardResponse> loadDashboardData({
+    bool isCurrentLocation = false,
+    double? lat,
+    double? long,
+  }) async {
+    final DashboardResponse dashboard = await userDashboard(
+      isCurrentLocation: isCurrentLocation,
+      lat: lat,
+      long: long,
+    );
+
+    try {
+      final Map<String, dynamic> request = {
+        'per_page': homeSectionItemLimit,
+        'page': 1,
+        if (isCurrentLocation) 'latitude': lat,
+        if (isCurrentLocation) 'longitude': long,
+      };
+
+      final List<ServiceData> serviceList = [];
+      final List<dynamic> responses = await Future.wait([
+        searchServiceAPI(
+          page: 1,
+          list: serviceList,
+          latitude: isCurrentLocation ? lat.validate().toString() : '',
+          longitude: isCurrentLocation ? long.validate().toString() : '',
+        ),
+        getProductList(request),
+        getPostList(request),
+      ]);
+
+      dashboard.service = (responses[0] as List<ServiceData>)
+          .take(homeSectionItemLimit)
+          .toList();
+      dashboard.product =
+          (responses[1] as ServiceResponse).serviceList.validate();
+      dashboard.post = _featuredFirst(
+          (responses[2] as ServiceResponse).serviceList.validate());
+      cachedDashboardResponse = dashboard;
+    } catch (e) {
+      log(e.toString());
+    }
+
+    return dashboard;
+  }
+
+  List<ServiceData> _featuredFirst(List<ServiceData> list) {
+    final List<ServiceData> sortedList = List<ServiceData>.from(list);
+    sortedList.sort(
+        (a, b) => b.isFeatured.validate().compareTo(a.isFeatured.validate()));
+    return sortedList;
   }
 
   Future<void> setStatusBarColorChange() async {
@@ -159,11 +216,17 @@ class _DashboardFragmentState extends State<DashboardFragment>
                         FeaturedServiceListComponent(
                             serviceList: snap.featuredServices.validate()),
                         ServiceListComponent(
-                          serviceList: snap.service.validate(),
+                          serviceList: snap.service
+                              .validate()
+                              .take(homeSectionItemLimit)
+                              .toList(),
                           alwaysShowViewAll: true,
                         ),
                         ServiceListComponent(
-                          serviceList: snap.product.validate(),
+                          serviceList: snap.product
+                              .validate()
+                              .take(homeSectionItemLimit)
+                              .toList(),
                           title: 'Products',
                           alwaysShowViewAll: true,
                           onViewAll: () {
@@ -171,7 +234,10 @@ class _DashboardFragmentState extends State<DashboardFragment>
                           },
                         ),
                         ServiceListComponent(
-                          serviceList: snap.post.validate(),
+                          serviceList: snap.post
+                              .validate()
+                              .take(homeSectionItemLimit)
+                              .toList(),
                           title: 'Posts',
                           alwaysShowViewAll: true,
                           onViewAll: () {
