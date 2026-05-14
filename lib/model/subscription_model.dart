@@ -265,6 +265,7 @@ class CheckoutResponse {
   String? checkoutUrl;
   String? paymentType;
   String? sessionId;
+  SubscriptionPaymentAction? paymentAction;
   Subscription? subscription;
 
   CheckoutResponse({
@@ -272,6 +273,7 @@ class CheckoutResponse {
     this.checkoutUrl,
     this.paymentType,
     this.sessionId,
+    this.paymentAction,
     this.subscription,
   });
 
@@ -281,6 +283,9 @@ class CheckoutResponse {
       checkoutUrl: json['checkout_url'],
       paymentType: json['payment_type'],
       sessionId: json['session_id'],
+      paymentAction: json['payment_action'] != null
+          ? SubscriptionPaymentAction.fromJson(json['payment_action'])
+          : null,
       subscription: json['subscription'] != null
           ? Subscription.fromJson(json['subscription'])
           : null,
@@ -293,10 +298,53 @@ class CheckoutResponse {
     data['checkout_url'] = checkoutUrl;
     data['payment_type'] = paymentType;
     data['session_id'] = sessionId;
+    if (paymentAction != null) {
+      data['payment_action'] = paymentAction!.toJson();
+    }
     if (subscription != null) {
       data['subscription'] = subscription!.toJson();
     }
     return data;
+  }
+}
+
+class SubscriptionPaymentAction {
+  String? type;
+  String? razorpayKey;
+  String? razorpayOrderId;
+  int? amount;
+  String? currency;
+  String? verifyEndpoint;
+
+  SubscriptionPaymentAction({
+    this.type,
+    this.razorpayKey,
+    this.razorpayOrderId,
+    this.amount,
+    this.currency,
+    this.verifyEndpoint,
+  });
+
+  factory SubscriptionPaymentAction.fromJson(Map<String, dynamic> json) {
+    return SubscriptionPaymentAction(
+      type: json['type']?.toString(),
+      razorpayKey: json['razorpay_key']?.toString(),
+      razorpayOrderId: json['razorpay_order_id']?.toString(),
+      amount: _parseInt(json['amount']),
+      currency: json['currency']?.toString(),
+      verifyEndpoint: json['verify_endpoint']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      'razorpay_key': razorpayKey,
+      'razorpay_order_id': razorpayOrderId,
+      'amount': amount,
+      'currency': currency,
+      'verify_endpoint': verifyEndpoint,
+    };
   }
 }
 

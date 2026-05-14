@@ -2002,4 +2002,22 @@ Future<CheckoutResponse> userSubscriptionCheckout(
     throw e;
   }
 }
+
+Future<dynamic> subscriptionRazorpayVerify({
+  required String verifyEndpoint,
+  required Map<String, dynamic> request,
+}) async {
+  try {
+    var res = await handleResponse(await buildHttpResponse(
+      verifyEndpoint,
+      request: request,
+      method: HttpMethodType.POST,
+    ));
+    appStore.setLoading(false);
+    return res;
+  } catch (e) {
+    appStore.setLoading(false);
+    throw e;
+  }
+}
 //endregion

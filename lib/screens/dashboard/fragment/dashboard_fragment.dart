@@ -20,6 +20,10 @@ import '../component/new_job_request_component.dart';
 import '../component/promotional_banner_slider_component.dart';
 
 class DashboardFragment extends StatefulWidget {
+  final Function(int)? onChangeTab;
+
+  DashboardFragment({this.onChangeTab});
+
   @override
   _DashboardFragmentState createState() => _DashboardFragmentState();
 }
@@ -163,7 +167,7 @@ class _DashboardFragmentState extends State<DashboardFragment>
                           title: 'Products',
                           alwaysShowViewAll: true,
                           onViewAll: () {
-                            LiveStream().emit('CHANGE_TAB', 1);
+                            widget.onChangeTab?.call(1);
                           },
                         ),
                         ServiceListComponent(
@@ -171,7 +175,7 @@ class _DashboardFragmentState extends State<DashboardFragment>
                           title: 'Posts',
                           alwaysShowViewAll: true,
                           onViewAll: () {
-                            LiveStream().emit('CHANGE_TAB', 2);
+                            widget.onChangeTab?.call(2);
                           },
                         ),
                         16.height,

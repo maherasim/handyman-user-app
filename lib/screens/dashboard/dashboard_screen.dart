@@ -38,6 +38,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int currentIndex = 0;
   bool isInterNetConnect = true;
 
+  void changeTab(int index) {
+    currentIndex = index;
+    if (index == 0) refreshCartCount();
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -72,8 +78,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     LiveStream().on('CHANGE_TAB', (tabIndex) {
       if (tabIndex is! int) return;
 
-      currentIndex = tabIndex;
-      setState(() {});
+      changeTab(tabIndex);
     });
 
     // Firebase.initializeApp().then((value) {
@@ -177,7 +182,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         DASHBOARD_4) {
                       return DashboardFragment4();
                     } else {
-                      return DashboardFragment();
+                      return DashboardFragment(onChangeTab: changeTab);
                     }
                   },
                 ),
@@ -257,9 +262,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
               onDestinationSelected: (index) {
-                currentIndex = index;
-                if (index == 0) refreshCartCount();
-                setState(() {});
+                changeTab(index);
               },
             ),
           ),

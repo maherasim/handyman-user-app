@@ -4,12 +4,15 @@ import 'package:booking_system_flutter/component/loader_widget.dart';
 import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/model/subscription_model.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
+import 'package:booking_system_flutter/screens/cart/razorpay_payment_options_screen.dart';
 import 'package:booking_system_flutter/utils/colors.dart';
 import 'package:booking_system_flutter/utils/common.dart';
+import 'package:booking_system_flutter/utils/configs.dart';
 import 'package:booking_system_flutter/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SubscriptionPlanScreen extends StatefulWidget {
@@ -27,6 +30,8 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
   List<SubscriptionHistoryData> history = [];
   int? selectedPlanId;
   String? selectedPaymentMethod;
+  Razorpay? razorpay;
+  CheckoutResponse? pendingRazorpayCheckout;
 
   @override
   void initState() {
@@ -37,6 +42,19 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
   Future<void> init() async {
     future = getSubscriptionConfig();
     historyFuture = getUserSubscriptionHistory();
+  }
+
+  void setupRazorpay() {
+    razorpay = Razorpay();
+    razorpay!.on(Razorpay.EVENT_PAYMENT_SUCCESS, handleRazorpaySuccess);
+    razorpay!.on(Razorpay.EVENT_PAYMENT_ERROR, handleRazorpayError);
+    razorpay!.on(Razorpay.EVENT_EXTERNAL_WALLET, handleRazorpayExternalWallet);
+  }
+
+  @override
+  void dispose() {
+    razorpay?.clear();
+    super.dispose();
   }
 
   Future<void> handleCheckout(Plan plan) async {
@@ -132,15 +150,11 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
         paymentMethod: paymentMethod,
       );
 
-      if (response.status == true && response.checkoutUrl != null) {
-        if (await canLaunchUrl(Uri.parse(response.checkoutUrl!))) {
-          await launchUrl(
-            Uri.parse(response.checkoutUrl!),
-            mode: LaunchMode.externalApplication,
-          );
-        } else {
-          toast(language.invalidURL);
-        }
+      if (response.status == true && _isRazorpay(paymentMethod)) {
+        appStore.setLoading(false);
+        _openSubscriptionPaymentOptions(response, plan);
+      } else if (response.status == true && response.checkoutUrl != null) {
+        await _launchExternalCheckout(response.checkoutUrl!);
       } else {
         toast(language.somethingWentWrong);
       }
@@ -149,6 +163,105 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
     } finally {
       appStore.setLoading(false);
     }
+  }
+
+  bool _isRazorpay(String paymentMethod) {
+    final String normalized = paymentMethod.toLowerCase();
+    return normalized == 'razorpay';
+  }
+
+  Future<void> _launchExternalCheckout(String url) async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } else {
+      toast(language.invalidURL);
+    }
+  }
+
+  void _openSubscriptionPaymentOptions(CheckoutResponse response, Plan plan) {
+    final SubscriptionPaymentAction? action = response.paymentAction;
+
+    if (action == null ||
+        action.razorpayKey.validate().isEmpty ||
+        action.razorpayOrderId.validate().isEmpty) {
+      toast('Subscription Razorpay details are missing from API');
+      return;
+    }
+
+    RazorpayPaymentOptionsScreen(
+      amountText: '${plan.amount?.toStringAsFixed(2) ?? '0.00'}',
+      onContinue: () {
+        finish(context);
+        300.milliseconds.delay.then((_) => _openRazorpay(response));
+      },
+    ).launch(context);
+  }
+
+  void _openRazorpay(CheckoutResponse response) {
+    final SubscriptionPaymentAction? action = response.paymentAction;
+    if (action == null ||
+        action.razorpayKey.validate().isEmpty ||
+        action.razorpayOrderId.validate().isEmpty) {
+      toast('Subscription Razorpay details are missing');
+      return;
+    }
+
+    pendingRazorpayCheckout = response;
+    setupRazorpay();
+
+    razorpay!.open({
+      'key': action.razorpayKey,
+      'order_id': action.razorpayOrderId,
+      'amount': action.amount.validate(),
+      'currency': action.currency.validate(value: 'INR'),
+      'name': APP_NAME,
+      'theme.color': primaryColor.toHex(),
+      'prefill': {
+        'contact': appStore.userContactNumber,
+        'email': appStore.userEmail,
+      },
+    });
+  }
+
+  Future<void> handleRazorpaySuccess(PaymentSuccessResponse response) async {
+    final CheckoutResponse? checkoutResponse = pendingRazorpayCheckout;
+    final SubscriptionPaymentAction? action = checkoutResponse?.paymentAction;
+    final Subscription? subscription = checkoutResponse?.subscription;
+
+    if (action == null || action.verifyEndpoint.validate().isEmpty) {
+      toast('Unable to verify subscription payment');
+      return;
+    }
+
+    appStore.setLoading(true);
+    try {
+      await subscriptionRazorpayVerify(
+        verifyEndpoint: action.verifyEndpoint!,
+        request: {
+          if (subscription?.id != null) 'subscription_id': subscription!.id,
+          'razorpay_payment_id': response.paymentId,
+          'razorpay_order_id': response.orderId,
+          'razorpay_signature': response.signature,
+        },
+      );
+
+      pendingRazorpayCheckout = null;
+      historyFuture = getUserSubscriptionHistory();
+      setState(() {});
+      toast('Subscription purchased successfully');
+    } catch (e) {
+      toast(e.toString());
+    } finally {
+      appStore.setLoading(false);
+    }
+  }
+
+  void handleRazorpayError(PaymentFailureResponse response) {
+    toast(response.message.validate(value: 'Razorpay payment failed'));
+  }
+
+  void handleRazorpayExternalWallet(ExternalWalletResponse response) {
+    toast('External wallet ${response.walletName.validate()}');
   }
 
   @override

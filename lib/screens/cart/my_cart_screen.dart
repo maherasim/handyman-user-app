@@ -4,6 +4,7 @@ import 'package:booking_system_flutter/component/loader_widget.dart';
 import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/model/cart_response.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
+import 'package:booking_system_flutter/screens/cart/razorpay_payment_options_screen.dart';
 import 'package:booking_system_flutter/utils/colors.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/configs.dart';
@@ -476,7 +477,13 @@ class _MyCartScreenState extends State<MyCartScreen> {
     final String actionType = response.paymentAction.type.toLowerCase();
 
     if (actionType == 'razorpay') {
-      _openRazorpay(response);
+      RazorpayPaymentOptionsScreen(
+        checkoutResponse: response,
+        onContinue: () {
+          finish(context);
+          300.milliseconds.delay.then((_) => _openRazorpay(response));
+        },
+      ).launch(context);
       return;
     }
 
@@ -749,11 +756,12 @@ class _MyCartScreenState extends State<MyCartScreen> {
       children: [
         _fieldLabel('State'),
         DropdownButtonFormField<String>(
-          value: selectedShippingState,
+          initialValue: selectedShippingState,
           isExpanded: true,
           dropdownColor: context.cardColor,
           decoration: inputDecoration(context, hintText: 'State'),
-          hint: Text('State', style: secondaryTextStyle(color: appTextSecondaryColor)),
+          hint: Text('State',
+              style: secondaryTextStyle(color: appTextSecondaryColor)),
           items: states.map((state) {
             return DropdownMenuItem<String>(
               value: state,

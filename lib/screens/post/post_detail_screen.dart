@@ -8,6 +8,7 @@ import 'package:booking_system_flutter/model/service_detail_response.dart';
 import 'package:booking_system_flutter/model/user_data_model.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
 import 'package:booking_system_flutter/screens/chat/user_chat_screen.dart';
+import 'package:booking_system_flutter/screens/zoom_image_screen.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -128,11 +129,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               if (mounted) setState(() {});
                             },
                             itemBuilder: (context, index) {
-                              return CachedImageWidget(
-                                url: sliderUrls[index],
-                                fit: BoxFit.cover,
-                                height: 250,
-                                width: context.width(),
+                              return GestureDetector(
+                                onTap: () {
+                                  ZoomImageScreen(
+                                    galleryImages: sliderUrls,
+                                    index: index,
+                                  ).launch(context);
+                                },
+                                child: CachedImageWidget(
+                                  url: sliderUrls[index],
+                                  fit: BoxFit.cover,
+                                  height: 250,
+                                  width: context.width(),
+                                ),
                               );
                             },
                           ),
