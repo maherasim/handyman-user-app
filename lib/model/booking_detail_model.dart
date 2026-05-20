@@ -124,7 +124,7 @@ class BookingActivity {
       activityData: json['activity_data'],
       activityMessage: json['activity_message'],
       activityType: json['activity_type'],
-      bookingId: json['booking_id'],
+      bookingId: json['booking_id'] ?? json['order_id'],
       createdAt: json['created_at'],
       datetime: json['datetime'],
       deletedAt: json['deleted_at'],

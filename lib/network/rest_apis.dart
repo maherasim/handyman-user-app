@@ -920,7 +920,7 @@ Future<List<ProductOrderData>> getProductOrders(
     final ProductOrderListResponse res = ProductOrderListResponse.fromJson(
       await handleResponse(
         await buildHttpResponse(
-          'my-product-orders?per_page=$perPage&page=$page',
+          'provider-product-order-list?per_page=$perPage&page=$page',
           method: HttpMethodType.GET,
         ),
       ),
@@ -947,8 +947,9 @@ Future<ProductOrderData> getProductOrderDetail(int orderId) async {
     final ProductOrderDetailResponse res = ProductOrderDetailResponse.fromJson(
       await handleResponse(
         await buildHttpResponse(
-          'my-product-orders/$orderId',
-          method: HttpMethodType.GET,
+          'product-order-detail',
+          request: {'id': orderId, 'order_id': orderId},
+          method: HttpMethodType.POST,
         ),
       ),
     );
@@ -969,7 +970,7 @@ Future<ProductOrderData> getProductOrderDetailByPost(int orderId) async {
       await handleResponse(
         await buildHttpResponse(
           'product-order-detail',
-          request: {'order_id': orderId},
+          request: {'id': orderId, 'order_id': orderId},
           method: HttpMethodType.POST,
         ),
       ),
@@ -982,6 +983,35 @@ Future<ProductOrderData> getProductOrderDetailByPost(int orderId) async {
     appStore.setLoading(false);
     throw e;
   }
+}
+
+Future<ProductOrderLocation> getProductOrderLocation(int orderId) async {
+  final ProductOrderLocationResponse res =
+      ProductOrderLocationResponse.fromJson(
+    await handleResponse(
+      await buildHttpResponse(
+        'product-order-location?id=$orderId&order_id=$orderId',
+        method: HttpMethodType.GET,
+      ),
+    ),
+  );
+
+  if (res.data == null) throw errorSomethingWentWrong;
+  return res.data!;
+}
+
+Future<List<ProductOrderProof>> getProductOrderProofList(int orderId) async {
+  final ProductOrderProofListResponse res =
+      ProductOrderProofListResponse.fromJson(
+    await handleResponse(
+      await buildHttpResponse(
+        'product-order-proof-list?id=$orderId',
+        method: HttpMethodType.GET,
+      ),
+    ),
+  );
+
+  return res.data;
 }
 
 Future<List<ServiceData>> searchServiceAPI({

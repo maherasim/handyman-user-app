@@ -2,10 +2,10 @@ import 'package:booking_system_flutter/component/image_border_component.dart';
 import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/screens/auth/sign_in_screen.dart';
 import 'package:booking_system_flutter/screens/post/post_list_screen.dart';
-
 import 'package:booking_system_flutter/screens/chat/chat_list_screen.dart';
 import 'package:booking_system_flutter/screens/dashboard/fragment/dashboard_fragment.dart';
 import 'package:booking_system_flutter/screens/dashboard/fragment/profile_fragment.dart';
+import 'package:booking_system_flutter/screens/product_order/product_order_history_screen.dart';
 import 'package:booking_system_flutter/utils/colors.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/constant.dart';
@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:nb_utils/nb_utils.dart';
-
 import '../../component/voice_search_component.dart';
 import '../../utils/app_configuration.dart';
 import '../product/product_fragment.dart';
@@ -187,6 +186,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   },
                 ),
                 ProductFragment(),
+                Observer(
+                    builder: (context) => appStore.isLoggedIn
+                        ? const ProductOrderHistoryScreen()
+                        : const SignInScreen(isFromDashboard: true)),
                 PostListScreen(),
                 if (appConfigurationStore.isEnableChat)
                   Observer(
@@ -224,6 +227,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   selectedIcon: Icon(MaterialCommunityIcons.shopping,
                       color: context.primaryColor),
                   label: "Product",
+                ),
+                NavigationDestination(
+                  icon: Icon(MaterialCommunityIcons.package_variant_closed,
+                      color: appTextSecondaryColor),
+                  selectedIcon: Icon(MaterialCommunityIcons.package_variant,
+                      color: context.primaryColor),
+                  label: "Orders",
                 ),
                 NavigationDestination(
                   icon: Icon(MaterialCommunityIcons.post_outline,

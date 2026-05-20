@@ -55,7 +55,8 @@ class ServiceDetailScreen extends StatefulWidget {
   _ServiceDetailScreenState createState() => _ServiceDetailScreenState();
 }
 
-class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerProviderStateMixin {
+class _ServiceDetailScreenState extends State<ServiceDetailScreen>
+    with TickerProviderStateMixin {
   PageController pageController = PageController();
 
   Future<ServiceDetailResponse>? future;
@@ -95,13 +96,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
   }
 
   //region Widgets
-  Widget availableWidget({required ServiceDetailResponse zone, required ServiceData data}) {
+  Widget availableWidget(
+      {required ServiceDetailResponse zone, required ServiceData data}) {
     if (zone.zones.validate().isNotEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           8.height,
-          Text(language.lblAvailableAt, style: boldTextStyle(size: LABEL_TEXT_SIZE)),
+          Text(language.lblAvailableAt,
+              style: boldTextStyle(size: LABEL_TEXT_SIZE)),
           8.height,
           Align(
             alignment: Alignment.centerLeft,
@@ -116,7 +119,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                   if (value.id == null) return Offstage();
                   bool isSelected = selectedAddressId == index;
                   if (selectedBookingAddressId == -1) {
-                    selectedBookingAddressId = zone.zones.validate().first.id.validate();
+                    selectedBookingAddressId =
+                        zone.zones.validate().first.id.validate();
                   }
                   return GestureDetector(
                     onTap: () {
@@ -134,10 +138,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                                   ? primaryColor
                                   : Colors.white),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 10),
                         child: Text(
                           value.name.validate(),
-                          style: boldTextStyle(color: isSelected ? Colors.white : textPrimaryColorGlobal),
+                          style: boldTextStyle(
+                              color: isSelected
+                                  ? Colors.white
+                                  : textPrimaryColorGlobal),
                         ),
                       ),
                     ),
@@ -155,7 +163,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           8.height,
-          Text(language.lblAvailableAt, style: boldTextStyle(size: LABEL_TEXT_SIZE)),
+          Text(language.lblAvailableAt,
+              style: boldTextStyle(size: LABEL_TEXT_SIZE)),
           8.height,
           Align(
             alignment: Alignment.centerLeft,
@@ -166,16 +175,21 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
               children: List.generate(
                 data.serviceAddressMapping!.length,
                 (index) {
-                  ServiceAddressMapping value = data.serviceAddressMapping![index];
-                  if (value.providerAddressMapping == null) return const Offstage();
+                  ServiceAddressMapping value =
+                      data.serviceAddressMapping![index];
+                  if (value.providerAddressMapping == null)
+                    return const Offstage();
                   bool isSelected = selectedAddressId == index;
                   if (selectedBookingAddressId == -1) {
-                    selectedBookingAddressId = data.serviceAddressMapping!.first.providerAddressId.validate();
+                    selectedBookingAddressId = data
+                        .serviceAddressMapping!.first.providerAddressId
+                        .validate();
                   }
                   return GestureDetector(
                     onTap: () {
                       selectedAddressId = index;
-                      selectedBookingAddressId = value.providerAddressId.validate();
+                      selectedBookingAddressId =
+                          value.providerAddressId.validate();
                       setState(() {});
                     },
                     child: Container(
@@ -188,10 +202,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                                   ? primaryColor
                                   : Colors.white),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 10),
                         child: Text(
                           value.providerAddressMapping!.address.validate(),
-                          style: boldTextStyle(color: isSelected ? Colors.white : textPrimaryColorGlobal),
+                          style: boldTextStyle(
+                              color: isSelected
+                                  ? Colors.white
+                                  : textPrimaryColorGlobal),
                         ),
                       ),
                     ),
@@ -211,7 +229,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(language.lblAboutProvider, style: boldTextStyle(size: LABEL_TEXT_SIZE)),
+        Text(language.lblAboutProvider,
+            style: boldTextStyle(size: LABEL_TEXT_SIZE)),
         16.height,
         BookingDetailProviderWidget(providerData: data).onTap(() async {
           await ProviderInfoScreen(providerId: data.id).launch(context);
@@ -235,7 +254,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
             physics: const NeverScrollableScrollPhysics(),
             itemCount: data.length,
             padding: const EdgeInsets.all(0),
-            itemBuilder: (_, index) => ServiceFaqWidget(serviceFaq: data[index]),
+            itemBuilder: (_, index) =>
+                ServiceFaqWidget(serviceFaq: data[index]),
           ),
           8.height,
         ],
@@ -243,28 +263,41 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
     );
   }
 
-  Widget slotsAvailable({required List<SlotData> data, required bool isSlotAvailable}) {
-    if (!isSlotAvailable || data.where((element) => element.slot.validate().isNotEmpty).isEmpty) return const Offstage();
+  Widget slotsAvailable(
+      {required List<SlotData> data, required bool isSlotAvailable}) {
+    if (!isSlotAvailable ||
+        data.where((element) => element.slot.validate().isNotEmpty).isEmpty)
+      return const Offstage();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         8.height,
-        Text(language.lblAvailableOnTheseDays, style: boldTextStyle(size: LABEL_TEXT_SIZE)),
+        Text(language.lblAvailableOnTheseDays,
+            style: boldTextStyle(size: LABEL_TEXT_SIZE)),
         8.height,
         Wrap(
           spacing: 16,
           runSpacing: 8,
-          children: List.generate(data.where((element) => element.slot.validate().isNotEmpty).length, (index) {
-            SlotData value = data.where((element) => element.slot.validate().isNotEmpty).toList()[index];
+          children: List.generate(
+              data
+                  .where((element) => element.slot.validate().isNotEmpty)
+                  .length, (index) {
+            SlotData value = data
+                .where((element) => element.slot.validate().isNotEmpty)
+                .toList()[index];
 
             return Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
               decoration: boxDecorationDefault(
                 color: context.cardColor,
-                border: appStore.isDarkMode ? Border.all(color: context.dividerColor) : null,
+                border: appStore.isDarkMode
+                    ? Border.all(color: context.dividerColor)
+                    : null,
               ),
-              child: Text(value.day.capitalizeFirstLetter(), style: secondaryTextStyle(size: LABEL_TEXT_SIZE, color: primaryColor)),
+              child: Text(value.day.capitalizeFirstLetter(),
+                  style: secondaryTextStyle(
+                      size: LABEL_TEXT_SIZE, color: primaryColor)),
             );
           }),
         ),
@@ -273,13 +306,16 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
     );
   }
 
-  Widget reviewWidget({required List<RatingData> data, required ServiceDetailResponse serviceDetailResponse}) {
+  Widget reviewWidget(
+      {required List<RatingData> data,
+      required ServiceDetailResponse serviceDetailResponse}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ViewAllLabel(
           //label: language.review,
-          label: '${language.review} (${serviceDetailResponse.serviceDetail!.totalReview})',
+          label:
+              '${language.review} (${serviceDetailResponse.serviceDetail!.totalReview})',
           list: data,
           onTap: () {
             RatingViewAllScreen(serviceId: widget.serviceId).launch(context);
@@ -297,7 +333,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
     ).paddingSymmetric(horizontal: 16);
   }
 
-  Widget relatedServiceWidget({required List<ServiceData> serviceList, required int serviceId}) {
+  Widget relatedServiceWidget(
+      {required List<ServiceData> serviceList, required int serviceId}) {
     if (serviceList.isEmpty) return const Offstage();
 
     serviceList.removeWhere((element) => element.id == serviceId);
@@ -319,7 +356,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (_, index) => RelatedServiceComponent(
               serviceData: serviceList[index],
-              width: appConfigurationStore.userDashboardType == DEFAULT_USER_DASHBOARD ? context.width() / 2 - 26 : 280,
+              width: appConfigurationStore.userDashboardType ==
+                      DEFAULT_USER_DASHBOARD
+                  ? context.width() / 2 - 26
+                  : 280,
             ).paddingOnly(bottom: 16, left: 8, right: 8),
           )
       ],
@@ -329,9 +369,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
   //endregion
   void bookNow(ServiceDetailResponse serviceDetailResponse) {
     doIfLoggedIn(context, () async {
-      serviceDetailResponse.serviceDetail!.bookingAddressId = selectedBookingAddressId;
-      if (serviceDetailResponse.serviceDetail!.isOnShopService && serviceDetailResponse.shops.validate().length > 1) {
-        await showModalBottomSheet  (
+      serviceDetailResponse.serviceDetail!.bookingAddressId =
+          selectedBookingAddressId;
+      if (serviceDetailResponse.serviceDetail!.isOnShopService &&
+          serviceDetailResponse.shops.validate().length > 1) {
+        await showModalBottomSheet(
           context: context,
           backgroundColor: context.scaffoldBackgroundColor,
           barrierColor: appStore.isDarkMode ? Colors.white10 : Colors.black26,
@@ -359,7 +401,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
           },
         );
       } else {
-        if (serviceDetailResponse.serviceDetail!.isOnShopService && serviceDetailResponse.shops.validate().length == 1) {
+        if (serviceDetailResponse.serviceDetail!.isOnShopService &&
+            serviceDetailResponse.shops.validate().length == 1) {
           selectedShop = serviceDetailResponse.shops.first;
         }
         handleBookNow(serviceDetailResponse, serviceId: widget.serviceId);
@@ -385,7 +428,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
 
   @override
   void dispose() {
-    setStatusBarColor(widget.isFromProviderInfo ? primaryColor : transparentColor);
+    setStatusBarColor(
+        widget.isFromProviderInfo ? primaryColor : transparentColor);
     super.dispose();
   }
 
@@ -410,9 +454,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
               children: [
                 Expanded(
                   child: AnimatedScrollView(
-                    padding: const EdgeInsets.only(bottom: 120),
+                    padding: EdgeInsets.only(
+                      bottom: widget.detailType == 'product' ? 24 : 120,
+                    ),
                     listAnimationType: ListAnimationType.FadeIn,
-                    fadeInConfiguration: FadeInConfiguration(duration: 2.seconds),
+                    fadeInConfiguration:
+                        FadeInConfiguration(duration: 2.seconds),
                     onSwipeRefresh: () async {
                       appStore.setLoading(true);
                       init();
@@ -421,7 +468,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                     },
                     children: [
                       8.height,
-                      ServiceDetailHeaderComponent(serviceDetail: snap.data!.serviceDetail!),
+                      ServiceDetailHeaderComponent(
+                          serviceDetail: snap.data!.serviceDetail!),
                       4.height,
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -435,20 +483,32 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                                     ShopServiceIconWidget(),
                                     8.width,
                                   ],
-                                  if (snap.data!.serviceDetail!.isOnlineService) ...[const OnlineServiceIconWidget(), 10.width],
+                                  if (snap.data!.serviceDetail!
+                                      .isOnlineService) ...[
+                                    const OnlineServiceIconWidget(),
+                                    10.width
+                                  ],
                                   Flexible(
                                       child: Container(
                                     decoration: BoxDecoration(
-                                      color: appStore.isDarkMode ? Colors.black : lightPrimaryColor,
+                                      color: appStore.isDarkMode
+                                          ? Colors.black
+                                          : lightPrimaryColor,
                                       borderRadius: radius(20),
                                     ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 5),
                                     child: Text(
-                                      (snap.data!.serviceDetail?.categoryName.validate() ?? ' '),
+                                      (snap.data!.serviceDetail?.categoryName
+                                              .validate() ??
+                                          ' '),
                                       maxLines: 1,
                                       textAlign: TextAlign.center,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 12),
+                                      style: TextStyle(
+                                          color: primaryColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12),
                                     ),
                                   )),
                                 ],
@@ -459,10 +519,17 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                                     Image.asset(
                                       ic_star_fill,
                                       height: 18,
-                                      color: getRatingBarColor(snap.data!.serviceDetail!.totalRating.validate().toInt()),
+                                      color: getRatingBarColor(snap
+                                          .data!.serviceDetail!.totalRating
+                                          .validate()
+                                          .toInt()),
                                     ),
                                     4.width,
-                                    Text(snap.data!.serviceDetail!.totalRating.validate().toStringAsFixed(1), style: boldTextStyle()),
+                                    Text(
+                                        snap.data!.serviceDetail!.totalRating
+                                            .validate()
+                                            .toStringAsFixed(1),
+                                        style: boldTextStyle()),
                                   ],
                                 ),
                               ),
@@ -471,41 +538,66 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                           12.height,
                           Text(
                             snap.data!.serviceDetail!.name.validate(),
-                            style: primaryTextStyle(weight: FontWeight.bold, size: 16),
+                            style: primaryTextStyle(
+                                weight: FontWeight.bold, size: 16),
                           ),
                           10.height,
-                          if (convertToHourMinute(snap.data!.serviceDetail!.duration.validate()).isNotEmpty)
+                          if (convertToHourMinute(
+                                  snap.data!.serviceDetail!.duration.validate())
+                              .isNotEmpty)
                             Row(
                               children: [
-                                Text(language.duration, style: secondaryTextStyle()),
+                                Text(language.duration,
+                                    style: secondaryTextStyle()),
                                 8.width,
                                 Text(
-                                  convertToHourMinute(snap.data!.serviceDetail!.duration.validate()),
-                                  style: secondaryTextStyle(weight: FontWeight.bold, color: textPrimaryColorGlobal),
+                                  convertToHourMinute(snap
+                                      .data!.serviceDetail!.duration
+                                      .validate()),
+                                  style: secondaryTextStyle(
+                                      weight: FontWeight.bold,
+                                      color: textPrimaryColorGlobal),
                                 )
                               ],
                             ),
                           10.height,
                           Row(
                             children: [
-                              if (snap.data!.serviceDetail!.discount.validate() > 0)
+                              if (snap.data!.serviceDetail!.discount
+                                      .validate() >
+                                  0)
                                 PriceWidget(
                                   size: 14,
-                                  price: snap.data!.serviceDetail!.getDiscountedPrice.validate(),
+                                  price: snap
+                                      .data!.serviceDetail!.getDiscountedPrice
+                                      .validate(),
                                 ).paddingRight(8),
                               PriceWidget(
-                                size: snap.data!.serviceDetail!.discount != 0 ? 12 : 14,
-                                price: snap.data!.serviceDetail!.price.validate(),
-                                isLineThroughEnabled: snap.data!.serviceDetail!.discount != 0 ? true : false,
-                                color: snap.data!.serviceDetail!.discount != 0 ? textSecondaryColorGlobal : primaryColor,
+                                size: snap.data!.serviceDetail!.discount != 0
+                                    ? 12
+                                    : 14,
+                                price:
+                                    snap.data!.serviceDetail!.price.validate(),
+                                isLineThroughEnabled:
+                                    snap.data!.serviceDetail!.discount != 0
+                                        ? true
+                                        : false,
+                                color: snap.data!.serviceDetail!.discount != 0
+                                    ? textSecondaryColorGlobal
+                                    : primaryColor,
                               ),
                               10.width,
-                              if (snap.data!.serviceDetail!.discount.validate() > 0)
+                              if (snap.data!.serviceDetail!.discount
+                                      .validate() >
+                                  0)
                                 Text(
                                   "${snap.data!.serviceDetail!.discount.validate()}% ${language.lblOff}",
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
-                                  style: const TextStyle(color: defaultActivityStatus, fontWeight: FontWeight.bold, fontSize: 12),
+                                  style: const TextStyle(
+                                      color: defaultActivityStatus,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12),
                                 ).expand(),
                             ],
                           ),
@@ -517,24 +609,32 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                         decoration: BoxDecoration(
                           color: context.cardColor,
                           borderRadius: radius(),
-                          border: appStore.isDarkMode ? Border.all(color: context.dividerColor) : null,
+                          border: appStore.isDarkMode
+                              ? Border.all(color: context.dividerColor)
+                              : null,
                         ),
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            snap.data!.serviceDetail!.description.validate().isNotEmpty
+                            snap.data!.serviceDetail!.description
+                                    .validate()
+                                    .isNotEmpty
                                 ? ReadMoreText(
-                                    snap.data!.serviceDetail!.description.validate(),
+                                    snap.data!.serviceDetail!.description
+                                        .validate(),
                                     style: secondaryTextStyle(),
                                     colorClickableText: context.primaryColor,
                                     textAlign: TextAlign.justify,
                                   )
-                                : Text(language.lblNotDescription, style: secondaryTextStyle()),
+                                : Text(language.lblNotDescription,
+                                    style: secondaryTextStyle()),
                             8.height,
                             slotsAvailable(
-                              data: snap.data!.serviceDetail!.bookingSlots.validate(),
-                              isSlotAvailable: snap.data!.serviceDetail!.isSlotAvailable,
+                              data: snap.data!.serviceDetail!.bookingSlots
+                                  .validate(),
+                              isSlotAvailable:
+                                  snap.data!.serviceDetail!.isSlotAvailable,
                             ),
                             availableWidget(
                               data: snap.data!.serviceDetail!,
@@ -543,19 +643,25 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                           ],
                         ),
                       ).paddingSymmetric(horizontal: 16, vertical: 8),
-                      if (snap.data!.provider != null) providerWidget(data: snap.data!.provider!),
+                      if (snap.data!.provider != null)
+                        providerWidget(data: snap.data!.provider!),
                       if (snap.data!.shops.validate().isNotEmpty)
                         HorizontalShopListComponent(
                           listTitle: language.lblAboutShop,
                           shopList: snap.data!.shops.validate(),
                           cardWidth: context.width() * 0.9,
                           serviceId: snap.data!.serviceDetail!.id.validate(),
-                          serviceName: snap.data!.serviceDetail!.name.validate(),
+                          serviceName:
+                              snap.data!.serviceDetail!.name.validate(),
                           showServices: false,
                         ),
-                      if (snap.data!.serviceDetail!.servicePackage.validate().isNotEmpty)
+                      if (snap.data!.serviceDetail!.servicePackage
+                          .validate()
+                          .isNotEmpty)
                         PackageComponent(
-                          servicePackage: snap.data!.serviceDetail!.servicePackage.validate(),
+                          servicePackage: snap
+                              .data!.serviceDetail!.servicePackage
+                              .validate(),
                           callBack: (v) {
                             if (v != null) {
                               selectedPackage = v;
@@ -572,8 +678,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                             serviceAddonStore.setSelectedServiceAddon(v);
                           },
                         ),
-                      serviceFaqWidget(data: snap.data!.serviceFaq.validate()).paddingSymmetric(horizontal: 16),
-                      reviewWidget(data: snap.data!.ratingData!, serviceDetailResponse: snap.data!),
+                      serviceFaqWidget(data: snap.data!.serviceFaq.validate())
+                          .paddingSymmetric(horizontal: 16),
+                      reviewWidget(
+                          data: snap.data!.ratingData!,
+                          serviceDetailResponse: snap.data!),
                       24.height,
                       if (snap.data!.relatedService.validate().isNotEmpty)
                         relatedServiceWidget(
@@ -583,16 +692,18 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
                     ],
                   ),
                 ),
-                AppButton(
-                  onTap: () {
-                    selectedPackage = null;
-                    bookNow(snap.data!);
-                  },
-                  color: context.primaryColor,
-                  child: Text(language.lblBookNow, style: boldTextStyle(color: white)),
-                  width: context.width(),
-                  textColor: Colors.white,
-                ).paddingSymmetric(horizontal: 16.0, vertical: 10.0)
+                if (widget.detailType != 'product')
+                  AppButton(
+                    onTap: () {
+                      selectedPackage = null;
+                      bookNow(snap.data!);
+                    },
+                    color: context.primaryColor,
+                    child: Text(language.lblBookNow,
+                        style: boldTextStyle(color: white)),
+                    width: context.width(),
+                    textColor: Colors.white,
+                  ).paddingSymmetric(horizontal: 16.0, vertical: 10.0)
               ],
             ),
           ),
@@ -602,14 +713,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with TickerPr
     }
 
     return FutureBuilder<ServiceDetailResponse>(
-      initialData: listOfCachedData.firstWhere((element) => element?.$1 == widget.serviceId.validate(), orElse: () => null)?.$2,
+      initialData: listOfCachedData
+          .firstWhere((element) => element?.$1 == widget.serviceId.validate(),
+              orElse: () => null)
+          ?.$2,
       future: future,
       builder: (context, snap) {
         return Scaffold(
           body: Stack(
             children: [
               buildBodyWidget(snap),
-              Observer(builder: (context) => LoaderWidget().visible(appStore.isLoading)),
+              Observer(
+                  builder: (context) =>
+                      LoaderWidget().visible(appStore.isLoading)),
             ],
           ),
         );
