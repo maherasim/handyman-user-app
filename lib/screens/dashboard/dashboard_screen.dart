@@ -5,7 +5,6 @@ import 'package:booking_system_flutter/screens/post/post_list_screen.dart';
 import 'package:booking_system_flutter/screens/chat/chat_list_screen.dart';
 import 'package:booking_system_flutter/screens/dashboard/fragment/dashboard_fragment.dart';
 import 'package:booking_system_flutter/screens/dashboard/fragment/profile_fragment.dart';
-import 'package:booking_system_flutter/screens/product_order/product_order_history_screen.dart';
 import 'package:booking_system_flutter/utils/colors.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/constant.dart';
@@ -186,10 +185,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   },
                 ),
                 ProductFragment(),
-                Observer(
-                    builder: (context) => appStore.isLoggedIn
-                        ? const ProductOrderHistoryScreen()
-                        : const SignInScreen(isFromDashboard: true)),
                 PostListScreen(),
                 if (appConfigurationStore.isEnableChat)
                   Observer(
@@ -229,18 +224,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   label: "Product",
                 ),
                 NavigationDestination(
-                  icon: Icon(MaterialCommunityIcons.package_variant_closed,
-                      color: appTextSecondaryColor),
-                  selectedIcon: Icon(MaterialCommunityIcons.package_variant,
-                      color: context.primaryColor),
-                  label: "Orders",
-                ),
-                NavigationDestination(
                   icon: Icon(MaterialCommunityIcons.post_outline,
                       color: appTextSecondaryColor),
                   selectedIcon: Icon(MaterialCommunityIcons.post,
-                      color: context.primaryColor),
-                  label: "Posts",
+                      color: context.primaryColor),  
+                  label: "Posts",           
                 ),
                 if (appConfigurationStore.isEnableChat)
                   NavigationDestination(

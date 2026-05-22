@@ -41,6 +41,8 @@ class ProductOrderDetailScreen extends StatefulWidget {
 
 class _ProductOrderDetailScreenState extends State<ProductOrderDetailScreen> {
   Future<ProductOrderData>? future;
+  ProductOrderLocation? liveLocation;
+  gmaps.GoogleMapController? mapController;
 
   @override
   void initState() {
@@ -49,7 +51,31 @@ class _ProductOrderDetailScreenState extends State<ProductOrderDetailScreen> {
   }
 
   void init() {
-    future = getProductOrderDetail(widget.orderId);
+    future = getProductOrderDetail(widget.orderId).then((value) {
+      if (_normalizeStatus(value.deliveryStatus) == 'on_going' ||
+          _normalizeStatus(value.status) == 'on_going' ||
+          _normalizeStatus(value.deliveryStatus) == 'delivered' ||
+          _normalizeStatus(value.status) == 'delivered') {
+        getProductOrderLocation(widget.orderId).then((loc) {
+          if (mounted) {
+            setState(() {
+              liveLocation = loc;
+              if (mapController != null) {
+                mapController!.animateCamera(
+                  gmaps.CameraUpdate.newLatLngZoom(
+                    gmaps.LatLng(loc.latitude.toDouble(), loc.longitude.toDouble()),
+                    14.0,
+                  ),
+                );
+              }
+            });
+          }
+        }).catchError((e) {
+          log(e.toString());
+        });
+      }
+      return value;
+    });
   }
 
   Future<void> refreshOrder() async {
@@ -387,11 +413,13 @@ class _ProductOrderDetailScreenState extends State<ProductOrderDetailScreen> {
   Widget _locationTrackWidget(ProductOrderData order) {
     final bool canTrack =
         _normalizeStatus(order.deliveryStatus) == 'on_going' ||
-            _normalizeStatus(order.status) == 'on_going';
+            _normalizeStatus(order.status) == 'on_going' ||
+            _normalizeStatus(order.deliveryStatus) == 'delivered' ||
+            _normalizeStatus(order.status) == 'delivered';
 
     if (!canTrack) return const Offstage();
 
-    final ProductOrderLocation location = order.latestLocation ??
+    final ProductOrderLocation location = liveLocation ?? order.latestLocation ??
         ProductOrderLocation(latitude: 0, longitude: 0, datetime: '');
     final gmaps.LatLng latLng = gmaps.LatLng(
         location.latitude.toDouble(), location.longitude.toDouble());
@@ -420,6 +448,21 @@ class _ProductOrderDetailScreenState extends State<ProductOrderDetailScreen> {
         SizedBox(
           height: 250,
           child: gmaps.GoogleMap(
+            onMapCreated: (controller) {
+              mapController = controller;
+              if (liveLocation != null) {
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (mounted) {
+                    controller.animateCamera(
+                      gmaps.CameraUpdate.newLatLngZoom(
+                        gmaps.LatLng(liveLocation!.latitude.toDouble(), liveLocation!.longitude.toDouble()),
+                        14.0,
+                      ),
+                    );
+                  }
+                });
+              }
+            },
             zoomControlsEnabled: true,
             initialCameraPosition: gmaps.CameraPosition(
               target: latLng,
@@ -511,7 +554,16 @@ class _ProductOrderDetailScreenState extends State<ProductOrderDetailScreen> {
   Future<void> _refreshProductOrderLocation(int orderId) async {
     appStore.setLoading(true);
     try {
-      await getProductOrderLocation(orderId);
+      final loc = await getProductOrderLocation(orderId);
+      liveLocation = loc;
+      if (mapController != null) {
+        mapController!.animateCamera(
+          gmaps.CameraUpdate.newLatLngZoom(
+            gmaps.LatLng(loc.latitude.toDouble(), loc.longitude.toDouble()),
+            14.0,
+          ),
+        );
+      }
       refreshOrder();
     } catch (e) {
       toast(e.toString());
